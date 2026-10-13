@@ -62,7 +62,15 @@ export function validateRoom(value: unknown): Validation {
       // Empty lists are what validation itself returns for a planned room, so a checked room
       // (as the client sends it to the server) passes again.
       const empty = (v: unknown) => v === undefined || (Array.isArray(v) && v.length === 0);
-      for (const key of ['characters', 'collections', 'panels', 'rooms', 'pulse', 'world'])
+      for (const key of [
+        'characters',
+        'collections',
+        'panels',
+        'rooms',
+        'pulse',
+        'world',
+        'layout',
+      ])
         if (!empty(source[key]))
           check.at(
             at(key),
@@ -105,6 +113,11 @@ export function validateRoom(value: unknown): Validation {
     if (source.world !== undefined)
       spec.world = validateWorld(check, source.world, at('world'), people);
     if (inner.length) spec.rooms = inner;
+    if (source.layout !== undefined) {
+      spec.layout = check.oneOf(source.layout, ['panels', 'immersive'] as const, at('layout'));
+      if (spec.layout === 'immersive' && (panels.length !== 1 || panels[0].kind !== 'world'))
+        check.at(at('layout'), 'an immersive room is its world: its only panel is the world');
+    }
     return spec;
   };
 

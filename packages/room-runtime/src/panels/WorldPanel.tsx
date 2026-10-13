@@ -5,5 +5,7 @@ import type { PanelProps } from './types';
 export function WorldPanel(props: PanelProps) {
   const View = props.surface?.View;
   if (!View) return <p className="room-error">{wordsFor(props.spec.language).missing}</p>;
-  return <View spec={props.spec} data={props.data} edit={props.edit} world={props.world} />;
+  return (
+    <View spec={props.spec} data={props.data} edit={props.edit} world={props.world} frame="panel" />
+  );
 }

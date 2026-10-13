@@ -34,7 +34,9 @@ The experience is the product; how it is drawn is the room's choice.
   its world now (`state()`), which goes into the brief.
 - **Surface** (`RoomSurface` in packages/room-runtime): whatever draws the world (Phaser, 3D,
   SVG, plain UI) plus its Presence. A room ships it from its folder or takes one from a kit;
-  the host creates it once per open room and shows it in a `world` panel.
+  the host creates it once per open room and shows it in a `world` panel, or on the whole
+  screen when the room is `immersive`: then the app adds only a voice-first presence layer
+  (one tap begins, the character speaks first, captions over the world, a small keyboard).
 - **Voice** (packages/live-runtime): Gemini Live calls with a server-locked ticket per
   character (`/api/live`), one playback clock whose audible PCM yields mouth frames for the
   presence, microphone capture, silent world actions as non-blocking tools. One call at a time.

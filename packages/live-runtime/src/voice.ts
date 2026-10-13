@@ -15,6 +15,8 @@ export type VoiceHost = {
   transcript(role: 'person' | 'character', text: string, final: boolean): void;
   status(status: VoiceStatus, message?: string): void;
   presence?: Presence;
+  /** Sent once the line is open so the character speaks first (e.g. the person just arrived). */
+  greet?: string;
   /** For tests: the socket address and the microphone worklet. */
   url?: string;
   worklet?: string;
@@ -75,6 +77,7 @@ export class VoiceSession {
       await this.mic.start((pcm) => this.live.audio(pcm), this.host.worklet);
       if (this.ended) return;
       this.host.status('live');
+      if (this.host.greet) this.live.text(this.host.greet);
       this.loop();
     } catch (error) {
       this.fail(error instanceof Error ? error.message : 'The voice call could not start.');
@@ -83,6 +86,11 @@ export class VoiceSession {
 
   mute(muted: boolean) {
     this.mic.muted = muted;
+  }
+
+  /** Words typed during the call, for when the person cannot speak aloud; the character answers. */
+  say(text: string) {
+    this.live.text(text);
   }
 
   /** Context the character should know without answering, e.g. where everyone stands now. */

@@ -43,6 +43,7 @@ once in `rooms/index.ts`: `{ spec: <its default export>, panels: { ... } }`.
 | `characters`    | yes, 1–4               | who lives here                                                                         |
 | `collections`   | yes, 0–6 (may be `[]`) | what the room remembers: its own database                                              |
 | `panels`        | yes, 1–8               | what the person sees                                                                   |
+| `layout`        | no                     | `panels` (default, a page) or `immersive` (the room is its world; see Immersive rooms) |
 | `pulse`         | no                     | `{ collection, field }`: a boolean field whose share of true is how alive the room is  |
 | `world`         | no                     | a place its characters act in, drawn by the room's own surface (see World and surface) |
 | `rooms`         | no, 0–8                | inner rooms (built or planned)                                                         |
@@ -147,8 +148,9 @@ tools and hands each accepted call to the room's surface.
 }
 ```
 
-- Action and param names are snake*case and never a data tool name (`list*`, `add*`,
-`update*`, `remove\_`, `open_room`). Up to 16 actions, 8 params each; `describe` ≤ 1500.
+- Action and param names are lowercase words joined by `_` (like `fly_to`), never a data tool
+  name (`list_…`, `add_…`, `update_…`, `remove_…`, `open_room`). Up to 16 actions, 8 params
+  each; `describe` ≤ 1500.
 - Param types: `text` (≤ 300), `number` (`min`/`max`, values outside are clamped), `boolean`,
   `choice` (1–40 `options`). The model names things by option, never by coordinates.
 - `characters` limits an action to some characters; all may use it when absent.
@@ -162,9 +164,24 @@ args)`, `speak(character | null)`, `setMode(character, mode)`, `mouth(character,
 shapes during voice) and `state()` (the world now, in words, read before each turn). Register
 the room with it: `{ spec, surface: (spec, store, path) => new MySurface(spec, store) }`.
 
+The view receives `frame`: `panel` inside a page (choose your own shape, e.g. 16:9) or
+`screen` in an immersive room (fill the parent: it is the whole screen, any shape from a tall
+phone to a wide desktop).
+
 A kit can build both halves. The SVG stage kit: `stageRoom(room, stageConfig)` from
 `@experience/kit-stage-svg` returns the entry with its world declared (see
 `examples/classroom-stage` and `kits/stage-svg/docs`).
+
+## Immersive rooms
+
+`"layout": "immersive"` makes the room its world: the surface fills the screen, with no
+title, panels or forms. The person meets the characters by voice: one tap ("يلا نبدأ ✨")
+starts a call and the character speaks first; what is said floats as captions over the
+world; a small keyboard stands in when voice cannot be used; with several characters, small
+name buttons choose who to talk to. Characters change everything through their tools (data,
+world actions, `open_room`), so the world must show what changed (a river that sparkles, a
+colour that returns). Rules: the room needs a `world`, and its only panel is the `world`
+panel. A room meant for forms, lists and dashboards (a parents' corner) stays `panels`.
 
 ## Pulse
 

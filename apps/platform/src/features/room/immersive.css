@@ -1,0 +1,159 @@
+/* An immersive room: the world is the page; everything else floats over it, quietly. */
+.immersive {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  overflow: hidden;
+  color: #fff;
+}
+.immersive-world {
+  position: absolute;
+  inset: 0;
+}
+.immersive-title,
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.immersive-exit,
+.immersive .round,
+.immersive-cast button,
+.immersive-live,
+.caption {
+  background: rgb(20 12 48 / 0.42);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgb(255 255 255 / 0.22);
+  color: #fff;
+}
+.immersive-exit {
+  position: absolute;
+  top: max(12px, env(safe-area-inset-top));
+  inset-inline-start: 12px;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 20px;
+  text-decoration: none;
+  opacity: 0.75;
+}
+.immersive-cast {
+  position: absolute;
+  top: max(12px, env(safe-area-inset-top));
+  inset-inline-end: 12px;
+  display: flex;
+  gap: 6px;
+}
+.immersive-cast button {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 14px;
+  opacity: 0.75;
+}
+.immersive-cast button[aria-pressed='true'] {
+  opacity: 1;
+  border-color: rgb(255 255 255 / 0.7);
+}
+.immersive-bottom {
+  position: absolute;
+  inset-inline: 0;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  pointer-events: none;
+}
+.immersive-bottom > * {
+  pointer-events: auto;
+}
+.immersive-captions {
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  max-width: min(680px, 100%);
+}
+.caption {
+  margin: 0;
+  padding: 8px 14px;
+  border-radius: 14px;
+  font-size: clamp(16px, 2.4vw, 21px);
+  line-height: 1.55;
+  text-align: center;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.4);
+}
+.caption-person {
+  font-size: 15px;
+  opacity: 0.75;
+}
+.immersive-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.immersive .round {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  font-size: 20px;
+}
+.immersive-begin {
+  padding: 14px 28px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #f9a8d4, #c4b5fd, #93c5fd);
+  color: #2e1065;
+  font: inherit;
+  font-size: 20px;
+  font-weight: 700;
+  box-shadow: 0 0 28px rgb(244 114 182 / 0.6);
+  animation: immersive-glow 2.4s ease-in-out infinite;
+}
+.immersive-live {
+  padding: 10px 16px;
+  border-radius: 999px;
+  box-shadow: 0 0 0 0 rgb(196 181 253 / 0.7);
+  animation: immersive-ring 1.8s ease-out infinite;
+}
+.immersive-type {
+  display: flex;
+  gap: 8px;
+  width: min(560px, 100%);
+}
+.immersive-type input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 999px;
+  font: inherit;
+}
+.immersive-type button {
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 999px;
+  font: inherit;
+}
+@keyframes immersive-glow {
+  50% {
+    box-shadow: 0 0 44px rgb(196 181 253 / 0.9);
+  }
+}
+@keyframes immersive-ring {
+  to {
+    box-shadow: 0 0 0 14px rgb(196 181 253 / 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .immersive-begin,
+  .immersive-live {
+    animation: none;
+  }
+}

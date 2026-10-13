@@ -123,6 +123,21 @@ test('tools follow who may act; calls are checked before the surface sees them',
   assert.equal(call('say_hi', { loud: true }).silent, false);
 });
 
+test('an immersive room is its world: one world panel and nothing else', () => {
+  assert.equal(valid(room(world, { layout: 'immersive' })).layout, 'immersive');
+  const extra = { id: 't', kind: 'text', title: 'T', text: 'x' };
+  const tank = { id: 'tank', kind: 'world', title: 'Tank' };
+  assert.match(
+    errorsOf(room(world, { layout: 'immersive', panels: [tank, extra] })),
+    /layout: an immersive room is its world: its only panel is the world/,
+  );
+  assert.match(
+    errorsOf(room(undefined, { layout: 'immersive', panels: [extra] })),
+    /layout: an immersive room is its world/,
+  );
+  assert.match(errorsOf(room(world, { layout: 'cinema' })), /layout: must be one of/);
+});
+
 test('the brief carries the description, the surface state and the rules', () => {
   const spec = valid(room(world));
   const brief = worldBrief(spec, spec.characters[0], 'Fin is at the cave.');

@@ -32,7 +32,11 @@ export type PanelProps = {
 };
 
 /** What a surface's view receives: the same room data and edits as any panel. */
-export type SurfaceViewProps = Pick<PanelProps, 'spec' | 'data' | 'edit' | 'world'>;
+export type SurfaceViewProps = Pick<PanelProps, 'spec' | 'data' | 'edit' | 'world'> & {
+  /** `panel`: a framed view inside a page (the surface picks its own shape). `screen`: an
+   * immersive room, so fill the parent, which is the whole screen. */
+  frame: 'panel' | 'screen';
+};
 
 /**
  * A room's surface: whatever draws its world (Phaser, 3D, SVG, plain UI), plus the Presence

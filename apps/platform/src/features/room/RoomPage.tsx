@@ -4,6 +4,7 @@ import { pathOf, roomHref, type OpenRoom } from '../../app/rooms';
 import { AiNotice } from '../../shared/AiNotice';
 import { AgentDock } from './AgentDock';
 import { conversationFor, takeHandoff } from './conversation';
+import { ImmersiveRoom } from './ImmersiveRoom';
 import { endCall } from './voiceCall';
 
 export function RoomPage(props: {
@@ -24,6 +25,8 @@ export function RoomPage(props: {
   }, [room]);
   // A voice call belongs to its room: leaving the room hangs up.
   useEffect(() => () => void endCall(), [room]);
+  if (room.spec.layout === 'immersive')
+    return <ImmersiveRoom room={room} rooms={rooms} ai={props.ai} />;
   return (
     <div className="room-page">
       <nav className="room-bar" aria-label="Rooms path">
