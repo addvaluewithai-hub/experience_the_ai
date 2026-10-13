@@ -133,7 +133,7 @@ after they say it is right.
 4. Custom component only if no built-in panel can show it, in `rooms/<top-room>/panels/`.
 5. A world (a game, a 3D place, a stage, a scene to fly in): declare `world` in `room.json`
    (see "World and surface" in `docs/room-spec.md`) and ship its surface from the room's
-   folder, or use a kit from `kits/` (the SVG stage, and later flight and others). Its art,
+   folder, or use a kit from `kits/` (the SVG stage, flight, and others as rooms need them). Its art,
    characters' bodies, places and props belong to the room, never to the engine.
 
 ## 6. When the engine cannot do it

@@ -37,7 +37,7 @@ OPEN_AI_PREVIEW=true
 | packages/room-spec    | Room contract, validation, data rules, room trees, agent tools                               |
 | packages/room-runtime | RoomView, panels (list, stat, progress, growth, text, rooms, world) and the surface contract |
 | packages/live-runtime | Voice calls: Gemini Live, microphone, playback clock, lip visemes                            |
-| kits                  | Optional reusable surfaces and motion (the SVG stage)                                        |
+| kits                  | Optional reusable surfaces and motion (the SVG stage, flight)                                |
 | rooms                 | Real rooms, one folder per top room                                                          |
 | examples              | Synthetic engine examples, including a nested room tree                                      |
 | apps/platform         | The app, agent conversation and server routes (Pages Functions)                              |
