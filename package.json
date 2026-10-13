@@ -37,5 +37,8 @@
     "typescript": "5.9.3",
     "vite": "8.2.2",
     "wrangler": "^4.129.0"
+  },
+  "dependencies": {
+    "phaser": "4.2.1"
   }
 }

@@ -155,7 +155,8 @@ tools and hands each accepted call to the room's surface.
 - `silent` (default `true`): presentation only, answered without interrupting speech. Set
   `false` when the character needs the result to continue.
 
-The surface lives in the room's folder (or comes from a kit) and implements `RoomSurface` from
+The surface lives in the room's folder (or comes from a kit), may draw with `phaser` (import it
+lazily inside the view so only this room loads it), and implements `RoomSurface` from
 `@experience/room-runtime`: `View` (what the `world` panel shows), `act(character, action,
 args)`, `speak(character | null)`, `setMode(character, mode)`, `mouth(character, frame)` (lip
 shapes during voice) and `state()` (the world now, in words, read before each turn). Register

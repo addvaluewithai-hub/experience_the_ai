@@ -15,10 +15,17 @@ const areas = [
   // Voice and audio: browser APIs only, no React and no drawing.
   { path: 'packages/live-runtime/src', allowed: ['@experience/room-spec'] },
   // Each room folder is self-contained content: base components only, no app or server code.
+  // A room may draw its own world with an approved renderer (loaded only when it is opened).
   {
     path: 'rooms',
     perFolder: true,
-    allowed: ['react', '@experience/room-spec', '@experience/room-runtime', '@experience/kit-'],
+    allowed: [
+      'react',
+      '@experience/room-spec',
+      '@experience/room-runtime',
+      '@experience/kit-',
+      'phaser',
+    ],
   },
   {
     path: 'examples',
