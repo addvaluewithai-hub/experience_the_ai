@@ -59,8 +59,11 @@ export function validateRoom(value: unknown): Validation {
     const icon = source.icon === undefined ? {} : { icon: check.text(source.icon, at('icon'), 8) };
     if (source.planned === true) {
       if (!parent) check.at(at('planned'), 'only a room inside another can be planned');
+      // Empty lists are what validation itself returns for a planned room, so a checked room
+      // (as the client sends it to the server) passes again.
+      const empty = (v: unknown) => v === undefined || (Array.isArray(v) && v.length === 0);
       for (const key of ['characters', 'collections', 'panels', 'rooms', 'pulse', 'world'])
-        if (source[key] !== undefined)
+        if (!empty(source[key]))
           check.at(
             at(key),
             'a planned room has only id, title, purpose and icon until it is built',

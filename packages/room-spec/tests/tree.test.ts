@@ -77,12 +77,16 @@ test('nesting is limited in depth, and rooms panels need rooms', () => {
 
 test('planned rooms carry only their name and purpose, and never at the top', () => {
   const source = structuredClone(nestedHouse) as any;
-  source.rooms[1].characters = [];
+  source.rooms[1].characters = [source.characters[0]];
   source.rooms[1].icon = '🌳🌳🌳🌳🌳';
   const result = validateRoom(source);
   const errors = !result.ok ? result.errors.join('\n') : '';
   assert.match(errors, /rooms\[1\]\.characters: a planned room has only id, title/);
   assert.match(errors, /rooms\[1\]\.icon: must be at most 8/);
+  // A checked room is valid again: the client sends it as checked, the server checks it again.
+  const again = validateRoom(JSON.parse(JSON.stringify(house())));
+  assert.ok(again.ok, JSON.stringify(!again.ok && again.errors));
+  assert.deepEqual(again.spec, house());
   const top = validateRoom({ ...nested(1), planned: true });
   assert.match(!top.ok ? top.errors.join() : '', /only a room inside another can be planned/);
 });
