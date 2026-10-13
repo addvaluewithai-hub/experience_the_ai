@@ -57,4 +57,4 @@ npm run test:browser
 ## Deploy (Cloudflare Pages)
 
 Build command `npm run build`, output `dist`, Functions from `functions/`.
-Secrets: `GEMINI_API_KEY`. AI stays closed unless `OPEN_AI_PREVIEW=true` on a guarded preview.
+Secrets `GEMINI_API_KEY` and `OPEN_AI_PREVIEW=true` open the characters. Steps: [docs/deploy.md](docs/deploy.md).

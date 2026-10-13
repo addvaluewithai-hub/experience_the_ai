@@ -72,7 +72,7 @@ history. Several characters each keep their own conversation; each speaks only a
 
 ## Security now
 
-AI routes are closed unless `OPEN_AI_PREVIEW=true` (there are no accounts to bill or limit
+AI routes are closed unless the `OPEN_AI_PREVIEW=true` secret is set (docs/deploy.md) (there are no accounts to bill or limit
 yet). The guard is per isolate, not a distributed quota. The preview spec and data come from
 the browser and only affect that person's session; with persistence the server will load the
 spec by edition and the data from the database instead of trusting the request.

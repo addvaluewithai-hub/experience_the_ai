@@ -19,7 +19,7 @@ export type Generation = {
 /** One generateContent call. Provider failure is a real error, never an invented reply. */
 export async function generate(env: Env, request: Generation): Promise<Part[]> {
   if (!env.GEMINI_API_KEY) throw new HttpError(503, 'The AI service is not configured.');
-  const model = env.GEMINI_CHAT_MODEL || 'gemini-3.5-flash';
+  const model = env.GEMINI_CHAT_MODEL || 'gemini-3.5-flash-lite';
   const payload = {
     systemInstruction: { parts: [{ text: request.instruction }] },
     contents: request.contents,

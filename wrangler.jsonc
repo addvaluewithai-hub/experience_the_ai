@@ -4,8 +4,6 @@
   "pages_build_output_dir": "./dist",
   "compatibility_date": "2026-10-09",
   "compatibility_flags": ["nodejs_compat"],
-  "vars": {
-    // AI routes stay closed until accounts exist; set "true" only on a guarded preview.
-    "OPEN_AI_PREVIEW": "false",
-  },
+  // No vars here on purpose: GEMINI_API_KEY, OPEN_AI_PREVIEW and the optional GEMINI_CHAT_MODEL
+  // are set per environment as secrets in the Cloudflare dashboard (see docs/deploy.md).
 }
