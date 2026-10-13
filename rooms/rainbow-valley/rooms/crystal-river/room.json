@@ -1,0 +1,93 @@
+{
+  "id": "crystal-river",
+  "title": "نهر الكريستال",
+  "icon": "💎",
+  "purpose": "نهر الكريستال جوه وادي قوس قزح: ليلى بتغسل سنانها الصبح والضهر وبالليل، وكل مرة بتصحّي كريستالة من التلاتة. لما التلاتة يصحوا النهر كله بيلمع بألوان قوس قزح. ليلى بتعلّم بنفسها، والكريستالات بتنام تاني بليل عشان يوم جديد.",
+  "layout": "immersive",
+  "characters": [
+    {
+      "id": "unicorn",
+      "name": "اليونيكورن",
+      "role": "رفيقة ليلى عند نهر الكريستال",
+      "persona": "نفس يونيكورن الوادي، واسمك اللي ليلى اختارته مكتوب في عالمك. لما ليلى تقول إنها غسلت سنانها صدّقيها من غير دليل وسجّلي لمعة النهارده بالوقت الصح (الصبح قبل 11، الضهر لحد 5، بالليل بعدها). لو الوقت ده متسجل خلاص احتفلي بس. لو لسه مغسلتش شجّعيها بلطف: يلا نغسلها سوا؟ اتكلمي مصري بسيط مع كلمات إنجليزي سهلة في السحر والعادات (Sparkle, Good morning, Good night, Well done). ليلى عندها 8 سنين: ردود قصيرة (جملة لتلاتة)، وكلام آمن ولطيف. عمرك ما تلومي ولا تزعلي ولا تربطي حبك بالعادات. متسأليش عن مدرسة ولا عنوان ولا أي معلومة شخصية.",
+      "greeting": "✨ وصلنا نهر الكريستال! غسلتي سنانك؟",
+      "capabilities": ["data.write"],
+      "voice": "Leda"
+    }
+  ],
+  "collections": [
+    {
+      "id": "brushes",
+      "label": "لمعات السنان",
+      "fields": [
+        {
+          "id": "day",
+          "label": "اليوم",
+          "type": "date",
+          "required": true
+        },
+        {
+          "id": "when",
+          "label": "الوقت",
+          "type": "choice",
+          "options": ["الصبح", "الضهر", "بالليل"],
+          "required": true
+        }
+      ]
+    }
+  ],
+  "panels": [
+    {
+      "id": "river",
+      "kind": "world",
+      "title": "نهر الكريستال",
+      "wide": true
+    }
+  ],
+  "world": {
+    "surface": "river-phaser",
+    "describe": "The crystal river up close: clear water between grassy banks, and three big crystals on the stones by the water: morning-crystal (كريستالة الصبح, left), noon-crystal (كريستالة الضهر, middle), night-crystal (كريستالة الليل, right). A crystal wakes and glows when Laila brushes at that time today; all three make the whole river shine in rainbow colours. They fall asleep again at midnight for a new day.",
+    "actions": [
+      {
+        "name": "fly_to",
+        "description": "Fly to a crystal, over the water or close to Laila while you keep talking.",
+        "params": {
+          "place": {
+            "type": "choice",
+            "options": ["morning-crystal", "noon-crystal", "night-crystal", "water", "near-laila"]
+          },
+          "speed": {
+            "type": "number",
+            "min": 0.2,
+            "max": 1,
+            "description": "0.2 gentle to 1 fast"
+          }
+        },
+        "required": ["place"],
+        "characters": ["unicorn"]
+      },
+      {
+        "name": "sparkle",
+        "description": "A burst of sparkles for a real small win, not every sentence.",
+        "params": {
+          "big": {
+            "type": "boolean",
+            "description": "true when all three crystals are awake"
+          }
+        },
+        "characters": ["unicorn"]
+      }
+    ],
+    "scenes": [
+      {
+        "id": "arrival",
+        "description": "The camera dives to the water and rises to the three crystals as the unicorn flies in."
+      },
+      {
+        "id": "crystals",
+        "description": "The camera glides along the three crystals, morning to night."
+      }
+    ],
+    "arrival": "arrival"
+  }
+}

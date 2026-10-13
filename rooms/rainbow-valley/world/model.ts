@@ -1,6 +1,15 @@
 import { Flight, Wings, type FlightPath, type WingFrame } from '@experience/kit-flight';
-import type { Character, MouthFrame, PresenceMode, RoomData } from '@experience/room-spec';
+import type { Character, RoomData } from '@experience/room-spec';
+import { awakeToday } from '../rooms/crystal-river/world/model';
+import { Cast } from './cast';
 import { isPlace, PLACES, placeAt } from './places';
+
+/** The name Laila chose for the unicorn, from the valley's memories; null until she does. */
+export function unicornName(valley?: RoomData): string | null {
+  const named = (valley?.memories ?? []).filter((r) => r.values.kind === NAME_KIND).at(-1)
+    ?.values.fact;
+  return typeof named === 'string' && named.trim() ? named.trim().slice(0, 16) : null;
+}
 
 /** One-off moments the scene plays once: a sparkle burst, the stars twinkling. */
 export type ValleyMoment =
@@ -17,23 +26,26 @@ const PATHS: FlightPath[] = ['direct', 'arc', 'swoop'];
  * The valley's living state, outside Phaser: where the unicorn flies, who speaks, which
  * mouth is audible. The scene only reads it every frame; the conversation only writes it.
  */
-export class ValleyModel {
+export class ValleyModel extends Cast {
   readonly flight: Flight;
   private readonly wings: Wings;
   /** What the unicorn is doing while it moves, in words. */
   private heading = '';
   private moments: ValleyMoment[] = [];
-  private modes = new Map<string, PresenceMode>();
-  private mouths = new Map<string, MouthFrame | null>();
   private scenes: SceneRequest[] = [];
-  speaker: string | null = null;
   wing: WingFrame = { phase: 0, beat: 0, open: 0 };
   /** The unicorn sleeps on the meadow until someone begins; the valley is waiting. */
   asleep = true;
 
   constructor(
-    readonly options: { reducedMotion?: boolean; memory?: () => RoomData | undefined } = {},
+    readonly options: {
+      reducedMotion?: boolean;
+      memory?: () => RoomData | undefined;
+      /** The crystal river's data: today's brushing wakes the river's colour here. */
+      river?: () => RoomData | undefined;
+    } = {},
   ) {
+    super();
     const home = PLACES.meadow;
     this.flight = new Flight({ x: home.x, y: home.y }, options);
     this.wings = new Wings(options);
@@ -89,7 +101,7 @@ export class ValleyModel {
   }
 
   speak(character: string | null) {
-    this.speaker = character;
+    super.speak(character);
     if (character === 'unicorn') this.wake();
   }
 
@@ -105,9 +117,20 @@ export class ValleyModel {
 
   /** The name Laila gave the unicorn, from the valley's memories; null until she chooses. */
   nameOf(): string | null {
-    const memories = this.options.memory?.()?.memories ?? [];
-    const named = memories.filter((r) => r.values.kind === NAME_KIND).at(-1)?.values.fact;
-    return typeof named === 'string' && named.trim() ? named.trim().slice(0, 16) : null;
+    return unicornName(this.options.memory?.());
+  }
+
+  /** How many of the river's three crystals are awake today. */
+  brushedToday(): number {
+    return awakeToday(this.options.river?.()).size;
+  }
+
+  /** The way to the crystal river: she wakes if she must and flies down to it. */
+  flyToRiver() {
+    this.wake();
+    const river = PLACES['crystal-river'];
+    this.flight.command({ action: 'land', x: river.x, speed: 0.7, path: 'swoop' });
+    this.heading = `flying to ${river.label} (crystal-river)`;
   }
 
   /** Asks the director for a scene; resolves when it has played. */
@@ -117,20 +140,6 @@ export class ValleyModel {
   takeScenes(): SceneRequest[] {
     return this.scenes.splice(0);
   }
-  setMode(character: string, mode: PresenceMode) {
-    this.modes.set(character, mode);
-  }
-  modeOf(character: string): PresenceMode {
-    if (this.speaker === character) return 'speaking';
-    return this.modes.get(character) ?? (this.speaker ? 'listening' : 'idle');
-  }
-  mouth(character: string, frame: MouthFrame | null) {
-    this.mouths.set(character, frame);
-  }
-  mouthOf(character: string) {
-    return this.mouths.get(character) ?? null;
-  }
-
   /** The valley now, in words, for the characters to read before they speak. */
   state(characters: Character[]): string {
     const s = this.flight.state();
@@ -148,6 +157,13 @@ export class ValleyModel {
           ? `${s.landed ? 'resting on the grass at' : 'hovering at'} ${PLACES[here].label} (${here})`
           : 'hovering between places';
     const speaking = this.speaker ? `; ${name(this.speaker)} is speaking` : '';
-    return `${who} ${where}; moon-granny (${name('moon-granny')}) in the sky${speaking}. The valley's colours are still asleep.`;
+    const brushed = this.brushedToday();
+    const colours =
+      brushed === 3
+        ? 'The crystal river shines fully awake today (3 of 3 sparkles); the rest of the valley is still asleep.'
+        : brushed
+          ? `The crystal river is waking (${brushed} of 3 sparkles today); the rest of the valley is still asleep.`
+          : "The valley's colours are still asleep.";
+    return `${who} ${where}; moon-granny (${name('moon-granny')}) in the sky${speaking}. ${colours}`;
   }
 }

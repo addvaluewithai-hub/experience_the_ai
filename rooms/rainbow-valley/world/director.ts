@@ -8,7 +8,10 @@ type Shot = View & { seconds: number; hold?: number; ease?: string };
  * The valley's named shots. While one plays it owns the camera; when it ends the camera
  * follows the unicorn again. Shots are slower and fewer with reduced motion.
  */
-export const SHOTS: Record<string, (reduced: boolean) => Shot[]> = {
+/** A world's named shots; each gets reduced motion and where its subject is now. */
+export type Shots = Record<string, (reduced: boolean, at: { x: number; y: number }) => Shot[]>;
+
+export const SHOTS: Shots = {
   // Long, the first time: the sky, the sleeping river, the bridge, down to the unicorn.
   'first-meeting': (reduced) =>
     reduced
@@ -23,11 +26,21 @@ export const SHOTS: Record<string, (reduced: boolean) => Shot[]> = {
           { x: 960, y: 440, zoom: 1.55, seconds: 2.4, hold: 0.8 },
           { x: 960, y: 400, zoom: 1, seconds: 1 },
         ],
-  // Short, every time after: a push in to the sleeping unicorn.
-  'welcome-back': (reduced) => [
-    { x: 960, y: 300, zoom: 1, seconds: 0, hold: reduced ? 0.2 : 0.5 },
-    { x: 960, y: 440, zoom: 1.35, seconds: reduced ? 0.8 : 1.6, hold: 0.5 },
-    { x: 960, y: 400, zoom: 1, seconds: 0.8 },
+  // Short, every time after: a push in to the unicorn, wherever she is.
+  'welcome-back': (reduced, at) => [
+    { x: at.x, y: 300, zoom: 1, seconds: 0, hold: reduced ? 0.2 : 0.5 },
+    { x: at.x, y: at.y, zoom: 1.35, seconds: reduced ? 0.8 : 1.6, hold: 0.5 },
+    { x: at.x, y: 400, zoom: 1, seconds: 0.8 },
+  ],
+  // Following her down into the crystal river: the camera dives to the water.
+  'to-crystal-river': (reduced) => [
+    {
+      x: 420,
+      y: 470,
+      zoom: reduced ? 1.3 : 2.2,
+      seconds: reduced ? 0.8 : 2.2,
+      ease: 'Cubic.easeIn',
+    },
   ],
   // Tilt up to the name written in the stars, hold, come back down.
   'name-in-stars': (reduced) => [
@@ -54,14 +67,15 @@ export class Director {
   constructor(
     private scene: Phaser.Scene,
     private reduced: boolean,
+    private shots: Shots = SHOTS,
   ) {}
 
   /** Plays a shot list from where the camera is now; calls done when it is over. */
-  run(name: string, from: View, done: () => void) {
+  run(name: string, from: View, done: () => void, at = { x: from.x, y: from.y }) {
     // A new scene cuts the one playing; whoever waited on it is told it is over.
     this.chain?.stop();
     this.pending?.();
-    const shots = SHOTS[name]?.(this.reduced) ?? [];
+    const shots = this.shots[name]?.(this.reduced, at) ?? [];
     if (!shots.length) return done();
     Object.assign(this.view, from);
     this.active = true;

@@ -211,6 +211,44 @@ try {
   );
   assert.match(agentRequests[2].world, /(flying to|hovering at) جسر قوس قزح \(rainbow-bridge\)/);
   await page.screenshot({ path: 'test-results/rainbow-valley.png', fullPage: true });
+  // Into an inner place by asking: the valley unicorn flies down to the river, the river's
+  // unicorn carries on from her note, and a brush told in words wakes a crystal.
+  const day = new Date();
+  const today = [day.getFullYear(), day.getMonth() + 1, day.getDate()]
+    .map((n) => String(n).padStart(2, '0'))
+    .join('-');
+  const riverAsks = [];
+  const river = (route) => {
+    const request = route.request().postDataJSON();
+    riverAsks.push(request);
+    const last = request.turns.at(-1);
+    const parts =
+      last.role !== 'user'
+        ? [{ text: request.room.id === 'rainbow-valley' ? 'يلا بينا!' : 'كريستالة الصبح صحيت! ✨' }]
+        : request.room.id === 'rainbow-valley'
+          ? [{ functionCall: { name: 'open_room', args: { room: 'crystal-river', note: 'سنان' } } }]
+          : last.text.startsWith('HANDOFF')
+            ? [{ text: 'غسلتي سنانك؟' }]
+            : [{ functionCall: { name: 'add_brushes', args: { day: today, when: 'الصبح' } } }];
+    return route.fulfill({ json: { parts } });
+  };
+  await page.route('**/api/agent', river);
+  await message.fill('عايزة أغسل سناني');
+  await page.keyboard.press('Enter');
+  await page.waitForURL(/#\/room\/rainbow-valley\/crystal-river$/);
+  await page.locator('[data-world="crystal-river"][data-status="ready"] canvas').waitFor();
+  await page.getByText('غسلتي سنانك؟').waitFor();
+  await page.getByRole('button', { name: 'كتابة بدل الصوت' }).click();
+  await page.getByRole('textbox', { name: 'اكتب هنا… اليونيكورن' }).fill('غسلت سناني');
+  await page.keyboard.press('Enter');
+  await page.getByText('كريستالة الصبح صحيت! ✨').waitFor();
+  const [handoff, told, after] = riverAsks.filter((r) => r.room.id === 'crystal-river');
+  assert.match(handoff.turns[0].text, /^HANDOFF from اليونيكورن .*: سنان$/);
+  assert.match(told.world, /\(0 of 3\)/);
+  assert.match(after.world, /morning-crystal awake.*\(1 of 3\)/);
+  assert.match(after.now.time, /^\d{2}:\d{2}$/);
+  await page.screenshot({ path: 'test-results/crystal-river.png', fullPage: true });
+  await page.unroute('**/api/agent', river);
   await page.emulateMedia({ reducedMotion: 'no-preference' });
 
   // Several characters each keep their own conversation.
@@ -230,6 +268,7 @@ try {
       'self-growth-studio',
       'study-room',
       'rainbow-valley',
+      'rainbow-valley/crystal-river',
     ]) {
       await page.goto(`${url}/#/room/${room}`);
       await page.locator('.room, .immersive').first().waitFor();

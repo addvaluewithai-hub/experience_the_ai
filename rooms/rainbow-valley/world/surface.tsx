@@ -1,6 +1,8 @@
 import type { MouthFrame, PresenceMode, RoomSpec } from '@experience/room-spec';
+import type { RoomData } from '@experience/room-spec';
 import type { RoomStore, RoomSurface, SurfaceViewProps } from '@experience/room-runtime';
-import { useEffect, useRef, useState, type ComponentType } from 'react';
+import type { ComponentType } from 'react';
+import { PhaserFrame } from './frame';
 import { ValleyModel } from './model';
 
 const prefersLessMotion = () =>
@@ -14,15 +16,30 @@ export class ValleySurface implements RoomSurface {
   constructor(
     private spec: RoomSpec,
     store?: RoomStore,
-    options: { reducedMotion?: boolean } = {},
+    options: { reducedMotion?: boolean; river?: () => RoomData | undefined } = {},
   ) {
     const model = new ValleyModel({
       reducedMotion: options.reducedMotion ?? prefersLessMotion(),
       memory: () => store?.get(),
+      river: options.river,
     });
     this.model = model;
+    const load = () =>
+      import('./scene').then(
+        ({ startValley }) =>
+          (el: HTMLElement) =>
+            startValley(el, model).stop,
+      );
     this.View = function ValleyView(props: SurfaceViewProps) {
-      return <Valley model={model} frame={props.frame} />;
+      return (
+        <PhaserFrame
+          world="rainbow-valley"
+          label="وادي قوس قزح: اليونيكورن الطايرة وجدّة القمر"
+          background="#4a3a8c"
+          frame={props.frame}
+          load={load}
+        />
+      );
     };
   }
 
@@ -52,56 +69,4 @@ export class ValleySurface implements RoomSurface {
   state() {
     return this.model.state(this.spec.characters);
   }
-}
-
-/** Loads Phaser only when the valley is on screen, and frees it when it leaves. */
-function Valley({ model, frame }: { model: ValleyModel; frame: SurfaceViewProps['frame'] }) {
-  const host = useRef<HTMLDivElement>(null);
-  const [status, setStatus] = useState<'waking' | 'ready' | 'failed'>('waking');
-  useEffect(() => {
-    let stop: (() => void) | undefined;
-    let gone = false;
-    import('./scene')
-      .then(({ startValley }) => {
-        if (gone || !host.current) return;
-        stop = startValley(host.current, model).stop;
-        setStatus('ready');
-      })
-      .catch(() => !gone && setStatus('failed'));
-    return () => {
-      gone = true;
-      stop?.();
-    };
-  }, [model]);
-  return (
-    <div
-      role="img"
-      aria-label="وادي قوس قزح: اليونيكورن الطايرة وجدّة القمر"
-      data-world="rainbow-valley"
-      data-status={status}
-      style={{
-        position: 'relative',
-        width: '100%',
-        ...(frame === 'screen' ? { height: '100%' } : { aspectRatio: '16 / 9', borderRadius: 18 }),
-        overflow: 'hidden',
-        background: '#4a3a8c',
-      }}
-    >
-      <div ref={host} style={{ position: 'absolute', inset: 0 }} />
-      {status !== 'ready' && (
-        <p
-          style={{
-            position: 'absolute',
-            inset: 0,
-            margin: 0,
-            display: 'grid',
-            placeItems: 'center',
-            color: '#fdf4ff',
-          }}
-        >
-          {status === 'failed' ? 'الوادي مش راضي يفتح دلوقتي.' : 'الوادي بيصحى… ✨'}
-        </p>
-      )}
-    </div>
-  );
 }

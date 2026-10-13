@@ -2,6 +2,7 @@ import * as Phaser from 'phaser';
 import type { FlightState } from '@experience/kit-flight';
 import { drawBackdrop, VIEW, WORLD, type Backdrop } from './backdrop';
 import { Director } from './director';
+import { startGame } from './game';
 import type { ValleyModel, ValleyMoment } from './model';
 import { Moon } from './moon';
 import { NameInStars } from './stars';
@@ -28,6 +29,7 @@ class ValleyScene extends Phaser.Scene {
   private director!: Director;
   private name!: NameInStars;
   private started = false;
+  private brushed = 0;
 
   constructor(private model: ValleyModel) {
     super('rainbow-valley');
@@ -132,14 +134,20 @@ class ValleyScene extends Phaser.Scene {
             ? 'welcome-back'
             : 'first-meeting'
           : scene.id;
+      if (id === 'to-crystal-river') this.model.flyToRiver();
       const from = { x: camera.midPoint.x, y: camera.midPoint.y, zoom: camera.zoom / fit };
-      this.director.run(id, from, scene.done);
+      this.director.run(id, from, scene.done, at);
     }
     if (this.name.update(dt, this.model.nameOf(), this.started)) {
       const from = { x: camera.midPoint.x, y: camera.midPoint.y, zoom: camera.zoom / fit };
       this.director.run('name-in-stars', from, () => undefined);
     }
     this.started = true;
+    const brushed = this.model.brushedToday();
+    if (brushed !== this.brushed) {
+      this.brushed = brushed;
+      this.backdrop.river(brushed / 3);
+    }
     if (this.director.active) {
       // A scene owns the camera: it goes exactly where the shot says.
       camera.setLerp(1, 1);
@@ -183,35 +191,6 @@ class ValleyScene extends Phaser.Scene {
   }
 }
 
-/**
- * Starts the valley inside parent, drawn at the screen's real pixel density (up to 2x) so it
- * stays sharp; it follows the parent's size. stop() frees the canvas and its GPU memory.
- */
-export function startValley(parent: HTMLElement, model: ValleyModel) {
-  const density = Math.min(2, Math.max(1, globalThis.devicePixelRatio || 1));
-  const size = () => ({
-    width: Math.round((parent.clientWidth || VIEW.width) * density),
-    height: Math.round((parent.clientHeight || VIEW.height) * density),
-  });
-  const game = new Phaser.Game({
-    type: Phaser.AUTO,
-    parent,
-    ...size(),
-    backgroundColor: '#4a3a8c',
-    banner: false,
-    audio: { noAudio: true },
-    scale: { mode: Phaser.Scale.NONE, zoom: 1 / density },
-    scene: new ValleyScene(model),
-  });
-  const resized = new ResizeObserver(() => {
-    const next = size();
-    if (next.width && next.height) game.scale.resize(next.width, next.height);
-  });
-  resized.observe(parent);
-  return {
-    stop: () => {
-      resized.disconnect();
-      game.destroy(true);
-    },
-  };
-}
+/** Starts the valley inside parent; stop() frees the canvas and its GPU memory. */
+export const startValley = (parent: HTMLElement, model: ValleyModel) =>
+  startGame(parent, new ValleyScene(model), '#4a3a8c');

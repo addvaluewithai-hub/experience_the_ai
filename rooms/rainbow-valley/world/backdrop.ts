@@ -14,7 +14,13 @@ const RAINBOW = [0xff6b6b, 0xffa94d, 0xffe066, 0x69db7c, 0x4dabf7, 0x748ffc, 0xd
 type Movable = { x: number; y: number };
 type Layer = { item: Movable; factor: number; x: number; y: number };
 export type Cloud = { layer: Layer; speed: number };
-export type Backdrop = { stars: Phaser.GameObjects.Arc[]; clouds: Cloud[]; depth: Depth };
+export type Backdrop = {
+  stars: Phaser.GameObjects.Arc[];
+  clouds: Cloud[];
+  depth: Depth;
+  /** Redraws the crystal river as awake as today's brushing (0 asleep, 1 all three). */
+  river: (wake: number) => void;
+};
 
 /**
  * Depth by hand: far layers move less than the view. The camera zooms to fit any screen, and
@@ -95,11 +101,13 @@ export function drawBackdrop(scene: Phaser.Scene): Backdrop {
     [8, 120, 0],
     [4, 37, 1],
   ]);
-  drawRiver(scene);
+  const g = scene.add.graphics();
+  const river = (wake: number) => drawRiver(g, wake);
+  river(0);
   drawBridge(scene);
   drawMeadow(scene);
   layer(1, GRASS + 64, asleep(0x6fd1a4, SLEEP), [[5, 60, 0.3]]);
-  return { stars, clouds, depth };
+  return { stars, clouds, depth, river };
 }
 
 function cloud(scene: Phaser.Scene, depth: Depth, factor: number, row: number, i: number): Cloud {
@@ -122,10 +130,10 @@ function cloud(scene: Phaser.Scene, depth: Depth, factor: number, row: number, i
   return { layer: depth.place(shape, factor), speed: 4 + factor * 6 };
 }
 
-/** The crystal river, winding from the far hills to the front. */
-function drawRiver(scene: Phaser.Scene) {
-  const g = scene.add.graphics();
-  const water = asleep(0x7dd3fc, SLEEP);
+/** The crystal river, winding from the far hills to the front; its colour wakes with `wake`. */
+function drawRiver(g: Phaser.GameObjects.Graphics, wake: number) {
+  g.clear();
+  const water = asleep(0x7dd3fc, SLEEP * (1 - wake));
   g.fillStyle(water, 0.9);
   fillShape(g, [
     { x: 330, y: GRASS + 2 },
@@ -141,7 +149,7 @@ function drawRiver(scene: Phaser.Scene) {
     [250, 500, 0.7],
     [540, 488, 0.9],
   ]) {
-    g.fillStyle(asleep(0xc4b5fd, SLEEP - 0.1), 0.95);
+    g.fillStyle(asleep(0xc4b5fd, (SLEEP - 0.1) * (1 - wake)), 0.95);
     fillShape(g, [
       { x, y: y - 26 * s },
       { x: x + 9 * s, y: y - 6 * s },

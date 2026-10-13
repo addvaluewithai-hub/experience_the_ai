@@ -60,22 +60,36 @@ try {
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
   await page.route('**/api/status', (route) => route.fulfill({ json: { ai: true } }));
-  let ticket;
+  const tickets = [];
   await page.route('**/api/live', (route) => {
-    ticket = route.request().postDataJSON();
+    tickets.push(route.request().postDataJSON());
     return route.fulfill({
       json: { token: 'auth_tokens/test', model: 'gemini-3.8-live', config: { tools: [] } },
     });
   });
   const sent = { setup: null, mic: 0, tools: [] };
+  // One socket per call; each call asked for its ticket first, so tickets[i] says whose it is.
+  const sessions = [];
   await page.routeWebSocket(/BidiGenerateContentConstrained/, (ws) => {
+    const session = { index: sessions.length, texts: [] };
+    sessions.push(session);
     ws.onMessage((raw) => {
       const message = JSON.parse(String(raw));
+      const said = message.clientContent?.turns?.[0]?.parts?.[0]?.text;
+      if (said) session.texts.push(said);
+      if (message.setup) ws.send(JSON.stringify({ setupComplete: {} }));
+      const room = tickets[session.index]?.room?.id;
+      if (room === 'rainbow-valley' && said)
+        setTimeout(() => {
+          const note = { room: 'crystal-river', note: 'سنان' };
+          const call = { id: 'v1', name: 'open_room', args: note };
+          ws.send(JSON.stringify({ toolCall: { functionCalls: [call] } }));
+        }, 200);
+      if (room !== 'classroom-stage') return;
       if (message.realtimeInput?.audio) sent.mic++;
       if (message.toolResponse) sent.tools.push(message.toolResponse);
       if (!message.setup) return;
       sent.setup = message.setup;
-      ws.send(JSON.stringify({ setupComplete: {} }));
       const audio = speech(2.4);
       setTimeout(() => {
         ws.send(
@@ -115,6 +129,7 @@ try {
     .first()
     .click();
   await page.getByText('على الخط').waitFor();
+  const [ticket] = tickets;
   assert.equal(ticket.characterId, 'ms-nour');
   assert.match(ticket.world, /omar \(عمر\) sitting at ديسك عمر/);
   assert.deepEqual(sent.setup, { model: 'models/gemini-3.8-live', tools: [] });
@@ -158,9 +173,27 @@ try {
     .getByRole('button', { name: /مكالمة صوت/ })
     .first()
     .waitFor();
+
+  // An immersive room: one tap begins and the unicorn speaks first; when she takes Laila into
+  // the river by voice, the call carries on there and the river's unicorn picks up the note.
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto(`${url}/#/room/rainbow-valley`);
+  await page.getByRole('button', { name: 'يلا نبدأ ✨' }).click();
+  await page.waitForURL(/#\/room\/rainbow-valley\/crystal-river$/);
+  await page.locator('.immersive-live[data-status="live"]').waitFor();
+  for (const end = Date.now() + 10000; !sessions[2]?.texts.length; ) {
+    if (Date.now() > end) throw new Error('The call did not carry on into the river');
+    await page.waitForTimeout(100);
+  }
+  assert.match(sessions[1].texts[0], /^ARRIVED: the person just came into "وادي قوس قزح"/);
+  assert.equal(tickets[2].room.id, 'crystal-river');
+  assert.match(sessions[2].texts[0], /^HANDOFF from اليونيكورن \(رفيقة ليلى الطايرة\) .*: سنان$/);
+  await page.getByRole('button', { name: 'إنهاء' }).click();
+  await page.getByRole('button', { name: 'يلا نبدأ ✨' }).waitFor();
+
   assert.deepEqual(errors, []);
   console.log(
-    'Voice flow passed: live audio, lip sync from playback, silent stage tool, mic, transcript.',
+    'Voice flow passed: live audio, lip sync from playback, silent stage tool, mic, transcript, a call carried into an inner room.',
   );
 } finally {
   await browser?.close();
