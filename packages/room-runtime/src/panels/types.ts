@@ -42,7 +42,12 @@ export type SurfaceViewProps = Pick<PanelProps, 'spec' | 'data' | 'edit' | 'worl
  * A room's surface: whatever draws its world (Phaser, 3D, SVG, plain UI), plus the Presence
  * the brain drives. Rooms ship their own; the engine only mounts and talks to it.
  */
-export type RoomSurface = Presence & { View: ComponentType<SurfaceViewProps>; dispose?(): void };
+export type RoomSurface = Presence & {
+  View: ComponentType<SurfaceViewProps>;
+  /** The director: plays one of the world's scenes; resolves when it is over. */
+  play?(scene: string): Promise<void>;
+  dispose?(): void;
+};
 
 export type PanelComponent = ComponentType<PanelProps>;
 export type PanelRegistry = Record<Exclude<PanelKind, 'custom'>, PanelComponent>;

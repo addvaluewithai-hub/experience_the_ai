@@ -1,5 +1,5 @@
 import { addRecord, describeData, removeRecord, updateRecord, type RoomData } from './data';
-import { parseWorldCall, worldTools, type WorldAct } from './world';
+import { isWorldCall, parseWorldCall, worldTools, type WorldAct } from './world';
 import { innerRooms } from './tree';
 import type { Character, Field, RoomSpec } from './types';
 
@@ -114,7 +114,7 @@ export function runTool(
 ): ToolOutcome {
   const allowed = agentTools(spec, character).some((t) => t.name === call.name);
   if (!allowed) return { data, response: { error: `Tool ${call.name} is not available` } };
-  if (spec.world?.actions.some((a) => a.name === call.name)) {
+  if (isWorldCall(spec, call.name)) {
     const parsed = parseWorldCall(spec, character, call.name, call.args);
     if ('error' in parsed) return { data, response: { error: parsed.error } };
     return { data, response: { ok: true }, act: parsed.act, silent: parsed.silent };

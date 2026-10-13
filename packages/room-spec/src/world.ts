@@ -26,13 +26,30 @@ export type WorldAction = {
   /** Presentation only: answered silently and never blocks speech (default true). */
   silent: boolean;
 };
-export type World = { surface: string; describe: string; actions: WorldAction[] };
+/** A moment the surface directs (camera, staging, effects), named so characters can call it. */
+export type WorldScene = { id: string; description: string };
+export type World = {
+  surface: string;
+  describe: string;
+  actions: WorldAction[];
+  /** Directed moments. Characters get a `play_scene` tool to play one at the right time. */
+  scenes?: WorldScene[];
+  /** The scene the surface plays when a person arrives, before anyone speaks. */
+  arrival?: string;
+};
 /** An accepted call, for the surface to perform. */
 export type WorldAct = { character: string; action: string; args: Record<string, unknown> };
 
 const NAME = /^[a-z][a-z0-9_]{1,39}$/;
-const RESERVED = /^(list_|add_|update_|remove_|open_room$)/;
-export const WORLD_LIMITS = { actions: 16, params: 8, options: 40, describe: 1500, state: 2000 };
+const RESERVED = /^(list_|add_|update_|remove_|open_room$|play_scene$)/;
+export const WORLD_LIMITS = {
+  actions: 16,
+  params: 8,
+  options: 40,
+  describe: 1500,
+  state: 2000,
+  scenes: 12,
+};
 
 export function validateWorld(
   check: Checker,
@@ -51,11 +68,30 @@ export function validateWorld(
     if (seen.has(a.name)) check.at(`${path}.actions`, `duplicate action ${a.name}`);
     seen.add(a.name);
   }
-  return {
+  const world: World = {
     surface: check.id(input.surface, `${path}.surface`),
     describe: check.text(input.describe, `${path}.describe`, WORLD_LIMITS.describe),
     actions,
   };
+  if (input.scenes !== undefined) {
+    world.scenes = check
+      .list(input.scenes, `${path}.scenes`, 1, WORLD_LIMITS.scenes)
+      .map((v, i) => {
+        const at = `${path}.scenes[${i}]`;
+        const scene = check.object(v, at);
+        return {
+          id: check.id(scene.id, `${at}.id`),
+          description: check.text(scene.description, `${at}.description`, 300),
+        };
+      });
+    check.unique(world.scenes, `${path}.scenes`);
+  }
+  if (input.arrival !== undefined) {
+    world.arrival = check.id(input.arrival, `${path}.arrival`);
+    if (!world.scenes?.some((s) => s.id === world.arrival))
+      check.at(`${path}.arrival`, 'must name one of the scenes');
+  }
+  return world;
 }
 
 function action(check: Checker, a: Input, at: string, people: Character[]): WorldAction {
@@ -108,8 +144,24 @@ function action(check: Checker, a: Input, at: string, people: Character[]): Worl
   return result;
 }
 
-const actionsFor = (spec: RoomSpec, character: Character) =>
-  (spec.world?.actions ?? []).filter((a) => !a.characters || a.characters.includes(character.id));
+/** Declared actions this character may use, plus `play_scene` when the world has scenes. */
+function actionsFor(spec: RoomSpec, character: Character): WorldAction[] {
+  const declared = (spec.world?.actions ?? []).filter(
+    (a) => !a.characters || a.characters.includes(character.id),
+  );
+  const scenes = spec.world?.scenes ?? [];
+  if (!scenes.length) return declared;
+  return [
+    ...declared,
+    {
+      name: 'play_scene',
+      description: `Play a directed moment of the world when it fits what is happening: ${scenes.map((s) => `${s.id} (${s.description})`).join('; ')}.`,
+      params: { scene: { type: 'choice', options: scenes.map((s) => s.id) } },
+      required: ['scene'],
+      silent: true,
+    },
+  ];
+}
 
 export function worldTools(spec: RoomSpec, character: Character) {
   return actionsFor(spec, character).map((a) => ({
@@ -131,6 +183,11 @@ export function worldTools(spec: RoomSpec, character: Character) {
     },
   }));
 }
+
+/** Whether a tool name belongs to the world (a declared action, or a scene to play). */
+export const isWorldCall = (spec: RoomSpec, name: string) =>
+  Boolean(spec.world?.actions.some((a) => a.name === name)) ||
+  (name === 'play_scene' && Boolean(spec.world?.scenes?.length));
 
 /** Checks a call against the declared action; the surface only ever sees accepted args. */
 export function parseWorldCall(

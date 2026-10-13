@@ -123,6 +123,51 @@ test('tools follow who may act; calls are checked before the surface sees them',
   assert.equal(call('say_hi', { loud: true }).silent, false);
 });
 
+test('scenes give characters a play_scene tool; arrival names one of them', () => {
+  const scenes = [
+    { id: 'dive', description: 'The camera dives into the reef.' },
+    { id: 'storm', description: 'A storm rolls over the tank.' },
+  ];
+  const spec = valid(room({ ...world, scenes, arrival: 'dive' }));
+  assert.equal(spec.world!.arrival, 'dive');
+  assert.deepEqual(valid(JSON.parse(JSON.stringify(spec))), spec, 'a checked world checks again');
+  const [fish] = spec.characters;
+  const tool = agentTools(spec, fish).find((t) => t.name === 'play_scene')!;
+  assert.deepEqual((tool.parameters.properties.scene as { enum: string[] }).enum, [
+    'dive',
+    'storm',
+  ]);
+  assert.match(tool.description, /dive \(The camera dives into the reef\.\)/);
+  const outcome = runTool(
+    spec,
+    fish,
+    emptyData(spec),
+    { name: 'play_scene', args: { scene: 'storm' } },
+    () => '',
+  );
+  assert.deepEqual(outcome.act, {
+    character: 'fish',
+    action: 'play_scene',
+    args: { scene: 'storm' },
+  });
+  assert.equal(outcome.silent, true);
+  const errors = errorsOf(
+    room({
+      ...world,
+      actions: [{ ...world.actions[0], name: 'play_scene' }],
+      scenes: [scenes[0], scenes[0]],
+      arrival: 'sunrise',
+    }),
+  );
+  assert.match(errors, /actions\[0\]\.name: must be a snake_case name that is not a data tool/);
+  assert.match(errors, /scenes: .*dive/);
+  assert.match(errors, /arrival: must name one of the scenes/);
+  assert.equal(
+    agentTools(valid(room(world)), fish).some((t) => t.name === 'play_scene'),
+    false,
+  );
+});
+
 test('an immersive room is its world: one world panel and nothing else', () => {
   assert.equal(valid(room(world, { layout: 'immersive' })).layout, 'immersive');
   const extra = { id: 't', kind: 'text', title: 'T', text: 'x' };

@@ -158,12 +158,19 @@ tools and hands each accepted call to the room's surface.
 - `characters` limits an action to some characters; all may use it when absent.
 - `silent` (default `true`): presentation only, answered without interrupting speech. Set
   `false` when the character needs the result to continue.
+- `scenes` (optional, 1–12): directed moments the surface plays (camera shots, staging,
+  effects), each `{ "id": "valley-tour", "description": "…" }`. Characters get one
+  `play_scene` tool to play them when it fits; the name is reserved for it.
+- `arrival` (optional): the id of the scene the surface plays when a person arrives, before
+  anyone speaks. In an immersive room the way to begin appears when it ends; the surface may
+  vary it (long the first time, short after) from the room's own data.
 
 The surface lives in the room's folder (or comes from a kit), may draw with `phaser` (import it
 lazily inside the view so only this room loads it), and implements `RoomSurface` from
 `@experience/room-runtime`: `View` (what the `world` panel shows), `act(character, action,
 args)`, `speak(character | null)`, `setMode(character, mode)`, `mouth(character, frame)` (lip
-shapes during voice) and `state()` (the world now, in words, read before each turn). Register
+shapes during voice), `state()` (the world now, in words, read before each turn) and, with
+scenes, `play(scene)` (the director: resolves when the scene is over). Register
 the room with it: `{ spec, surface: (spec, store, path) => new MySurface(spec, store) }`.
 
 The view receives `frame`: `panel` inside a page (choose your own shape, e.g. 16:9) or

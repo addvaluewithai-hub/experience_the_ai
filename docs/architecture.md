@@ -37,6 +37,9 @@ The experience is the product; how it is drawn is the room's choice.
   the host creates it once per open room and shows it in a `world` panel, or on the whole
   screen when the room is `immersive`: then the app adds only a voice-first presence layer
   (one tap begins, the character speaks first, captions over the world, a small keyboard).
+- **Director** (`scenes` and `arrival` in a room's world, `RoomSurface.play`): named moments
+  the surface directs. The arrival scene plays before anyone speaks; characters play the
+  others with one derived `play_scene` tool. The engine knows the names, never the shots.
 - **Voice** (packages/live-runtime): Gemini Live calls with a server-locked ticket per
   character (`/api/live`), one playback clock whose audible PCM yields mouth frames for the
   presence, microphone capture, silent world actions as non-blocking tools. One call at a time.

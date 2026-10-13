@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { RoomData } from '@experience/room-spec';
 import { useRoomData } from '@experience/room-runtime';
 import { roomHref, type OpenRoom } from '../../app/rooms';
@@ -20,6 +20,21 @@ export function ImmersiveRoom(props: {
     (change: (current: RoomData) => RoomData) => room.store.set(change(room.store.get())),
     [room],
   );
+  // The arrival scene plays before anyone speaks; the way to begin appears when it ends.
+  const arrival = room.spec.world?.arrival;
+  const [arriving, setArriving] = useState(Boolean(arrival && room.surface?.play));
+  useEffect(() => {
+    if (!arrival || !room.surface?.play) return;
+    let here = true;
+    setArriving(true);
+    void room.surface
+      .play(arrival)
+      .catch(() => undefined)
+      .then(() => here && setArriving(false));
+    return () => {
+      here = false;
+    };
+  }, [room, arrival]);
   const View = room.surface?.View;
   const ar = room.spec.language === 'ar';
   return (
@@ -51,7 +66,7 @@ export function ImmersiveRoom(props: {
       >
         {room.parent ? (ar ? '›' : '‹') : '⌂'}
       </a>
-      <PresenceLayer room={room} ai={props.ai} />
+      <PresenceLayer room={room} ai={props.ai} hidden={arriving} />
     </div>
   );
 }

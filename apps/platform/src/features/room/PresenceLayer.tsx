@@ -43,7 +43,16 @@ function captions(lines: Line[]) {
  * How a person meets the characters of an immersive room: one tap begins a voice call and the
  * character speaks first; captions float over the world; a small keyboard stands in for voice.
  */
-export function PresenceLayer({ room, ai }: { room: OpenRoom; ai: boolean | null }) {
+export function PresenceLayer({
+  room,
+  ai,
+  hidden = false,
+}: {
+  room: OpenRoom;
+  ai: boolean | null;
+  /** While a scene plays the world speaks for itself. */
+  hidden?: boolean;
+}) {
   const cast = room.spec.characters;
   const [who, setWho] = useState(cast[0].id);
   const [typing, setTyping] = useState(false);
@@ -69,6 +78,7 @@ export function PresenceLayer({ room, ai }: { room: OpenRoom; ai: boolean | null
     if (!sayInCall(room, character, text)) void conversation.send(text);
   };
 
+  if (hidden) return null;
   return (
     <>
       {cast.length > 1 && (
