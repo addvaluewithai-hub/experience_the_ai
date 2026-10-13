@@ -22,6 +22,7 @@ plain variables cannot be edited in the dashboard; everything below is a secret.
 | ------------------- | ----------------------------------------- | ------------------------------------------ |
 | `GEMINI_API_KEY`    | key from Google AI Studio                 | Never in Git or the client bundle          |
 | `OPEN_AI_PREVIEW`   | `true` to let characters talk             | Anything else, or missing, keeps AI closed |
+| `GEMINI_LIVE_MODEL` | optional, default `gemini-3.8-live`       | Voice calls; free tier: unlimited requests |
 | `GEMINI_CHAT_MODEL` | optional, default `gemini-3.5-flash-lite` | Must be a model the key's tier can use     |
 
 Set them for the environment you test on (Production and/or Preview), then redeploy: secrets

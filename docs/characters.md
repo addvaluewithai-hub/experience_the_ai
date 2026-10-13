@@ -1,7 +1,8 @@
 # Characters and stages (engine design)
 
-Status: the humanoid plan, its parts kit and the SVG stage surface are built
-(packages/stage-runtime); the audio path, voice and other plans and surfaces are not yet.
+Status: built: the humanoid plan and parts kit, the SVG stage surface (packages/stage-runtime),
+and voice with lip sync from audible playback (packages/live-runtime, `/api/live`). Not yet:
+other body plans, 3D and Phaser surfaces, several voices taking turns, a real-device check.
 Goal: any character, in any theme, alone or with others, with real lip sync and acting,
 described by a room as data. Rooms never draw characters; they describe them.
 

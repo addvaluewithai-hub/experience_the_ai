@@ -10,6 +10,8 @@ const areas = [
     allowed: ['react', 'react-dom', '@experience/room-spec', '@experience/stage-runtime'],
   },
   { path: 'packages/stage-runtime/src', allowed: ['react', 'react-dom', '@experience/room-spec'] },
+  // Voice and audio: browser APIs only, no React and no drawing.
+  { path: 'packages/live-runtime/src', allowed: ['@experience/room-spec'] },
   // Each room folder is self-contained content: base components only, no app or server code.
   {
     path: 'rooms',

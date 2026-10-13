@@ -21,7 +21,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "functions:check": "wrangler pages functions build functions --outdir .functions-check",
-    "rooms": "node --import tsx tools/rooms.mjs"
+    "rooms": "node --import tsx tools/rooms.mjs",
+    "test:browser:voice": "node tests/voice-browser.mjs"
   },
   "devDependencies": {
     "@types/node": "24.13.4",

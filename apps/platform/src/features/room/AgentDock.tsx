@@ -2,11 +2,73 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import type { Character } from '@experience/room-spec';
 import type { OpenRoom } from '../../app/rooms';
 import { conversationFor, useConversation } from './conversation';
+import { endCall, startCall, toggleMute, useCall } from './voiceCall';
 
 const labels = {
-  en: { talk: 'Talk to', send: 'Send', stop: 'Stop', closed: 'Characters are not live here yet' },
-  ar: { talk: 'كلّم', send: 'إرسال', stop: 'إيقاف', closed: 'الشخصيات مش شغالة هنا لسه' },
+  en: {
+    talk: 'Talk to',
+    send: 'Send',
+    stop: 'Stop',
+    closed: 'Characters are not live here yet',
+    voice: 'Voice call',
+    end: 'End call',
+    mute: 'Mute',
+    unmute: 'Unmute',
+    connecting: 'Connecting…',
+    live: 'On the line',
+  },
+  ar: {
+    talk: 'كلّم',
+    send: 'إرسال',
+    stop: 'إيقاف',
+    closed: 'الشخصيات مش شغالة هنا لسه',
+    voice: 'مكالمة صوت',
+    end: 'إنهاء',
+    mute: 'كتم',
+    unmute: 'رجّع الصوت',
+    connecting: 'بيتصل…',
+    live: 'على الخط',
+  },
 };
+
+/** Start, mute and end a voice call with this character; its words land in the conversation. */
+function CallBar(props: { room: OpenRoom; character: Character; ai: boolean | null }) {
+  const call = useCall();
+  const words = labels[props.room.spec.language];
+  const mine = call.roomKey === props.room.key && call.character === props.character.id;
+  if (!mine || call.status === 'idle')
+    return (
+      <div className="dock-call">
+        <button
+          type="button"
+          disabled={props.ai === false}
+          onClick={() => void startCall(props.room, props.character)}
+        >
+          🎙️ {words.voice}
+        </button>
+        {mine && call.message ? <span role="alert">{call.message}</span> : null}
+      </div>
+    );
+  return (
+    <div className="dock-call" data-status={call.status}>
+      <span role="status">
+        {call.status === 'connecting'
+          ? words.connecting
+          : call.status === 'live'
+            ? words.live
+            : (call.message ?? '')}
+      </span>
+      {call.status === 'live' ? (
+        <button type="button" aria-pressed={call.muted} onClick={toggleMute}>
+          {call.muted ? words.unmute : words.mute}
+        </button>
+      ) : null}
+      <button type="button" onClick={() => void endCall()}>
+        {words.end}
+      </button>
+    </div>
+  );
+}
 
 /** The conversation with one character; mounted per character so each keeps its own talk. */
 function Conversation(props: { room: OpenRoom; character: Character; ai: boolean | null }) {
@@ -34,6 +96,7 @@ function Conversation(props: { room: OpenRoom; character: Character; ai: boolean
         ))}
         {busy ? <li className="dock-line dock-thinking">…</li> : null}
       </ol>
+      <CallBar room={props.room} character={props.character} ai={props.ai} />
       <form className="dock-form" onSubmit={submit}>
         <textarea
           value={draft}

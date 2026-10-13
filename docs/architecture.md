@@ -24,6 +24,9 @@ The experience is the product; how it is drawn is a choice per room.
 - **Presence** (`Presence` in packages/room-spec/src/presence.ts): the only way the brain
   touches a body: dispatch a stage command, give someone the floor, set a mode, send a mouth
   frame, read positions.
+- **Voice** (packages/live-runtime): Gemini Live calls with a server-locked ticket per
+  character (`/api/live`), one playback clock whose audible PCM yields mouth frames for the
+  presence, microphone capture, stage tools answered silently. One call at a time.
 - **Surfaces**: anything that implements Presence and draws: the dashboard panels, the SVG
   stage (packages/stage-runtime, built), and next a 3D place and a Phaser 2.5D world. A room
   picks its surface; a room may ship its own.

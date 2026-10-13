@@ -129,3 +129,38 @@ export type Routine = keyof typeof ROUTINES;
 export const ROUTINE_NAMES = Object.keys(ROUTINES) as Routine[];
 
 export const STAGE_LIMITS = { places: 16, props: 24, routes: 6, routeStops: 8, cast: 6 } as const;
+
+/** Gemini Live's prebuilt voices, by Google's names (as in new-learn's Nova settings). */
+export const VOICES = [
+  'Zephyr',
+  'Puck',
+  'Charon',
+  'Kore',
+  'Fenrir',
+  'Leda',
+  'Orus',
+  'Aoede',
+  'Callirrhoe',
+  'Autonoe',
+  'Enceladus',
+  'Iapetus',
+  'Umbriel',
+  'Algieba',
+  'Despina',
+  'Erinome',
+  'Algenib',
+  'Rasalgethi',
+  'Laomedeia',
+  'Achernar',
+  'Alnilam',
+  'Schedar',
+  'Gacrux',
+  'Pulcherrima',
+  'Achird',
+  'Zubenelgenubi',
+  'Vindemiatrix',
+  'Sadachbia',
+  'Sadaltager',
+  'Sulafat',
+] as const;
+export type VoiceName = (typeof VOICES)[number];

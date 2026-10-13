@@ -3,7 +3,7 @@ import { HttpError } from './http';
 // Best-effort per-isolate guard; a distributed quota per account comes with accounts.
 // 15 per minute matches the free Gemini 3.5 Flash Lite limit; one message can take several.
 const requests = new Map<string, { until: number; count: number }>();
-const MAX: Record<string, number> = { agent: 15 };
+const MAX: Record<string, number> = { agent: 15, live: 4 };
 
 export function limit(request: Request, action: string, now = Date.now()) {
   for (const [key, value] of requests) if (value.until <= now) requests.delete(key);

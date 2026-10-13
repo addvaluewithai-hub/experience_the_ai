@@ -1,3 +1,4 @@
+import type { VoiceName } from './kit';
 import type { CharacterLook } from './look';
 import type { Stage } from './stage';
 
@@ -66,6 +67,8 @@ export type Character = {
   capabilities: Capability[];
   /** How the character looks on a stage; without one it lives in the conversation only. */
   look?: CharacterLook;
+  /** The character's voice in live calls. */
+  voice?: VoiceName;
 };
 
 export type Panel = {

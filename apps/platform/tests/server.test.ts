@@ -158,3 +158,39 @@ test('a character on a stage gets the stage brief and stage tools; positions are
   for (const name of ['go_to', 'play_routine', 'look_at', 'set_pose', 'perform'])
     assert.ok(names.includes(name));
 });
+
+test('a voice ticket locks the character, its voice, instruction and silent stage tools', async () => {
+  const seen: { url: string; body: any }[] = [];
+  globalThis.fetch = (async (url: string, init: RequestInit) => {
+    seen.push({ url, body: JSON.parse(String(init.body)) });
+    return Response.json({ name: 'auth_tokens/abc' });
+  }) as typeof fetch;
+  const spec = structuredClone(byId('classroom-stage')) as any;
+  spec.characters[0].voice = 'Puck';
+  const response = await post('/api/live', { room: spec, characterId: 'ms-nour', data: {} });
+  const result = await response.json();
+  assert.equal(response.status, 200);
+  assert.deepEqual([result.token, result.model], ['auth_tokens/abc', 'gemini-3.8-live']);
+  assert.match(seen[0].url, /\/v1beta\/auth_tokens$/);
+  assert.equal(seen[0].body.uses, 1);
+  const { model, ...setup } = seen[0].body.bidiGenerateContentSetup;
+  assert.equal(model, 'models/gemini-3.8-live');
+  assert.deepEqual(result.config, setup, 'the browser gets exactly the locked setup');
+  assert.equal(
+    setup.generationConfig.speechConfig.voiceConfig.prebuiltVoiceConfig.voiceName,
+    'Puck',
+  );
+  assert.match(setup.systemInstruction.parts[0].text, /<stage>[\s\S]*live voice call/);
+  const tools = setup.tools[0].functionDeclarations;
+  const go = tools.find((t: { name: string }) => t.name === 'go_to');
+  assert.equal(go.behavior, 'NON_BLOCKING');
+  assert.equal(go.parameters.type, 'OBJECT');
+  assert.equal(go.parameters.properties.place.type, 'STRING');
+  assert.equal(tools.find((t: { name: string }) => t.name === 'add_ideas').behavior, undefined);
+
+  spec.characters[0].voice = 'Robot';
+  assert.equal(
+    (await post('/api/live', { room: spec, characterId: 'ms-nour', data: {} })).status,
+    400,
+  );
+});

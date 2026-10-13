@@ -220,3 +220,24 @@ a {
   background: var(--room-surface);
   color: inherit;
 }
+.dock-call {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--room-muted);
+}
+.dock-call button {
+  font: inherit;
+  border-radius: 999px;
+  border: 1px solid var(--room-accent);
+  background: transparent;
+  color: inherit;
+  padding: 4px 12px;
+  cursor: pointer;
+}
+.dock-call[data-status='live'] {
+  color: var(--room-accent);
+  font-weight: 600;
+}

@@ -1,0 +1,12 @@
+{
+  "name": "@experience/live-runtime",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@experience/room-spec": "0.1.0"
+  }
+}

@@ -67,6 +67,7 @@ export function StageView({ spec, controller, data, title }: Props) {
           data-at={frame.at ?? ''}
           data-pose={frame.sit > 0.5 ? 'sit' : 'stand'}
           data-mode={frame.mode}
+          data-lips={frame.lips ?? ''}
         >
           <ellipse
             cx={ground.sx}

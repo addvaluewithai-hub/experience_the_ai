@@ -1,4 +1,5 @@
 import type { Checker } from './check';
+import { VOICES } from './kit';
 import { validateLook } from './look';
 import { validateStage } from './stage';
 import {
@@ -58,6 +59,7 @@ export function characters(check: Checker, value: unknown, path: string): Charac
       greeting: check.text(c.greeting, `${at}.greeting`, LIMITS.longText),
       capabilities: [...new Set(capabilities)],
       ...(c.look === undefined ? {} : { look: validateLook(check, c.look, `${at}.look`) }),
+      ...(c.voice === undefined ? {} : { voice: check.oneOf(c.voice, VOICES, `${at}.voice`) }),
     };
   });
   check.unique(result, path);

@@ -88,6 +88,63 @@ export class Conversation {
     return below;
   }
 
+  /**
+   * Runs one tool call through the room rules and applies it: data to the store, stage
+   * commands to the presence, focus and activity to the page. Text turns and voice share it.
+   */
+  apply(name: string, args: Record<string, unknown>) {
+    const { room, character } = this;
+    const outcome = runTool(room.spec, character, room.store.get(), { name, args }, newRecordId);
+    room.store.set(outcome.data);
+    if (outcome.focus) host?.focus(room.key, outcome.focus);
+    if (outcome.stage) room.stage?.dispatch(outcome.stage);
+    if (outcome.activity) this.add('activity', outcome.activity);
+    if ('error' in outcome.response) this.add('activity', `⚠ ${String(outcome.response.error)}`);
+    return { response: outcome.response, open: outcome.open, silent: Boolean(outcome.stage) };
+  }
+
+  handOff(handoff: { path: string; note: string }) {
+    const { room, character } = this;
+    const key = `${room.key}/${handoff.path}`;
+    pending = {
+      key,
+      message: `HANDOFF from ${character.name} (${character.role}) in "${room.spec.title}": ${handoff.note}`,
+      shown: `↪ ${character.name}: ${handoff.note}`,
+    };
+    host?.open(key);
+  }
+
+  /** A spoken line from a voice call: grows while it is said, joins the history when done. */
+  private live: Partial<Record<'person' | 'agent', number>> = {};
+  hear(role: 'person' | 'agent', text: string, final: boolean) {
+    const id = this.live[role];
+    const lines = this.state.lines;
+    if (id !== undefined && lines.some((l) => l.id === id))
+      this.update({ lines: lines.map((l) => (l.id === id ? { ...l, text } : l)) });
+    else {
+      this.add(role, text);
+      this.live[role] = this.state.lines.at(-1)!.id;
+    }
+    if (!final) return;
+    delete this.live[role];
+    this.turns = bounded([
+      ...this.turns,
+      role === 'person' ? { role: 'user', text } : { role: 'agent', parts: [{ text }] },
+    ]);
+  }
+
+  /** What a voice ticket needs to know about this conversation's room. */
+  context() {
+    const { room, character } = this;
+    return {
+      room: room.spec,
+      characterId: character.id,
+      data: room.store.get(),
+      below: this.below(),
+      positions: room.stage?.positions(),
+    };
+  }
+
   async send(message: string, shown?: { kind: Line['kind']; text: string }) {
     const text = message.trim();
     if (!text || this.controller) return;
@@ -103,14 +160,7 @@ export class Conversation {
       for (let step = 0; step < MAX_STEPS; step++) {
         const { parts } = await post<{ parts: Part[] }>(
           '/api/agent',
-          {
-            room: room.spec,
-            characterId: character.id,
-            data: room.store.get(),
-            below: this.below(),
-            positions: room.stage?.positions(),
-            turns: history,
-          },
+          { ...this.context(), turns: history },
           abort.signal,
         );
         history.push({ role: 'agent', parts });
@@ -125,40 +175,18 @@ export class Conversation {
         const calls = parts.flatMap((p) => (p.functionCall ? [p.functionCall] : []));
         if (!calls.length) break;
         const results = calls.map((call) => {
-          const args = { ...call.args } as Record<string, unknown>;
-          const outcome = runTool(
-            room.spec,
-            character,
-            room.store.get(),
-            { name: call.name, args },
-            newRecordId,
-          );
-          room.store.set(outcome.data);
-          if (outcome.focus) host?.focus(room.key, outcome.focus);
-          if (outcome.stage) room.stage?.dispatch(outcome.stage);
-          if (outcome.open) handoff = outcome.open;
-          if (outcome.activity) this.add('activity', outcome.activity);
-          if ('error' in outcome.response)
-            this.add('activity', `⚠ ${String(outcome.response.error)}`);
-          return {
-            ...(call.id ? { id: call.id } : {}),
-            name: call.name,
-            response: outcome.response,
-          };
+          const { response, open } = this.apply(call.name, { ...call.args } as Record<
+            string,
+            unknown
+          >);
+          if (open) handoff = open;
+          return { ...(call.id ? { id: call.id } : {}), name: call.name, response };
         });
         history.push({ role: 'tool', results });
         if (step === MAX_STEPS - 1) this.add('error', 'Stopped after several actions in a row.');
       }
       if (history.at(-1)?.role !== 'tool') this.turns = history;
-      if (handoff) {
-        const key = `${room.key}/${handoff.path}`;
-        pending = {
-          key,
-          message: `HANDOFF from ${character.name} (${character.role}) in "${room.spec.title}": ${handoff.note}`,
-          shown: `↪ ${character.name}: ${handoff.note}`,
-        };
-        host?.open(key);
-      }
+      if (handoff) this.handOff(handoff);
     } catch (error) {
       if (!abort.signal.aborted)
         this.add('error', error instanceof Error ? error.message : 'Something went wrong.');

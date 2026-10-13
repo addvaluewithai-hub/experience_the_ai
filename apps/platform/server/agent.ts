@@ -111,11 +111,11 @@ export function agentHistory(value: unknown): Content[] {
   return contents;
 }
 
-export async function agentTurn(
-  env: Env,
-  input: Record<string, unknown>,
-  signal?: AbortSignal,
-): Promise<{ parts: Part[] }> {
+/**
+ * Who is speaking, with what they know and may do: the validated room, the character, its
+ * instruction (room, data, inner rooms, stage) and its tools. Text turns and voice calls share it.
+ */
+export function characterContext(input: Record<string, unknown>) {
   const room = validateRoom(input.room);
   if (!room.ok) throw new HttpError(400, 'The room is not valid.');
   const spec = room.spec;
@@ -131,20 +131,33 @@ export async function agentTurn(
   } catch (error) {
     throw new HttpError(400, error instanceof DataError ? error.message : 'Bad room data.');
   }
-  const dataText = describeData(spec, data.get('')!);
-  const innerText = describeRooms(spec, (path) => data.get(path));
   const stageText = stageBrief(
     spec,
     character,
     stagePositions(spec, input.positions),
     data.get(''),
   );
-  const contents = agentHistory(input.turns);
-  const today = new Date().toISOString().slice(0, 10);
+  const instruction = instructionFor(
+    spec,
+    character,
+    describeData(spec, data.get('')!),
+    describeRooms(spec, (path) => data.get(path)),
+    stageText,
+    new Date().toISOString().slice(0, 10),
+  );
+  return { spec, character, instruction, tools: agentTools(spec, character) };
+}
+
+export async function agentTurn(
+  env: Env,
+  input: Record<string, unknown>,
+  signal?: AbortSignal,
+): Promise<{ parts: Part[] }> {
+  const { instruction, tools } = characterContext(input);
   const parts = await generate(env, {
-    instruction: instructionFor(spec, character, dataText, innerText, stageText, today),
-    contents,
-    tools: agentTools(spec, character),
+    instruction,
+    contents: agentHistory(input.turns),
+    tools,
     signal,
   });
   return { parts: parts.map(sanitizePart).filter((p) => p.text || p.functionCall) };
