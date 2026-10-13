@@ -186,11 +186,16 @@ try {
       document.querySelector('[data-prop="chalkboard"]')?.getAttribute('data-state') === 'written',
   );
 
-  // A room that draws its own world: Phaser loads here only, and the unicorn flies on request.
+  // An immersive room: its own Phaser world on the whole screen, no forms; one tap begins, and
+  // the keyboard stands in for voice. The unicorn flies when she is asked.
   agentRequests.length = 0;
   await page.goto(`${url}/#/room/rainbow-valley`);
   await page.locator('[data-world="rainbow-valley"][data-status="ready"] canvas').waitFor();
-  const message = page.getByRole('textbox', { name: 'Message اليونيكورن' });
+  assert.equal(await page.locator('.room, .room-bar, form').count(), 0, 'no page, no forms');
+  await page.getByRole('button', { name: 'يلا نبدأ ✨' }).waitFor();
+  await page.getByRole('button', { name: 'جدّة القمر' }).waitFor();
+  await page.getByRole('button', { name: 'كتابة بدل الصوت' }).click();
+  const message = page.getByRole('textbox', { name: 'اكتب هنا… اليونيكورن' });
   for (const text of ['طيري للجسر', 'وصلنا؟']) {
     await message.fill(text);
     await page.keyboard.press('Enter');
@@ -223,7 +228,7 @@ try {
       'rainbow-valley',
     ]) {
       await page.goto(`${url}/#/room/${room}`);
-      await page.locator('.room').waitFor();
+      await page.locator('.room, .immersive').first().waitFor();
       await noOverflow(page, `${room} at ${width}px`);
     }
     await page.screenshot({ path: `test-results/studio-${width}.png`, fullPage: true });

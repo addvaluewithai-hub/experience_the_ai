@@ -40,7 +40,7 @@ class ValleyScene extends Phaser.Scene {
     dot.generateTexture('valley-spark', 16, 16).destroy();
 
     this.backdrop = drawBackdrop(this);
-    this.moon = new Moon(this, 800, 86);
+    this.moon = new Moon(this, this.backdrop.depth, 800, 86);
     this.add.particles(0, 0, 'valley-spark', {
       x: { min: 0, max: WORLD.width },
       y: { min: 220, max: 520 },
@@ -80,7 +80,9 @@ class ValleyScene extends Phaser.Scene {
     const camera = this.cameras.main;
     camera.setBounds(0, 0, WORLD.width, WORLD.height);
     camera.startFollow(this.focus, false, 0.06, 0.06);
+    camera.setZoom(this.scale.height / WORLD.height);
     camera.centerOn(start.x, start.y);
+    this.scale.on('resize', (size: Phaser.Structs.Size) => camera.setSize(size.width, size.height));
     if (this.renderer.type === Phaser.WEBGL) {
       try {
         camera.filters.external.addVignette(0.5, 0.5, 1.1, 0.18);
@@ -114,12 +116,17 @@ class ValleyScene extends Phaser.Scene {
     this.focus.y = at.y;
     const close = !s.moving && placeAt(s.x, s.y) === 'near-laila';
     const camera = this.cameras.main;
-    camera.setZoom(camera.zoom + ((close ? 1.4 : 1) - camera.zoom) * Math.min(1, dt * 2));
+    // The valley's height always fills the screen: a wide screen sees more of it, a tall phone a
+    // slice that the camera carries along with the unicorn.
+    const fit = this.scale.height / WORLD.height;
+    const zoom = fit * (close ? 1.4 : 1);
+    camera.setZoom(camera.zoom + (zoom - camera.zoom) * Math.min(1, dt * 2));
     for (const moment of this.model.takeMoments()) this.play(moment, at);
-    for (const { shape, speed } of this.backdrop.clouds) {
-      shape.x += speed * dt * (this.reduced ? 0.3 : 1);
-      if (shape.x > WORLD.width + VIEW.width) shape.x = -160;
+    for (const { layer, speed } of this.backdrop.clouds) {
+      layer.x += speed * dt * (this.reduced ? 0.3 : 1);
+      if (layer.x > WORLD.width + VIEW.width) layer.x = -160;
     }
+    this.backdrop.depth.follow(camera.worldView);
   }
 
   private play(moment: ValleyMoment, at: { x: number; y: number }) {
@@ -141,18 +148,35 @@ class ValleyScene extends Phaser.Scene {
   }
 }
 
-/** Starts the valley inside parent; the returned stop() frees the canvas and its GPU memory. */
+/**
+ * Starts the valley inside parent, drawn at the screen's real pixel density (up to 2x) so it
+ * stays sharp; it follows the parent's size. stop() frees the canvas and its GPU memory.
+ */
 export function startValley(parent: HTMLElement, model: ValleyModel) {
+  const density = Math.min(2, Math.max(1, globalThis.devicePixelRatio || 1));
+  const size = () => ({
+    width: Math.round((parent.clientWidth || VIEW.width) * density),
+    height: Math.round((parent.clientHeight || VIEW.height) * density),
+  });
   const game = new Phaser.Game({
     type: Phaser.AUTO,
     parent,
-    width: VIEW.width,
-    height: VIEW.height,
+    ...size(),
     backgroundColor: '#4a3a8c',
     banner: false,
     audio: { noAudio: true },
-    scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
+    scale: { mode: Phaser.Scale.NONE, zoom: 1 / density },
     scene: new ValleyScene(model),
   });
-  return { stop: () => game.destroy(true) };
+  const resized = new ResizeObserver(() => {
+    const next = size();
+    if (next.width && next.height) game.scale.resize(next.width, next.height);
+  });
+  resized.observe(parent);
+  return {
+    stop: () => {
+      resized.disconnect();
+      game.destroy(true);
+    },
+  };
 }

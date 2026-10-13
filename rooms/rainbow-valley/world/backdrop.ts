@@ -2,19 +2,48 @@ import type * as Phaser from 'phaser';
 import { asleep, ellipsePoints, fillShape, hillPoints, lerpColor } from './draw';
 
 export const VIEW = { width: 960, height: 540 };
-export const WORLD = { width: 1920, height: 540 };
+/** The widest view the screen-fixed layers must cover (a 3.5:1 screen at the valley's height). */
+const WIDEST = 1900;
+/** The valley: a band of ground below the grass keeps the unicorn above the controls. */
+export const WORLD = { width: 1920, height: 620 };
 export const GRASS = 492;
 /** How asleep the valley's colours are, until habits wake them (0 awake, 1 grey). */
 const SLEEP = 0.55;
 const RAINBOW = [0xff6b6b, 0xffa94d, 0xffe066, 0x69db7c, 0x4dabf7, 0x748ffc, 0xda77f2];
 
-export type Cloud = { shape: Phaser.GameObjects.Image; speed: number };
-export type Backdrop = { stars: Phaser.GameObjects.Arc[]; clouds: Cloud[] };
+type Movable = { x: number; y: number };
+type Layer = { item: Movable; factor: number; x: number; y: number };
+export type Cloud = { layer: Layer; speed: number };
+export type Backdrop = { stars: Phaser.GameObjects.Arc[]; clouds: Cloud[]; depth: Depth };
+
+/**
+ * Depth by hand: far layers move less than the view. The camera zooms to fit any screen, and
+ * Phaser's scroll factors drift under zoom, so each far layer follows the visible area itself.
+ */
+export class Depth {
+  private layers: Layer[] = [];
+  add<T extends Movable>(item: T, factor: number): T {
+    this.place(item, factor);
+    return item;
+  }
+  place(item: Movable, factor: number): Layer {
+    const layer = { item, factor, x: item.x, y: item.y };
+    this.layers.push(layer);
+    return layer;
+  }
+  follow(view: Movable) {
+    for (const l of this.layers) {
+      l.item.x = l.x + view.x * (1 - l.factor);
+      l.item.y = l.y + view.y * (1 - l.factor);
+    }
+  }
+}
 
 /** The valley at dawn, drawn in layers that move at different depths. */
 export function drawBackdrop(scene: Phaser.Scene): Backdrop {
   const add = scene.add;
-  const sky = add.graphics().setScrollFactor(0);
+  const depth = new Depth();
+  const sky = depth.add(add.graphics(), 0);
   const bands = 54;
   for (let i = 0; i < bands; i++) {
     const t = i / (bands - 1);
@@ -23,16 +52,17 @@ export function drawBackdrop(scene: Phaser.Scene): Backdrop {
         ? lerpColor(0x4a3a8c, 0xa98be6, t / 0.5)
         : lerpColor(0xa98be6, 0xffd3e4, (t - 0.5) / 0.5);
     sky.fillStyle(color, 1);
-    sky.fillRect(0, Math.floor((i * VIEW.height) / bands), VIEW.width, VIEW.height / bands + 2);
+    sky.fillRect(0, Math.floor((i * WORLD.height) / bands), WIDEST, WORLD.height / bands + 2);
   }
-  const stars = Array.from({ length: 46 }, (_, i) => {
-    const x = (i * 211) % 1180;
+  const stars = Array.from({ length: 70 }, (_, i) => {
+    const x = (i * 211) % 2100;
     const y = 12 + ((i * 97) % 230) * (0.4 + 0.6 * ((i % 5) / 4));
-    return add
-      .circle(x, y, i % 7 === 0 ? 2.2 : 1.3, 0xfffbe6, 0.35 + (i % 4) * 0.12)
-      .setScrollFactor(0.12);
+    return depth.add(
+      add.circle(x, y, i % 7 === 0 ? 2.2 : 1.3, 0xfffbe6, 0.35 + (i % 4) * 0.12),
+      0.12,
+    );
   });
-  const rainbow = add.graphics().setScrollFactor(0.35);
+  const rainbow = depth.add(add.graphics(), 0.35);
   RAINBOW.forEach((color, i) => {
     rainbow.lineStyle(16, asleep(color, SLEEP + 0.15), 0.3);
     rainbow.beginPath();
@@ -41,8 +71,8 @@ export function drawBackdrop(scene: Phaser.Scene): Backdrop {
   });
   const layer = (factor: number, base: number, color: number, waves: number[][]) =>
     fillShape(
-      add.graphics().setScrollFactor(factor).fillStyle(color, 1),
-      hillPoints(VIEW.width + WORLD.width * factor, base, WORLD.height, waves),
+      depth.add(add.graphics(), factor).fillStyle(color, 1),
+      hillPoints(WIDEST + WORLD.width * factor, base, WORLD.height, waves),
     );
   layer(0.3, 330, 0x8e7ad6, [
     [26, 170, 0],
@@ -53,7 +83,7 @@ export function drawBackdrop(scene: Phaser.Scene): Backdrop {
     [10, 47, 0.5],
   ]);
   const clouds = [0.25, 0.45, 0.7, 1].flatMap((factor, row) =>
-    [0, 1, 2].map((i) => cloud(scene, factor, row, i)),
+    [0, 1, 2].map((i) => cloud(scene, depth, factor, row, i)),
   );
   layer(1, GRASS + 8, asleep(0x9be7c4, SLEEP), [
     [8, 120, 0],
@@ -62,11 +92,11 @@ export function drawBackdrop(scene: Phaser.Scene): Backdrop {
   drawRiver(scene);
   drawBridge(scene);
   drawMeadow(scene);
-  layer(1, WORLD.height - 18, asleep(0x6fd1a4, SLEEP), [[5, 60, 0.3]]);
-  return { stars, clouds };
+  layer(1, GRASS + 64, asleep(0x6fd1a4, SLEEP), [[5, 60, 0.3]]);
+  return { stars, clouds, depth };
 }
 
-function cloud(scene: Phaser.Scene, factor: number, row: number, i: number): Cloud {
+function cloud(scene: Phaser.Scene, depth: Depth, factor: number, row: number, i: number): Cloud {
   if (!scene.textures.exists('valley-cloud')) {
     const g = scene.add.graphics().fillStyle(0xffffff, 1);
     for (const [x, y, r] of [
@@ -80,11 +110,10 @@ function cloud(scene: Phaser.Scene, factor: number, row: number, i: number): Clo
   }
   const shape = scene.add
     .image(180 + i * 640 + row * 210, 70 + row * 46 + (i % 2) * 22, 'valley-cloud')
-    .setScrollFactor(factor)
     .setScale(0.55 + factor * 0.5)
     .setTint(0xfdf4ff)
     .setAlpha(0.5 + row * 0.12);
-  return { shape, speed: 4 + factor * 6 };
+  return { layer: depth.place(shape, factor), speed: 4 + factor * 6 };
 }
 
 /** The crystal river, winding from the far hills to the front. */

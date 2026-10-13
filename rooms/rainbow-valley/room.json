@@ -9,6 +9,7 @@
     "preset": "kids",
     "accent": "#c084fc"
   },
+  "layout": "immersive",
   "characters": [
     {
       "id": "unicorn",
@@ -82,26 +83,6 @@
       "kind": "world",
       "title": "الوادي",
       "wide": true
-    },
-    {
-      "id": "valley",
-      "kind": "rooms",
-      "title": "أماكن الوادي",
-      "view": "world",
-      "wide": true
-    },
-    {
-      "id": "story",
-      "kind": "text",
-      "title": "الحكاية",
-      "text": "ألوان الوادي نامت… وكل عادة حلوة بترجّع لون. ✨ Sparkle by sparkle."
-    },
-    {
-      "id": "chapter-list",
-      "kind": "list",
-      "title": "حلقات الحكاية",
-      "collection": "chapters",
-      "field": "told"
     }
   ],
   "world": {

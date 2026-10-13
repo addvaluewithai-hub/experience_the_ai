@@ -1,5 +1,6 @@
 import type * as Phaser from 'phaser';
 import type { MouthFrame, PresenceMode } from '@experience/room-spec';
+import type { Depth } from './backdrop';
 import { drawMouth } from './draw';
 
 /** Grandma Moon: a warm face in the sky that glows brighter while she tells the story. */
@@ -8,9 +9,9 @@ export class Moon {
   private mouth: Phaser.GameObjects.Graphics;
   private time = 0;
 
-  constructor(scene: Phaser.Scene, x: number, y: number) {
-    this.glow = scene.add.circle(x, y, 70, 0xfff3c4, 0.18).setScrollFactor(0.2);
-    const face = scene.add.graphics().setScrollFactor(0.2);
+  constructor(scene: Phaser.Scene, depth: Depth, x: number, y: number) {
+    this.glow = depth.add(scene.add.circle(x, y, 70, 0xfff3c4, 0.18), 0.2);
+    const face = depth.add(scene.add.graphics(), 0.2);
     face.fillStyle(0xfff7d6, 1);
     face.fillCircle(x, y, 40);
     face.fillStyle(0xf3e3b0, 1);
@@ -25,10 +26,7 @@ export class Moon {
     face.fillStyle(0xf9a8d4, 0.55);
     face.fillCircle(x - 22, y + 8, 6);
     face.fillCircle(x + 22, y + 8, 6);
-    this.mouth = scene.add
-      .graphics()
-      .setScrollFactor(0.2)
-      .setPosition(x, y + 14);
+    this.mouth = depth.add(scene.add.graphics().setPosition(x, y + 14), 0.2);
   }
 
   update(dt: number, mode: PresenceMode, mouth: MouthFrame | null, reduced: boolean) {
