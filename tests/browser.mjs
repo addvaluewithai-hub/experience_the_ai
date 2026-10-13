@@ -47,23 +47,34 @@ try {
   let ai = true;
   const agentRequests = [];
   await page.route('**/api/status', (route) => route.fulfill({ json: { ai } }));
+  // Scripted replies per character: a tool call first, words once its result comes back.
+  const replies = {
+    zeezo: [
+      { text: 'هزرعلك شجرة!' },
+      { functionCall: { name: 'add_habits', args: { name: 'شرب مية', done: true } } },
+      { functionCall: { name: 'focus_panel', args: { panelId: 'planet' } } },
+    ],
+    guide: [
+      { text: 'ده شغل الكرار.' },
+      { functionCall: { name: 'open_room', args: { room: 'kitchen/pantry', note: 'ناقص رز' } } },
+    ],
+  };
+  const answers = { zeezo: 'تمام يا بطل، الكوكب كبر!', guide: 'اتفضل على الكرار.' };
   await page.route('**/api/agent', (route) => {
     const request = route.request().postDataJSON();
     agentRequests.push(request);
+    const last = request.turns.at(-1);
     const parts =
-      agentRequests.length === 1
-        ? [
-            { text: 'هزرعلك شجرة!' },
-            { functionCall: { name: 'add_habits', args: { name: 'شرب مية', done: true } } },
-            { functionCall: { name: 'focus_panel', args: { panelId: 'planet' } } },
-          ]
-        : [{ text: 'تمام يا بطل، الكوكب كبر!' }];
+      last.role === 'user' && replies[request.characterId]
+        ? replies[request.characterId]
+        : [{ text: answers[request.characterId] ?? 'تمام، نكتب الرز.' }];
     return route.fulfill({ json: { parts } });
   });
 
   await page.goto(url);
   await assert.doesNotReject(page.getByRole('link', { name: /كوكب العادات/ }).waitFor());
-  assert.equal(await page.locator('.card').count(), 3);
+  assert.equal(await page.locator('.card').count(), 4);
+  await page.getByText('No rooms built yet.').waitFor();
   await page.screenshot({ path: 'test-results/home.png', fullPage: true });
 
   // A person's own edits go through the room rules and every panel agrees.
@@ -99,6 +110,36 @@ try {
   assert.equal(agentRequests[1].data.habits.length, 2);
   await page.screenshot({ path: 'test-results/kids-room.png', fullPage: true });
 
+  // Rooms inside rooms: a world, doors, a planned room, the path back up and pulse rising.
+  agentRequests.length = 0;
+  await page.goto(`${url}/#/room/nested-house`);
+  await page.getByRole('button', { name: 'ادخل: المطبخ, 0%' }).click();
+  assert.equal(new URL(page.url()).hash, '#/room/nested-house/kitchen');
+  await page.getByRole('textbox', { name: 'جديد: المهمة' }).fill('غسيل');
+  await page.getByRole('button', { name: 'إضافة' }).click();
+  await page.getByRole('checkbox', { name: 'غسيل' }).check();
+  await page.getByRole('link', { name: 'مثال: بيت متداخل' }).click();
+  await page.getByRole('button', { name: 'ادخل: المطبخ, 100%' }).waitFor();
+  assert.equal(await page.getByRole('button', { name: 'الجنينة: قيد البناء' }).isDisabled(), true);
+  await page.screenshot({ path: 'test-results/world.png', fullPage: true });
+
+  // A character sends the person into an inner room; the character there picks up the note.
+  await page.getByRole('textbox', { name: 'Message الدليل' }).fill('عايز رز');
+  await page.keyboard.press('Enter');
+  await page.waitForURL(/#\/room\/nested-house\/kitchen\/pantry$/);
+  await page.getByText('↪ الدليل: ناقص رز').waitFor();
+  await page.getByText('تمام، نكتب الرز.').waitFor();
+  const [guideAsk, , keeperAsk] = agentRequests;
+  assert.equal(guideAsk.below.kitchen.tasks.length, 1);
+  assert.equal(keeperAsk.characterId, 'keeper');
+  assert.match(
+    keeperAsk.turns[0].text,
+    /^HANDOFF from الدليل \(دليل البيت\) in "مثال: بيت متداخل": ناقص رز$/,
+  );
+  await page.getByRole('link', { name: 'مثال: بيت متداخل' }).click();
+  await page.getByText('اتفضل على الكرار.').waitFor();
+  assert.equal(agentRequests.length, 3, 'going back does not resend the handoff');
+
   // Several characters each keep their own conversation.
   await page.goto(`${url}/#/room/study-room`);
   await page.getByRole('tab', { name: 'سلمى' }).click();
@@ -107,7 +148,13 @@ try {
 
   for (const width of [320, 390]) {
     await page.setViewportSize({ width, height: 800 });
-    for (const room of ['kids-habit-planet', 'self-growth-studio', 'study-room']) {
+    for (const room of [
+      'nested-house',
+      'nested-house/kitchen',
+      'kids-habit-planet',
+      'self-growth-studio',
+      'study-room',
+    ]) {
       await page.goto(`${url}/#/room/${room}`);
       await page.locator('.room').waitFor();
       await noOverflow(page, `${room} at ${width}px`);
@@ -124,7 +171,9 @@ try {
   assert.equal(await page.getByRole('textbox', { name: 'Message Maya' }).isDisabled(), true);
 
   assert.deepEqual(errors, []);
-  console.log('Browser flow passed: rooms, panels, agent tool loop, characters, 320/390/1280.');
+  console.log(
+    'Browser flow passed: rooms, nested rooms, handoff, panels, agent tool loop, characters, 320/390/1280.',
+  );
 } finally {
   await browser?.close();
   server.kill('SIGTERM');

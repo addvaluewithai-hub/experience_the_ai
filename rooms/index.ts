@@ -1,16 +1,8 @@
-import type { PanelComponent } from '@experience/room-runtime';
-import kidsHabitPlanet from './kids-habit-planet/room.json';
-import selfGrowthStudio from './self-growth-studio/room.json';
-import studyRoom from './study-room/room.json';
+import type { RoomEntry } from '@experience/room-runtime';
 
 /**
- * Every room the app ships, built in this repository from docs/build-a-room.md. A room's
- * custom panels are compiled in from its own folder; the app never loads room code at runtime.
+ * The real rooms, built with the people who asked for them (docs/build-a-room.md). Register
+ * each top room here as `{ spec: <its index.ts export>, panels: <its custom components> }`.
+ * Engine examples live in examples/, not here.
  */
-export type RoomEntry = { spec: unknown; panels?: Record<string, PanelComponent> };
-
-export const rooms: RoomEntry[] = [
-  { spec: kidsHabitPlanet },
-  { spec: selfGrowthStudio },
-  { spec: studyRoom },
-];
+export const rooms: RoomEntry[] = [];

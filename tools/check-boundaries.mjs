@@ -12,6 +12,11 @@ const areas = [
     perFolder: true,
     allowed: ['react', '@experience/room-spec', '@experience/room-runtime'],
   },
+  {
+    path: 'examples',
+    perFolder: true,
+    allowed: ['react', '@experience/room-spec', '@experience/room-runtime'],
+  },
 ];
 const excluded = new Set([
   '.git',

@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "nested-house",
+  "title": "مثال: بيت متداخل",
+  "icon": "🏠",
+  "purpose": "مثال للمحرك وليس أوضة حقيقية: أوض جوه أوض، باب لأوضة مخططة، نبض بيطلع لفوق، ومساعد بيسلّم لمساعد.",
+  "language": "ar",
+  "theme": { "preset": "planet", "accent": "#7dd3fc" },
+  "characters": [
+    {
+      "id": "guide",
+      "name": "الدليل",
+      "role": "دليل البيت",
+      "persona": "دليل تجريبي هادي. بيعرّف بالأوض اللي جوه البيت، وأي طلب يخص المطبخ بيوصّله للمطبخ.",
+      "greeting": "ده بيت تجريبي للمحرك. عايز تروح أنهي أوضة؟",
+      "capabilities": ["ui.focus"]
+    }
+  ],
+  "collections": [],
+  "panels": [
+    { "id": "world", "kind": "rooms", "title": "أوض البيت", "view": "world", "wide": true },
+    {
+      "id": "about",
+      "kind": "text",
+      "title": "عن المثال",
+      "text": "الجنينة لسه مخططة: بتبان باب مقفول لحد ما تتبني في فولدرها."
+    }
+  ],
+  "rooms": [
+    { "id": "kitchen", "title": "المطبخ", "icon": "🍳", "purpose": "مكان تجريبي", "planned": true },
+    {
+      "id": "garden",
+      "title": "الجنينة",
+      "icon": "🌳",
+      "purpose": "أوضة متفق عليها ولسه متبنتش.",
+      "planned": true
+    }
+  ]
+}

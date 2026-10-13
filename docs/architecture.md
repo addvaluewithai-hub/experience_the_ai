@@ -2,8 +2,17 @@
 
 Experience the AI hosts rooms: themed spaces where live AI characters (teacher, CEO, friend,
 planner, news anchor, project manager…) help a person, with interactive panels and the room's
-own data. Claude Code builds each room in this repository (docs/build-a-room.md); the product
-runs them.
+own data. A room may hold rooms, which may hold rooms: a life, a house, a school are all one
+room with rooms inside. The product runs rooms; it has no AI that builds them.
+
+Two kinds of work happen in this repository:
+
+- **Engine** (packages/, apps/, tools/): what any room can be and do. Changed by the engine
+  developer, with tests and browser checks.
+- **Rooms** (rooms/): built with the person who wants them, one room per session from the
+  outside in, by any capable chat or model following docs/build-a-room.md and
+  docs/room-spec.md. Room builders never change the engine; they file engine requests in the
+  room's brief.md.
 
 ## What came from new-learn
 
@@ -14,6 +23,7 @@ addvaluewithai-hub/new-learn is a reference, not a dependency. Its proven patter
 | LessonPackage contract + structural validation         | RoomSpec + `validateRoom` in `packages/room-spec`      |
 | lesson-runtime imports only React/Remotion             | room-runtime imports only React and room-spec          |
 | Curriculum renderers owned by content, allowlisted     | Room custom panels in `rooms/<id>/panels`, compiled in |
+| fixtures/runtime-probe: synthetic engine content       | examples/: synthetic rooms, not product rooms          |
 | Build-time content registry, no uploaded code          | `rooms/index.ts`; the app never evaluates room code    |
 | Nova: server-held key, trusted context, real errors    | `/api/agent`: key in Pages secrets, rebuilt context    |
 | Live `show_step` tool answered by the client           | Room tools answered by the client through room rules   |
@@ -26,21 +36,30 @@ Not taken: Remotion playback, curriculum import, lesson editions and the old Lea
 ## Ownership
 
 ```
-apps/platform      host: navigation, agent conversation, server routes, persistence adapters
-packages/room-spec contract, validation, data rules, derived agent tools (no dependencies)
+apps/platform          host: navigation, conversations, server routes, persistence adapters
+packages/room-spec     contract, validation, data rules, room trees, derived tools (no deps)
 packages/room-runtime  RoomView, built-in panels, themes, store interface (React only)
-rooms/<id>         one room: room.json and its own custom panels
+rooms/<id>             a real room tree: brief.md, room.json, inner rooms, custom panels
+examples/<id>          synthetic rooms exercising the engine (nested-house shows a tree)
 ```
 
-Platform → room-runtime → room-spec. Rooms may import room-runtime and room-spec only.
+Platform → room-runtime → room-spec. Rooms and examples may import room-runtime and room-spec only.
 The runtime never decides where data lives: the host passes a `RoomStore`.
 
 ## A room
 
-`RoomSpec` (packages/room-spec/src/types.ts) declares characters, collections, panels, theme
-and language. It is data, never code. Validation checks shape, limits and every reference, and
-returns a copy with only known keys. Structural validity means "the runtime can render it", not
-that the room was reviewed.
+`RoomSpec` (packages/room-spec/src/types.ts, documented in docs/room-spec.md) declares
+characters, collections, panels, theme, language, and optionally an icon, a pulse and inner
+rooms. It is data, never code. Validation walks the whole tree (4 levels, 40 rooms), fills in
+what inner rooms inherit, checks every reference and returns a copy with only known keys.
+Structural validity means "the runtime can render it", not that the room was reviewed.
+
+- **Planned rooms** are inner rooms agreed but not built (id, title, purpose, icon). They show
+  as closed doors, so a world is built from the outside in. `composeRoom` swaps a stub for the
+  built room when its folder exists.
+- **Pulse**: a room is as alive as the share of one boolean field that is true; a room without
+  one averages its inner rooms. The `rooms` panel (doors or a 2.5D world) lights each door by it.
+- Each room in a tree has its own store and its own page at its path (`#/room/life/health`).
 
 ## Data: each room has its own database shape
 
@@ -70,10 +89,16 @@ runs each call with `runTool`, applies the result to its store, and sends the re
 until the character answers in words (at most six steps). A failed exchange is not kept as
 history. Several characters each keep their own conversation; each speaks only as itself.
 
+A character reads its own room's data and a summary of every room inside it (sent as `below`,
+rebuilt per room on the server), but writes only its own. `open_room` takes the person into a
+built inner room: the client navigates there and that room's first character receives a
+`HANDOFF` note and continues. Conversations live outside pages (features/room/conversation.ts),
+so they survive moving between rooms and a reply in flight still lands.
+
 ## Security now
 
-AI routes are closed unless the `OPEN_AI_PREVIEW=true` secret is set (docs/deploy.md) (there are no accounts to bill or limit
-yet). The guard is per isolate, not a distributed quota. The preview spec and data come from
+AI routes are closed unless the `OPEN_AI_PREVIEW=true` secret is set (docs/deploy.md);
+there are no accounts to bill or limit yet. The guard is per isolate, not a distributed quota. The preview spec and data come from
 the browser and only affect that person's session; with persistence the server will load the
 spec by edition and the data from the database instead of trusting the request.
 
@@ -94,5 +119,5 @@ spec by edition and the data from the database instead of trusting the request.
 
 At most 300 lines per authored file. `npm run check` enforces it and the import boundaries.
 Unit tests cover contract, data rules, tools, rendering and server routes with the provider
-mocked; `npm run test:browser` covers the room and agent tool loop in Chromium with the API
-mocked. Neither proves a real model's behaviour: check a real conversation on a preview.
+mocked; `npm run test:browser` covers rooms, nested rooms, planned doors, handoff and the agent
+tool loop in Chromium with the API mocked. Neither proves a real model's behaviour: check a real conversation on a preview.

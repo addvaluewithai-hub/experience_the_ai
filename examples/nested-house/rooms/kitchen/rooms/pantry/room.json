@@ -1,0 +1,30 @@
+{
+  "id": "pantry",
+  "title": "الكرار",
+  "icon": "🫙",
+  "purpose": "الخزين: إيه موجود وإيه ناقص.",
+  "characters": [
+    {
+      "id": "keeper",
+      "name": "أمين الكرار",
+      "role": "مسؤول الخزين",
+      "persona": "مسؤول خزين تجريبي، بيكتب الحاجات ويعلّم على الموجود منها.",
+      "greeting": "ناقصنا إيه؟",
+      "capabilities": ["data.write"]
+    }
+  ],
+  "collections": [
+    {
+      "id": "items",
+      "label": "الخزين",
+      "fields": [
+        { "id": "name", "label": "الصنف", "type": "text", "required": true },
+        { "id": "have", "label": "موجود", "type": "boolean" }
+      ]
+    }
+  ],
+  "pulse": { "collection": "items", "field": "have" },
+  "panels": [
+    { "id": "item-list", "kind": "list", "title": "الخزين", "collection": "items", "field": "have" }
+  ]
+}

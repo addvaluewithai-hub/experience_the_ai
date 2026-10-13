@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
 import { afterEach, test } from 'node:test';
-import { rooms } from '../../../rooms/index.ts';
-const exampleRooms = rooms.map((r) => r.spec);
+import { examples as rooms } from '../../../examples/index.ts';
+const exampleRooms = ['kids-habit-planet', 'self-growth-studio', 'study-room'].map(
+  (id) => rooms.find((r) => (r.spec as { id: string }).id === id)!.spec,
+);
 import { handleRequest } from '../server/app.ts';
 
 const env = { GEMINI_API_KEY: 'test-key', OPEN_AI_PREVIEW: 'true' };
@@ -105,4 +107,21 @@ test('provider failure is an error, not an invented reply', async () => {
   });
   assert.equal(response.status, 502);
   assert.match((await response.json()).error, /failed/);
+});
+
+test('a character reads the rooms inside its own and can send the person there', async () => {
+  const seen = provider([{ text: 'تمام' }]);
+  const below = { kitchen: { tasks: [{ id: 't1', values: { task: 'غسيل', done: true } }] } };
+  const base = { room: rooms[0].spec, characterId: 'guide', data: {}, turns: say('عايز أطبخ') };
+  assert.equal((await post('/api/agent', { ...base, below })).status, 200);
+  const instruction = seen[0].systemInstruction.parts[0].text;
+  assert.match(instruction, /<inner_rooms>/);
+  assert.match(instruction, /- \[kitchen\] 🍳 المطبخ: .*100% alive/);
+  assert.match(instruction, /\[t1\] \{"task":"غسيل","done":true\}/);
+  assert.match(instruction, /- \[garden\] 🌳 الجنينة: .*planned, not built yet/);
+  assert.match(instruction, /HANDOFF/);
+  const names = seen[0].tools[0].functionDeclarations.map((t: { name: string }) => t.name);
+  assert.ok(names.includes('open_room') && !names.includes('add_tasks'));
+  const bad = { kitchen: { tasks: [{ id: 't1', values: { task: 3 } }] } };
+  assert.equal((await post('/api/agent', { ...base, below: bad })).status, 400);
 });

@@ -20,7 +20,8 @@
     "test:browser": "node tests/browser.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "functions:check": "wrangler pages functions build functions --outdir .functions-check"
+    "functions:check": "wrangler pages functions build functions --outdir .functions-check",
+    "rooms": "node --import tsx tools/rooms.mjs"
   },
   "devDependencies": {
     "@types/node": "24.13.4",

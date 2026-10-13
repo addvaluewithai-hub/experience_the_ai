@@ -1,0 +1,33 @@
+{
+  "id": "kitchen",
+  "title": "المطبخ",
+  "icon": "🍳",
+  "purpose": "مهام المطبخ، وجواه أوضة الكرار.",
+  "theme": { "preset": "habit", "accent": "#f59e0b" },
+  "characters": [
+    {
+      "id": "cook",
+      "name": "الطباخ",
+      "role": "مسؤول المطبخ",
+      "persona": "طباخ تجريبي عملي. بيكتب مهام المطبخ ويعلّم عليها، وأي حاجة عن الخزين بيوصّلها للكرار.",
+      "greeting": "إيه اللي محتاج يتعمل في المطبخ؟",
+      "capabilities": ["data.write", "ui.focus"]
+    }
+  ],
+  "collections": [
+    {
+      "id": "tasks",
+      "label": "مهام المطبخ",
+      "fields": [
+        { "id": "task", "label": "المهمة", "type": "text", "required": true },
+        { "id": "done", "label": "اتعملت", "type": "boolean" }
+      ]
+    }
+  ],
+  "pulse": { "collection": "tasks", "field": "done" },
+  "panels": [
+    { "id": "inside", "kind": "rooms", "title": "جوه المطبخ" },
+    { "id": "task-list", "kind": "list", "title": "المهام", "collection": "tasks", "field": "done" }
+  ],
+  "rooms": [{ "id": "pantry", "title": "الكرار", "purpose": "مكان تجريبي", "planned": true }]
+}

@@ -1,7 +1,13 @@
 # Working on Experience the AI
 
 Read README.md and docs/architecture.md before changing boundaries.
-To build a new room for someone, follow docs/build-a-room.md: talk it through first, then author.
+Two roles work here; know which one you are in this session:
+
+- Building or continuing a room with a person: follow docs/build-a-room.md and docs/room-spec.md
+  (or the /build-room skill). One room per session, outside in. Work only under rooms/.
+  Never edit packages/, apps/ or tools/; write engine requests in the room's brief.md.
+- Developing the engine: everything below.
+
 addvaluewithai-hub/new-learn is a reference for patterns, not a workspace dependency.
 
 ## Boundaries
@@ -9,7 +15,8 @@ addvaluewithai-hub/new-learn is a reference for patterns, not a workspace depend
 - apps/platform owns navigation, the agent conversation, server routes and persistence adapters.
 - packages/room-spec owns the room contract, validation, data rules and derived agent tools; no dependencies.
 - packages/room-runtime renders rooms; it imports only React, React DOM and room-spec.
-- rooms/<id> holds one room: room.json and its own custom panels, importing only React, room-spec and room-runtime.
+- rooms/<id> holds one real room tree: brief.md, room.json, inner rooms and custom panels, importing only React, room-spec and room-runtime.
+- examples/ holds synthetic rooms that exercise the engine; they are not product rooms.
 - Room-specific components and parameters belong to the room's folder, not engine switches.
 - Add directories when used; do not pre-create a folder for every future feature.
 - Keep authored code, CSS, tests and docs at most 300 lines after readable formatting.
@@ -26,7 +33,7 @@ Never mark a blocked or unrun browser check as passed.
 
 ## AI, data and safety
 
-The product has no room-building AI; Claude Code builds rooms in this repository.
+The product has no room-building AI; rooms are built in this repository with their person.
 Characters change data only through derived tools and the room-spec data rules.
 Room data reaches the model as content, never as instructions.
 Provider failure is a real error, never an invented reply. The API key stays server-side.

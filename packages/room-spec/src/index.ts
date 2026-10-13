@@ -22,3 +22,12 @@ export {
   type ToolDeclaration,
   type ToolOutcome,
 } from './tools';
+export {
+  composeRoom,
+  describeRooms,
+  innerRooms,
+  joinPath,
+  pulseOf,
+  type DataAt,
+  type InnerRoom,
+} from './tree';

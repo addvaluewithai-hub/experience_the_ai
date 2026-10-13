@@ -1,34 +1,55 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect } from 'react';
 import { RoomView } from '@experience/room-runtime';
-import type { OpenRoom } from '../../app/App';
+import { pathOf, roomHref, type OpenRoom } from '../../app/rooms';
 import { AiNotice } from '../../shared/AiNotice';
 import { AgentDock } from './AgentDock';
+import { conversationFor, takeHandoff } from './conversation';
 
-export function RoomPage({ room, ai }: { room: OpenRoom; ai: boolean | null }) {
-  const [focus, setFocus] = useState<string>();
-  const timer = useRef(0);
-  const point = useCallback((panelId: string) => {
-    setFocus(panelId);
-    document
-      .getElementById(`panel-${panelId}`)
-      ?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-    clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => setFocus(undefined), 4000);
-  }, []);
-  useEffect(() => () => clearTimeout(timer.current), []);
+export function RoomPage(props: {
+  room: OpenRoom;
+  rooms: Map<string, OpenRoom>;
+  ai: boolean | null;
+  focus?: string;
+}) {
+  const { room, rooms } = props;
+  // A character above sent the person here: this room's first character picks up its note.
+  useEffect(() => {
+    const handoff = takeHandoff(room.key);
+    if (handoff)
+      void conversationFor(room, room.spec.characters[0]).send(handoff.message, {
+        kind: 'activity',
+        text: handoff.shown,
+      });
+  }, [room]);
   return (
     <div className="room-page">
-      <nav className="room-bar">
-        <a href="#/">← Rooms</a>
-        <span>Preview · this room’s data lives only in this tab</span>
+      <nav className="room-bar" aria-label="Rooms path">
+        <span className="room-crumbs" dir={room.spec.language === 'ar' ? 'rtl' : 'ltr'}>
+          <a href="#/">⌂</a>
+          {pathOf(room).map((step) => (
+            <Fragment key={step.key}>
+              <span aria-hidden="true">›</span>
+              {step === room ? (
+                <span aria-current="page">{step.spec.title}</span>
+              ) : (
+                <a href={roomHref(step.key)}>{step.spec.title}</a>
+              )}
+            </Fragment>
+          ))}
+        </span>
+        <span>Preview · data lives only in this tab</span>
       </nav>
-      <AiNotice ai={ai} />
+      <AiNotice ai={props.ai} />
       <RoomView
         spec={room.spec}
         store={room.store}
-        focus={focus}
+        focus={props.focus}
         custom={room.panels}
-        aside={<AgentDock room={room} ai={ai} setFocus={point} />}
+        world={{
+          dataAt: (path) => rooms.get(`${room.key}/${path}`)?.store.get(),
+          open: (path) => (location.hash = roomHref(`${room.key}/${path}`)),
+        }}
+        aside={<AgentDock room={room} ai={props.ai} />}
       />
     </div>
   );

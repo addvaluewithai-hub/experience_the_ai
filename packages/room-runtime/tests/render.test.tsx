@@ -2,8 +2,10 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { addRecord, emptyData, validateRoom, type RoomSpec } from '@experience/room-spec';
-import { rooms } from '../../../rooms/index.ts';
-const exampleRooms = rooms.map((r) => r.spec);
+import { examples as rooms } from '../../../examples/index.ts';
+const exampleRooms = ['kids-habit-planet', 'self-growth-studio', 'study-room'].map(
+  (id) => rooms.find((r) => (r.spec as { id: string }).id === id)!.spec,
+);
 import { createRoomStore, RoomView } from '../src/index.ts';
 
 function room(index: number): RoomSpec {
@@ -68,4 +70,25 @@ test('custom panels come from the room registry; a missing one says so', () => {
     validateRoom({ ...spec, panels: [{ ...panels[0], component: 'Bad Id' }] }).ok,
     false,
   );
+});
+
+test('a world shows inner rooms lit by their pulse, planned ones as closed doors', () => {
+  const result = validateRoom(rooms[0].spec);
+  assert.ok(result.ok);
+  const house = result.spec;
+  const kitchen = house.rooms!.find((r) => r.id === 'kitchen')!;
+  let tasks = emptyData(kitchen);
+  tasks = addRecord(kitchen, tasks, 'tasks', { task: 'غسيل', done: true }, 'a');
+  const world = { dataAt: (path: string) => (path === 'kitchen' ? tasks : undefined), open() {} };
+  const html = renderToStaticMarkup(
+    <RoomView spec={house} store={createRoomStore(house)} world={world} />,
+  );
+  assert.match(html, /<svg class="room-world-ground"/);
+  assert.match(html, /data-lit="true"[^>]*aria-label="ادخل: المطبخ, 100%"/);
+  assert.match(html, /data-planned="true" disabled=""[^>]*aria-label="الجنينة: قيد البناء"/);
+  const inner = renderToStaticMarkup(
+    <RoomView spec={kitchen} store={createRoomStore(kitchen, tasks)} world={world} />,
+  );
+  assert.match(inner, /class="room-doors"/);
+  assert.match(inner, /aria-label="ادخل: الكرار, 0%"/);
 });

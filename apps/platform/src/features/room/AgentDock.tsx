@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import type { Character } from '@experience/room-spec';
-import type { OpenRoom } from '../../app/App';
-import { useAgent } from './useAgent';
+import type { OpenRoom } from '../../app/rooms';
+import { conversationFor, useConversation } from './conversation';
 
 const labels = {
   en: { talk: 'Talk to', send: 'Send', stop: 'Stop', closed: 'Characters are not live here yet' },
@@ -9,13 +9,9 @@ const labels = {
 };
 
 /** The conversation with one character; mounted per character so each keeps its own talk. */
-function Conversation(props: {
-  room: OpenRoom;
-  character: Character;
-  ai: boolean | null;
-  setFocus: (id: string) => void;
-}) {
-  const { lines, busy, send, stop } = useAgent(props.room, props.character, props.setFocus);
+function Conversation(props: { room: OpenRoom; character: Character; ai: boolean | null }) {
+  const conversation = conversationFor(props.room, props.character);
+  const { lines, busy } = useConversation(conversation);
   const [draft, setDraft] = useState('');
   const words = labels[props.room.spec.language];
   const log = useRef<HTMLOListElement>(null);
@@ -25,7 +21,7 @@ function Conversation(props: {
   const submit = (event: FormEvent) => {
     event.preventDefault();
     if (!draft.trim() || busy) return;
-    void send(draft);
+    void conversation.send(draft);
     setDraft('');
   };
   return (
@@ -53,7 +49,7 @@ function Conversation(props: {
           }}
         />
         {busy ? (
-          <button type="button" onClick={stop}>
+          <button type="button" onClick={() => conversation.stop()}>
             {words.stop}
           </button>
         ) : (
@@ -66,11 +62,7 @@ function Conversation(props: {
   );
 }
 
-export function AgentDock(props: {
-  room: OpenRoom;
-  ai: boolean | null;
-  setFocus: (id: string) => void;
-}) {
+export function AgentDock(props: { room: OpenRoom; ai: boolean | null }) {
   const characters = props.room.spec.characters;
   const [active, setActive] = useState(characters[0].id);
   return (
@@ -95,7 +87,7 @@ export function AgentDock(props: {
           <p className="dock-who">
             <strong>{c.name}</strong> · {c.role}
           </p>
-          <Conversation room={props.room} character={c} ai={props.ai} setFocus={props.setFocus} />
+          <Conversation room={props.room} character={c} ai={props.ai} />
         </div>
       ))}
     </aside>

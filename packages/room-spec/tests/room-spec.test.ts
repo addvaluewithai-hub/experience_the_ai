@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { rooms } from '../../../rooms/index.ts';
-const exampleRooms = rooms.map((r) => r.spec);
+import { examples as rooms } from '../../../examples/index.ts';
+const exampleRooms = ['kids-habit-planet', 'self-growth-studio', 'study-room'].map(
+  (id) => rooms.find((r) => (r.spec as { id: string }).id === id)!.spec,
+);
 import {
   addRecord,
   agentTools,
@@ -20,8 +22,8 @@ function room(index = 0): RoomSpec {
   return result.spec;
 }
 
-test('every example room is structurally valid', () => {
-  for (const example of exampleRooms) assert.equal(validateRoom(example).ok, true);
+test('every shipped room is structurally valid', () => {
+  for (const room of rooms) assert.equal(validateRoom(room.spec).ok, true);
 });
 
 test('validation strips unknown keys and normalises the accent', () => {

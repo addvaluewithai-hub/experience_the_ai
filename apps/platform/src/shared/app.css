@@ -112,8 +112,17 @@ a {
   border-block-end: 1px solid var(--app-line);
   font-size: 0.9rem;
 }
-.room-bar span {
+.room-bar > span:last-child {
   color: var(--app-muted);
+}
+.room-crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.room-crumbs [aria-current] {
+  font-weight: 600;
 }
 .dock {
   background: var(--room-surface);

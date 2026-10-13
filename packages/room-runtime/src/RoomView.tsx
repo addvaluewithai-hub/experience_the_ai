@@ -2,8 +2,9 @@ import { useCallback, type CSSProperties, type ReactNode } from 'react';
 import type { RoomData, RoomSpec } from '@experience/room-spec';
 import { GrowthPanel } from './panels/GrowthPanel';
 import { ListPanel } from './panels/ListPanel';
+import { RoomsPanel } from './panels/RoomsPanel';
 import { ProgressPanel, StatPanel, TextPanel } from './panels/SummaryPanels';
-import type { CustomPanels, PanelRegistry } from './panels/types';
+import type { CustomPanels, PanelRegistry, RoomWorld } from './panels/types';
 import { PanelBoundary } from './PanelBoundary';
 import { wordsFor } from './words';
 import { useRoomData, type RoomStore } from './store';
@@ -14,6 +15,7 @@ export const builtInPanels: PanelRegistry = {
   progress: ProgressPanel,
   growth: GrowthPanel,
   text: TextPanel,
+  rooms: RoomsPanel,
 };
 
 export type RoomViewProps = {
@@ -27,11 +29,13 @@ export type RoomViewProps = {
   registry?: PanelRegistry;
   /** Components of this room's custom panels, compiled in by the host. */
   custom?: CustomPanels;
+  /** The rooms inside this one: their data and a way in. Needed for rooms panels. */
+  world?: RoomWorld;
 };
 
 /** Renders a room: theme, header and a responsive grid of panels from a fixed registry. */
 export function RoomView(props: RoomViewProps) {
-  const { spec, store, focus, aside, registry = builtInPanels, custom = {} } = props;
+  const { spec, store, focus, aside, registry = builtInPanels, custom = {}, world } = props;
   const words = wordsFor(spec.language);
   const data = useRoomData(store);
   const edit = useCallback(
@@ -75,6 +79,7 @@ export function RoomView(props: RoomViewProps) {
                       collection={collection}
                       data={data}
                       edit={edit}
+                      world={world}
                     />
                   ) : (
                     <p className="room-error">{words.missing}</p>

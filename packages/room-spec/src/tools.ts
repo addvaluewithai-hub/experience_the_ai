@@ -1,10 +1,12 @@
 import { addRecord, describeData, removeRecord, updateRecord, type RoomData } from './data';
+import { innerRooms } from './tree';
 import type { Character, Field, RoomSpec } from './types';
 
 /**
  * Agent tools are derived from the room, never authored: one set per collection with typed
- * parameters, plus focus_panel. A character only receives the tools its capabilities allow,
- * and every call runs through the same data rules as a person's edit.
+ * parameters, plus focus_panel, and open_room when the room holds rooms. A character only
+ * receives the tools its capabilities allow, and every call runs through the same data rules
+ * as a person's edit. Characters never write into another room's data.
  */
 export type ToolDeclaration = {
   name: string;
@@ -18,6 +20,8 @@ export type ToolOutcome = {
   /** A short human line for the activity log, e.g. "Added to Habits". */
   activity?: string;
   focus?: string;
+  /** open_room: the inner room to take the person to, with a note for its character. */
+  open?: { path: string; note: string };
 };
 
 const key = (id: string) => id.replaceAll('-', '_');
@@ -77,6 +81,21 @@ export function agentTools(spec: RoomSpec, character: Character): ToolDeclaratio
         required: ['panelId'],
       },
     });
+  const inner = innerRooms(spec).filter((r) => !r.spec.planned);
+  if (inner.length)
+    tools.push({
+      name: 'open_room',
+      description:
+        'Take the person to a room inside this one when their need belongs there. Its own character continues from your note, so say what they want in a sentence or two.',
+      parameters: {
+        type: 'object',
+        properties: {
+          room: { type: 'string', enum: inner.map((r) => r.path), description: 'Room path' },
+          note: { type: 'string', description: 'What the person needs, in their language' },
+        },
+        required: ['room', 'note'],
+      },
+    });
   return tools;
 }
 
@@ -90,6 +109,12 @@ export function runTool(
 ): ToolOutcome {
   const allowed = agentTools(spec, character).some((t) => t.name === call.name);
   if (!allowed) return { data, response: { error: `Tool ${call.name} is not available` } };
+  if (call.name === 'open_room') {
+    const room = innerRooms(spec).find((r) => r.path === call.args.room && !r.spec.planned);
+    const note = typeof call.args.note === 'string' ? call.args.note.trim().slice(0, 1000) : '';
+    if (!room || !note) return { data, response: { error: 'Give a known room and a note' } };
+    return { data, response: { ok: true }, open: { path: room.path, note } };
+  }
   if (call.name === 'focus_panel') {
     const panel = spec.panels.find((p) => p.id === call.args.panelId);
     if (!panel) return { data, response: { error: 'Unknown panel' } };

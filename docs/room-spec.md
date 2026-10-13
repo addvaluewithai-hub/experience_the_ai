@@ -1,0 +1,153 @@
+# Room spec reference
+
+Everything a room can say. The source of truth is `packages/room-spec/src/types.ts`;
+`validateRoom` enforces it. A room is data only: no code, no URLs, no HTML.
+
+## Folder layout
+
+```
+rooms/<room-id>/
+  brief.md            what was agreed with the person, decisions, open questions
+  room.json           this room (inner rooms listed as planned stubs until built)
+  index.ts            composes this room with its built inner rooms
+  panels/*.tsx        custom components, only if the built-ins cannot do it
+  rooms/<inner-id>/   an inner room, the same shape again (up to 4 levels in all)
+```
+
+`index.ts` of a room with inner rooms:
+
+```ts
+import { composeRoom } from '@experience/room-spec';
+import kitchen from './rooms/kitchen'; // a built inner room (its own index.ts or room.json)
+import room from './room.json';
+
+export default composeRoom(room, [kitchen]);
+```
+
+`composeRoom` swaps each planned stub in `room.json` for the built room with the same id and
+keeps the order. A room without inner rooms needs no `index.ts`. Register each **top** room
+once in `rooms/index.ts`: `{ spec: <its default export>, panels: { ... } }`.
+`examples/nested-house` is a complete working example of this layout.
+
+## The room
+
+| Key             | Required               | Meaning                                                                               |
+| --------------- | ---------------------- | ------------------------------------------------------------------------------------- |
+| `schemaVersion` | top room only          | `1`                                                                                   |
+| `id`            | yes                    | kebab-case, unique among its siblings; part of the room's path                        |
+| `title`         | yes                    | ≤ 60 characters                                                                       |
+| `purpose`       | yes                    | ≤ 600; what the room is for and who it serves (characters read it)                    |
+| `language`      | top room; inherited    | `ar` (right to left, Egyptian Arabic characters) or `en`                              |
+| `theme`         | top room; inherited    | `{ preset, accent }`; an inner room may set either or both                            |
+| `icon`          | no                     | an emoji ≤ 8 characters; how the room looks as a door in its parent                   |
+| `characters`    | yes, 1–4               | who lives here                                                                        |
+| `collections`   | yes, 0–6 (may be `[]`) | what the room remembers: its own database                                             |
+| `panels`        | yes, 1–8               | what the person sees                                                                  |
+| `pulse`         | no                     | `{ collection, field }`: a boolean field whose share of true is how alive the room is |
+| `rooms`         | no, 0–8                | inner rooms (built or planned)                                                        |
+| `planned`       | inner rooms only       | `true`: agreed but not built; only `id`, `title`, `purpose`, `icon`                   |
+
+Theme presets: `school`, `studio`, `habit`, `kids`, `planet` (dark, space), `office`, `calm`.
+Accent: `#rrggbb`. Limits for a whole tree: 4 levels, 40 rooms.
+
+## Characters
+
+```json
+{
+  "id": "coach",
+  "name": "حسام",
+  "role": "مدرب صحة",
+  "persona": "How it thinks and talks, what it cares about, what it refuses, when it sends the person to an inner room.",
+  "greeting": "The first line the person sees.",
+  "capabilities": ["data.write", "ui.focus"]
+}
+```
+
+- `name`, `role` ≤ 60; `persona`, `greeting` ≤ 600. In Arabic, write greetings that do not
+  assume the person's gender.
+- Every character can read its room's data and the data of all rooms inside it.
+- `data.write` lets it add, change and delete records of **its own room only**.
+- `ui.focus` lets it point at a panel while talking.
+- A character in a room with built inner rooms can take the person into one (`open_room`); the
+  first character of that room continues from its note. Order characters so the one who
+  should receive people comes first.
+
+## Collections (the room's database)
+
+```json
+{
+  "id": "tasks",
+  "label": "المهام",
+  "fields": [
+    { "id": "task", "label": "المهمة", "type": "text", "required": true },
+    { "id": "due", "label": "آخر ميعاد", "type": "date" },
+    {
+      "id": "priority",
+      "label": "الأولوية",
+      "type": "choice",
+      "options": ["عاجل", "مهم", "بعدين"]
+    },
+    { "id": "minutes", "label": "دقايق", "type": "number" },
+    { "id": "done", "label": "خلصت", "type": "boolean" }
+  ]
+}
+```
+
+- Field types: `text` (≤ 600), `number`, `boolean`, `date` (`YYYY-MM-DD`), `choice` (1–12
+  `options`). Up to 8 fields. At most 200 records per collection.
+- A list panel offers quick add only when the first text field is the only required field.
+- Characters get typed tools per collection: `list_<id>`, and with `data.write` also
+  `add_<id>`, `update_<id>`, `remove_<id>` (dashes become underscores). Prefer a clear boolean
+  (done, reached, rested) and choices over free text where a character must be consistent.
+
+## Panels
+
+| `kind`     | Keys                                   | Shows                                                             |
+| ---------- | -------------------------------------- | ----------------------------------------------------------------- |
+| `list`     | `collection`; optional boolean `field` | records, a checkbox for the field, remove, quick add              |
+| `stat`     | `collection`; optional number `field`  | the record count, or the sum of the field                         |
+| `progress` | `collection`; boolean `field`          | share of records where the field is true                          |
+| `growth`   | `collection`; boolean `field`          | a 2.5D planet growing one plant per true record                   |
+| `text`     | `text` (≤ 600)                         | fixed words                                                       |
+| `rooms`    | `view`: `doors` (default) or `world`   | the inner rooms, lit by their pulse; planned ones as closed doors |
+| `custom`   | `component` id; optional `collection`  | a component from the room's `panels/` folder                      |
+
+Every panel has `id`, `kind`, `title` (≤ 60) and optional `wide: true` (full row).
+A `rooms` panel needs at least one inner room.
+
+## Pulse
+
+A room with `pulse` is as alive as the share of its records where the field is true (no records
+yet is 0, a dim door). A room without `pulse` takes the average of its built inner rooms. The
+parent's `rooms` panel lights each door by it, so the top room shows at a glance which parts
+are alive. Choose the field that means "this part of life is being looked after".
+
+## Custom panels
+
+`rooms/<top-room>/panels/<Name>.tsx` exporting a React component that receives
+`{ spec, panel, collection, data, edit, world }`. Change data only through `edit` with
+`addRecord`, `updateRecord`, `removeRecord` from `@experience/room-spec`. Import only `react`,
+`@experience/room-spec` and `@experience/room-runtime`. Register it in `rooms/index.ts` under
+the id that the panel's `component` names; one map serves the whole tree. A failing
+component is contained by the panel boundary. A component two rooms need belongs in the engine:
+ask for it instead of copying it.
+
+## Planned stub
+
+```json
+{
+  "id": "garden",
+  "title": "الجنينة",
+  "icon": "🌳",
+  "purpose": "What it will be for.",
+  "planned": true
+}
+```
+
+## Checks
+
+```bash
+npm run rooms          # the tree: ✓ built, ○ planned, ✗ errors
+npm run format:check && npm run check && npm test && npm run build
+npm run test:browser
+```
