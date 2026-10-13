@@ -1,0 +1,213 @@
+:root {
+  --app-bg: #f5f6f8;
+  --app-surface: #ffffff;
+  --app-ink: #18202b;
+  --app-muted: #5b6573;
+  --app-line: #dde2e9;
+  --app-accent: #5b4bff;
+  --app-notice: #fff5d6;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --app-bg: #11151c;
+    --app-surface: #1a2029;
+    --app-ink: #e8ecf2;
+    --app-muted: #9aa5b4;
+    --app-line: #2c3440;
+    --app-accent: #8f84ff;
+    --app-notice: #3a3218;
+    color-scheme: dark;
+  }
+}
+html,
+body,
+#root {
+  margin: 0;
+  min-block-size: 100%;
+}
+body {
+  background: var(--app-bg);
+  color: var(--app-ink);
+  font-family: 'IBM Plex Sans Arabic', system-ui, 'Segoe UI', Tahoma, sans-serif;
+  line-height: 1.5;
+}
+a {
+  color: inherit;
+}
+:focus-visible {
+  outline: 3px solid var(--app-accent);
+  outline-offset: 2px;
+}
+.app-page {
+  max-inline-size: 1080px;
+  margin: 0 auto;
+  padding: 32px 16px 48px;
+}
+.hero {
+  margin-block-end: 32px;
+}
+.hero h1 {
+  font-size: clamp(1.8rem, 5vw, 2.8rem);
+  margin: 0 0 8px;
+}
+.hero p {
+  max-inline-size: 60ch;
+  color: var(--app-muted);
+}
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.8rem;
+  margin: 0;
+}
+.notice {
+  background: var(--app-notice);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin: 12px 0;
+}
+.cards {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+}
+.card {
+  display: grid;
+  gap: 6px;
+  padding: 18px;
+  text-decoration: none;
+  background: var(--app-surface);
+  border: 1px solid var(--app-line);
+  border-block-start: 6px solid var(--card-accent);
+  border-radius: 14px;
+}
+.card strong {
+  font-size: 1.2rem;
+}
+.card span {
+  color: var(--app-muted);
+}
+.card-theme {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.room-page {
+  min-block-size: 100vh;
+}
+.room-page > .notice {
+  margin: 0;
+  border-radius: 0;
+}
+.room-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--app-surface);
+  border-block-end: 1px solid var(--app-line);
+  font-size: 0.9rem;
+}
+.room-bar span {
+  color: var(--app-muted);
+}
+.dock {
+  background: var(--room-surface);
+  border: 1px solid var(--room-line);
+  border-radius: var(--room-radius);
+  box-shadow: var(--room-shadow);
+  padding: 12px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+}
+@media (min-width: 900px) {
+  .dock {
+    position: sticky;
+    inset-block-start: 12px;
+  }
+}
+.dock-tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.dock-tabs button,
+.dock-form button {
+  font: inherit;
+  border-radius: 999px;
+  border: 1px solid var(--room-line);
+  background: transparent;
+  color: inherit;
+  padding: 6px 14px;
+  cursor: pointer;
+}
+.dock-tabs button[aria-selected='true'],
+.dock-form button[type='submit'] {
+  background: var(--room-accent);
+  border-color: var(--room-accent);
+  color: #fff;
+}
+.dock-form button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.dock-who {
+  margin: 0;
+}
+.dock-log {
+  grid-template-columns: minmax(0, 1fr);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+  max-block-size: min(55vh, 520px);
+  overflow-y: auto;
+}
+.dock-line {
+  padding: 8px 12px;
+  border-radius: 14px;
+  max-inline-size: 90%;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.dock-agent {
+  background: color-mix(in srgb, var(--room-accent) 12%, transparent);
+  justify-self: start;
+}
+.dock-person {
+  background: var(--room-line);
+  justify-self: end;
+}
+.dock-activity,
+.dock-thinking {
+  font-size: 0.85rem;
+  color: var(--room-muted);
+  justify-self: center;
+  padding: 2px 8px;
+}
+.dock-error {
+  color: #c62828;
+  justify-self: center;
+}
+.dock-form {
+  display: flex;
+  gap: 8px;
+  align-items: end;
+}
+.dock-form textarea {
+  flex: 1;
+  min-inline-size: 0;
+  font: inherit;
+  resize: vertical;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid var(--room-line);
+  background: var(--room-surface);
+  color: inherit;
+}

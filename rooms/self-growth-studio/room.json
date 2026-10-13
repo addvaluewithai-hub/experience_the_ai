@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "id": "self-growth-studio",
+  "title": "Growth Studio",
+  "purpose": "An adult plans goals for the quarter, breaks them into weekly tasks and reflects with a coach and a planner.",
+  "language": "en",
+  "theme": { "preset": "studio", "accent": "#7c5cff" },
+  "characters": [
+    {
+      "id": "maya",
+      "name": "Maya",
+      "role": "Life coach",
+      "persona": "Warm, direct coach. Asks one good question at a time, connects tasks back to why the goal matters, and names avoidance kindly.",
+      "greeting": "Good to see you. What feels most important this week?",
+      "capabilities": ["data.write", "ui.focus"]
+    },
+    {
+      "id": "otto",
+      "name": "Otto",
+      "role": "Planner",
+      "persona": "Calm, practical planner. Turns vague intentions into small dated tasks, keeps the list realistic, and never adds work without asking.",
+      "greeting": "Tell me what you want done and by when, and I will lay it out.",
+      "capabilities": ["data.write"]
+    }
+  ],
+  "collections": [
+    {
+      "id": "goals",
+      "label": "Goals",
+      "fields": [
+        { "id": "title", "label": "Goal", "type": "text", "required": true },
+        { "id": "why", "label": "Why it matters", "type": "text" },
+        {
+          "id": "area",
+          "label": "Area",
+          "type": "choice",
+          "options": ["Health", "Work", "Learning", "People", "Money"]
+        },
+        { "id": "achieved", "label": "Achieved", "type": "boolean" }
+      ]
+    },
+    {
+      "id": "tasks",
+      "label": "Tasks",
+      "fields": [
+        { "id": "title", "label": "Task", "type": "text", "required": true },
+        { "id": "due", "label": "Due", "type": "date" },
+        { "id": "minutes", "label": "Minutes", "type": "number" },
+        { "id": "done", "label": "Done", "type": "boolean" }
+      ]
+    }
+  ],
+  "panels": [
+    {
+      "id": "focus",
+      "kind": "text",
+      "title": "This quarter",
+      "text": "Three goals at most. Every task should point at one of them.",
+      "wide": true
+    },
+    {
+      "id": "goal-list",
+      "kind": "list",
+      "title": "Goals",
+      "collection": "goals",
+      "field": "achieved"
+    },
+    { "id": "task-list", "kind": "list", "title": "Tasks", "collection": "tasks", "field": "done" },
+    {
+      "id": "task-progress",
+      "kind": "progress",
+      "title": "Tasks done",
+      "collection": "tasks",
+      "field": "done"
+    },
+    {
+      "id": "minutes",
+      "kind": "stat",
+      "title": "Planned minutes",
+      "collection": "tasks",
+      "field": "minutes"
+    }
+  ]
+}

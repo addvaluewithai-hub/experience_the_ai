@@ -1,0 +1,58 @@
+/* Theme presets are tokens only; the accent comes from the room spec. */
+.room {
+  --room-bg: #f6f7f9;
+  --room-surface: #ffffff;
+  --room-ink: #1d2330;
+  --room-muted: #5d6676;
+  --room-line: #dfe3ea;
+  --room-radius: 14px;
+  --room-font: 'IBM Plex Sans Arabic', system-ui, 'Segoe UI', Tahoma, sans-serif;
+  --room-shadow: 0 1px 2px rgb(16 24 40 / 6%), 0 4px 16px rgb(16 24 40 / 6%);
+  --room-planet-light: #b9f0c8;
+  --room-planet-dark: #2f8f5b;
+}
+.room[data-theme='school'] {
+  --room-bg: #f4f1e8;
+  --room-surface: #fffdf7;
+  --room-line: #e3dccb;
+  --room-radius: 8px;
+}
+.room[data-theme='studio'] {
+  --room-bg: #f3f0fb;
+  --room-line: #e2dcf3;
+  --room-radius: 18px;
+}
+.room[data-theme='habit'] {
+  --room-bg: #eef8f2;
+  --room-line: #d3eadb;
+}
+.room[data-theme='kids'] {
+  --room-bg: #fff4e3;
+  --room-surface: #ffffff;
+  --room-ink: #2a2140;
+  --room-line: #ffd9a8;
+  --room-radius: 26px;
+  --room-font: 'Baloo Bhaijaan 2', 'IBM Plex Sans Arabic', system-ui, sans-serif;
+  --room-planet-light: #ffe08a;
+  --room-planet-dark: #4cae6e;
+}
+.room[data-theme='planet'] {
+  --room-bg: radial-gradient(circle at 20% 10%, #23305c, #0b1024 70%);
+  --room-surface: rgb(255 255 255 / 8%);
+  --room-ink: #eef1ff;
+  --room-muted: #aab3d6;
+  --room-line: rgb(255 255 255 / 14%);
+  --room-shadow: none;
+  --room-planet-light: #8fe3ff;
+  --room-planet-dark: #3557c5;
+}
+.room[data-theme='office'] {
+  --room-bg: #eef1f5;
+  --room-ink: #17202c;
+  --room-radius: 6px;
+}
+.room[data-theme='calm'] {
+  --room-bg: #f1f5f2;
+  --room-muted: #63736a;
+  --room-radius: 20px;
+}

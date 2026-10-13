@@ -1,0 +1,223 @@
+@import './themes.css';
+
+.room {
+  min-block-size: 100%;
+  background: var(--room-bg);
+  color: var(--room-ink);
+  font-family: var(--room-font);
+  padding: 20px 16px 32px;
+  box-sizing: border-box;
+}
+.room *,
+.room *::before,
+.room *::after {
+  box-sizing: inherit;
+}
+.room-header {
+  max-inline-size: 1180px;
+  margin: 0 auto 16px;
+}
+.room-header h1 {
+  margin: 0 0 4px;
+  font-size: clamp(1.4rem, 3vw, 2rem);
+}
+.room-header p,
+.room-muted {
+  margin: 0;
+  color: var(--room-muted);
+}
+.room-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  max-inline-size: 1180px;
+  margin: 0 auto;
+}
+@media (min-width: 900px) {
+  .room-body.has-aside {
+    grid-template-columns: minmax(0, 1fr) 360px;
+    align-items: start;
+  }
+}
+.room-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+}
+.room-panel {
+  background: var(--room-surface);
+  border: 1px solid var(--room-line);
+  border-radius: var(--room-radius);
+  box-shadow: var(--room-shadow);
+  padding: 16px;
+  min-inline-size: 0;
+  transition:
+    outline-color 200ms,
+    transform 200ms;
+  outline: 3px solid transparent;
+  outline-offset: 2px;
+}
+.room-panel[data-wide] {
+  grid-column: 1 / -1;
+}
+.room-panel[data-focus] {
+  outline-color: var(--room-accent);
+  transform: translateY(-2px);
+}
+.room-panel h2 {
+  margin: 0 0 12px;
+  font-size: 1rem;
+}
+.room-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.room-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-block-end: 1px solid var(--room-line);
+}
+.room-list input[type='checkbox'] {
+  inline-size: 20px;
+  block-size: 20px;
+  accent-color: var(--room-accent);
+  flex: none;
+}
+.room-list-text {
+  flex: 1;
+  min-inline-size: 0;
+  display: grid;
+  overflow-wrap: anywhere;
+}
+.room-list-text small {
+  color: var(--room-muted);
+}
+.room-icon-button {
+  border: 0;
+  background: none;
+  color: var(--room-muted);
+  font-size: 1.2rem;
+  inline-size: 32px;
+  block-size: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.room-add {
+  display: flex;
+  gap: 8px;
+  margin-block-start: 12px;
+}
+.room-add input {
+  flex: 1;
+  min-inline-size: 0;
+  font: inherit;
+  padding: 8px 10px;
+  border: 1px solid var(--room-line);
+  border-radius: calc(var(--room-radius) / 2);
+  background: var(--room-surface);
+  color: inherit;
+}
+.room-add button {
+  font: inherit;
+  border: 0;
+  border-radius: calc(var(--room-radius) / 2);
+  padding: 8px 14px;
+  background: var(--room-accent);
+  color: #fff;
+  cursor: pointer;
+}
+.room-error {
+  color: #c62828;
+  margin: 8px 0 0;
+}
+.room-stat {
+  display: grid;
+  margin: 0;
+}
+.room-stat strong {
+  font-size: 2.4rem;
+  color: var(--room-accent);
+}
+.room-stat span,
+.room-progress p,
+.room-growth figcaption {
+  color: var(--room-muted);
+}
+.room-progress-track {
+  block-size: 12px;
+  border-radius: 999px;
+  background: var(--room-line);
+  overflow: hidden;
+}
+.room-progress-track span {
+  display: block;
+  block-size: 100%;
+  background: var(--room-accent);
+  transition: inline-size 300ms;
+}
+.room-progress p {
+  margin: 10px 0 0;
+}
+.room-text {
+  margin: 0;
+  line-height: 1.7;
+  white-space: pre-line;
+}
+.room-growth {
+  margin: 0;
+  display: grid;
+  justify-items: center;
+}
+.room-growth svg {
+  inline-size: min(100%, 420px);
+  block-size: auto;
+}
+.room-planet-light {
+  stop-color: var(--room-planet-light);
+}
+.room-planet-dark {
+  stop-color: var(--room-planet-dark);
+}
+.room-planet-shadow {
+  fill: rgb(0 0 0 / 12%);
+}
+.room-planet-ring {
+  fill: none;
+  stroke: var(--room-accent);
+  stroke-width: 3;
+  opacity: 0.45;
+}
+.room-plant line {
+  stroke: #2d6a3e;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+.room-leaf {
+  fill: #3fa35f;
+}
+.room-flower {
+  fill: var(--room-accent);
+}
+.room-plant {
+  transform-box: fill-box;
+  transform-origin: bottom;
+  animation: room-grow 500ms ease-out both;
+}
+@keyframes room-grow {
+  from {
+    transform: scale(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .room-plant,
+  .room-panel,
+  .room-progress-track span {
+    animation: none;
+    transition: none;
+  }
+}

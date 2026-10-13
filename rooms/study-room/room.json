@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "id": "study-room",
+  "title": "أوضة المذاكرة",
+  "purpose": "طالب ثانوي بيذاكر مع مدرس صبور وزميل بيراجع معاه، ويسجل المواضيع اللي فهمها والأسئلة اللي لسه محتاجة شرح.",
+  "language": "ar",
+  "theme": { "preset": "school", "accent": "#1f7a5c" },
+  "characters": [
+    {
+      "id": "ustaz-karim",
+      "name": "أستاذ كريم",
+      "role": "مدرس",
+      "persona": "مدرس صبور بيشرح بأمثلة من الحياة، بيسأل الطالب يشرح بكلامه قبل ما يكمل، ومش بيدي الإجابة على طول.",
+      "greeting": "يلا نبدأ. إيه الموضوع اللي عايز نفهمه النهارده؟",
+      "capabilities": ["data.write", "ui.focus"]
+    },
+    {
+      "id": "salma",
+      "name": "سلمى",
+      "role": "زميلة مراجعة",
+      "persona": "زميلة شاطرة وخفيفة الدم، بتعمل أسئلة سريعة للمراجعة وبتعترف لما مش متأكدة.",
+      "greeting": "جاهز لمراجعة سريعة؟ قولي آخر حاجة ذاكرتها.",
+      "capabilities": ["data.write"]
+    }
+  ],
+  "collections": [
+    {
+      "id": "topics",
+      "label": "المواضيع",
+      "fields": [
+        { "id": "name", "label": "الموضوع", "type": "text", "required": true },
+        {
+          "id": "subject",
+          "label": "المادة",
+          "type": "choice",
+          "options": ["رياضيات", "فيزياء", "كيمياء", "أحياء", "لغات"]
+        },
+        { "id": "understood", "label": "فهمته", "type": "boolean" }
+      ]
+    },
+    {
+      "id": "questions",
+      "label": "أسئلة مفتوحة",
+      "fields": [
+        { "id": "question", "label": "السؤال", "type": "text", "required": true },
+        { "id": "answered", "label": "اتجاوب", "type": "boolean" }
+      ]
+    }
+  ],
+  "panels": [
+    {
+      "id": "topic-list",
+      "kind": "list",
+      "title": "المواضيع",
+      "collection": "topics",
+      "field": "understood"
+    },
+    {
+      "id": "mastery",
+      "kind": "progress",
+      "title": "فهمت قد إيه",
+      "collection": "topics",
+      "field": "understood"
+    },
+    {
+      "id": "open-questions",
+      "kind": "list",
+      "title": "أسئلتي",
+      "collection": "questions",
+      "field": "answered",
+      "wide": true
+    }
+  ]
+}

@@ -1,0 +1,98 @@
+# Architecture
+
+Experience the AI hosts rooms: themed spaces where live AI characters (teacher, CEO, friend,
+planner, news anchor, project manager…) help a person, with interactive panels and the room's
+own data. Claude Code builds each room in this repository (docs/build-a-room.md); the product
+runs them.
+
+## What came from new-learn
+
+addvaluewithai-hub/new-learn is a reference, not a dependency. Its proven patterns, reused:
+
+| new-learn                                              | here                                                   |
+| ------------------------------------------------------ | ------------------------------------------------------ |
+| LessonPackage contract + structural validation         | RoomSpec + `validateRoom` in `packages/room-spec`      |
+| lesson-runtime imports only React/Remotion             | room-runtime imports only React and room-spec          |
+| Curriculum renderers owned by content, allowlisted     | Room custom panels in `rooms/<id>/panels`, compiled in |
+| Build-time content registry, no uploaded code          | `rooms/index.ts`; the app never evaluates room code    |
+| Nova: server-held key, trusted context, real errors    | `/api/agent`: key in Pages secrets, rebuilt context    |
+| Live `show_step` tool answered by the client           | Room tools answered by the client through room rules   |
+| Same-origin mutations, bounded JSON, per-isolate guard | Same `http.ts` / `limits.ts` shape                     |
+| check-boundaries + 300-line limit, CI browser checks   | Same gates, areas adapted to room folders              |
+| Cloudflare Pages + Functions, Vite, npm workspaces     | Same deployment shape                                  |
+
+Not taken: Remotion playback, curriculum import, lesson editions and the old Learn UI.
+
+## Ownership
+
+```
+apps/platform      host: navigation, agent conversation, server routes, persistence adapters
+packages/room-spec contract, validation, data rules, derived agent tools (no dependencies)
+packages/room-runtime  RoomView, built-in panels, themes, store interface (React only)
+rooms/<id>         one room: room.json and its own custom panels
+```
+
+Platform → room-runtime → room-spec. Rooms may import room-runtime and room-spec only.
+The runtime never decides where data lives: the host passes a `RoomStore`.
+
+## A room
+
+`RoomSpec` (packages/room-spec/src/types.ts) declares characters, collections, panels, theme
+and language. It is data, never code. Validation checks shape, limits and every reference, and
+returns a copy with only known keys. Structural validity means "the runtime can render it", not
+that the room was reviewed.
+
+## Data: each room has its own database shape
+
+A room's collections are its schema. `data.ts` holds the only rules for records: declared
+fields only, typed values, required fields, size caps. A person's edit, an agent's tool call and
+a snapshot arriving at the server all pass through them.
+
+Today the store is in memory (one tab). Persistence plan, in order:
+
+1. Accounts (Neon Auth, as in new-learn) and a `room_app` schema: `room_editions` (immutable
+   spec + hash), `room_instances` (a person's room pinned to an edition) and `room_records`
+   (instance, collection, record id, `values jsonb`, revision). Writes validate with room-spec
+   and use expected-revision updates, like new-learn's progress API.
+2. The schema lives in the spec, so a new room needs no migration and no generated SQL.
+3. A room that truly needs relational queries can later get a dedicated Postgres schema,
+   generated from its spec at publish time and reviewed like any migration.
+4. A new spec edition never rewrites existing records; moving an instance forward is explicit.
+
+Test DB changes on a separate Neon branch before connecting production.
+
+## Characters and tools
+
+`agentTools(spec, character)` derives typed tools from the collections and the character's
+capabilities. `/api/agent` rebuilds the room and data from the request, puts the data in the
+system instruction as content (not instructions), and returns the model's parts. The client
+runs each call with `runTool`, applies the result to its store, and sends the results back
+until the character answers in words (at most six steps). A failed exchange is not kept as
+history. Several characters each keep their own conversation; each speaks only as itself.
+
+## Security now
+
+AI routes are closed unless `OPEN_AI_PREVIEW=true` (there are no accounts to bill or limit
+yet). The guard is per isolate, not a distributed quota. The preview spec and data come from
+the browser and only affect that person's session; with persistence the server will load the
+spec by edition and the data from the database instead of trusting the request.
+
+## Next
+
+1. Accounts + persisted rooms (above).
+2. Voice: port new-learn's Nova Live. Server mints a single-use token with the character's
+   persona and voice locked; Live function calls are answered by the same `runTool`.
+   Several live characters: one session per active speaker, with a context note on handover.
+3. MCP and outside services: platform-registered MCP servers (never URLs inside a spec), a
+   room lists which it uses, tools run on the server with the person's own authorization, and
+   anything that changes the outside world asks the person first.
+4. 3D/2.5D scenes as custom panels first (e.g. react-three-fiber inside a room folder); promote
+   to a built-in once a second room needs it.
+5. Room catalogue, sharing, schools with rooms and curricula as collections of rooms.
+
+## Gates
+
+At most 300 lines per authored file. `npm run check` enforces it and the import boundaries.
+Unit tests cover contract, data rules, tools, rendering and server routes with the provider
+mocked; `npm run test:browser` covers the room and agent tool loop in Chromium with the API
+mocked. Neither proves a real model's behaviour: check a real conversation on a preview.

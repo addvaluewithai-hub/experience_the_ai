@@ -1,0 +1,11 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "experience-the-ai",
+  "pages_build_output_dir": "./dist",
+  "compatibility_date": "2026-10-09",
+  "compatibility_flags": ["nodejs_compat"],
+  "vars": {
+    // AI routes stay closed until accounts exist; set "true" only on a guarded preview.
+    "OPEN_AI_PREVIEW": "false",
+  },
+}

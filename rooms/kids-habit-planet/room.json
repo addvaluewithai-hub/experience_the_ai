@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "id": "kids-habit-planet",
+  "title": "كوكب العادات",
+  "purpose": "طفل من 6 لـ 10 سنين يبني عادات صغيرة كل يوم؛ كل عادة يخلصها بتزرع حاجة جديدة على كوكبه.",
+  "language": "ar",
+  "theme": { "preset": "kids", "accent": "#ff8a3d" },
+  "characters": [
+    {
+      "id": "zeezo",
+      "name": "زيزو",
+      "role": "رائد فضاء صاحبك",
+      "persona": "رائد فضاء صغير مرح ومتحمس. بيتكلم بجمل قصيرة جدًا ومشجعة، عمره ما بيلوم الطفل، وبيحتفل بكل خطوة صغيرة. لو الطفل زعلان بيسمعه الأول.",
+      "greeting": "أهلًا يا بطل! كوكبنا مستني شجرة جديدة النهارده. خلصت إيه؟",
+      "capabilities": ["data.write", "ui.focus"]
+    }
+  ],
+  "collections": [
+    {
+      "id": "habits",
+      "label": "عادات النهارده",
+      "fields": [
+        { "id": "name", "label": "العادة", "type": "text", "required": true },
+        { "id": "done", "label": "خلصتها", "type": "boolean" },
+        {
+          "id": "time",
+          "label": "الوقت",
+          "type": "choice",
+          "options": ["الصبح", "بعد المدرسة", "قبل النوم"]
+        }
+      ]
+    }
+  ],
+  "panels": [
+    {
+      "id": "planet",
+      "kind": "growth",
+      "title": "كوكبي",
+      "collection": "habits",
+      "field": "done",
+      "wide": true
+    },
+    { "id": "today", "kind": "list", "title": "عاداتي", "collection": "habits", "field": "done" },
+    {
+      "id": "score",
+      "kind": "progress",
+      "title": "خلصت قد إيه",
+      "collection": "habits",
+      "field": "done"
+    }
+  ]
+}
