@@ -78,9 +78,15 @@
   ],
   "panels": [
     {
+      "id": "scene",
+      "kind": "world",
+      "title": "الوادي",
+      "wide": true
+    },
+    {
       "id": "valley",
       "kind": "rooms",
-      "title": "الوادي",
+      "title": "أماكن الوادي",
       "view": "world",
       "wide": true
     },
@@ -98,6 +104,61 @@
       "field": "told"
     }
   ],
+  "world": {
+    "surface": "valley-phaser",
+    "describe": "A pastel rainbow valley at dawn whose colours are still asleep; Laila's habits will wake them. The flying unicorn lives here and Grandma Moon glows in the sky. Places: crystal-river (نهر الكريستال, on the grass, the river of sparkling teeth), meadow (المرج, on the grass, home), rainbow-bridge (جسر قوس قزح, an arch in the air), dream-sky (سما الأحلام, high among the clouds by the moon), near-laila (قدام ليلى, close in front of Laila).",
+    "actions": [
+      {
+        "name": "fly_to",
+        "description": "Fly to a place in the valley while you keep talking; on grass places you land softly.",
+        "params": {
+          "place": {
+            "type": "choice",
+            "options": ["crystal-river", "meadow", "rainbow-bridge", "dream-sky", "near-laila"]
+          },
+          "speed": {
+            "type": "number",
+            "min": 0.2,
+            "max": 1,
+            "description": "0.2 gentle to 1 fast"
+          },
+          "path": {
+            "type": "choice",
+            "options": ["arc", "swoop", "direct"],
+            "description": "arc curves up, swoop dips down"
+          }
+        },
+        "required": ["place"],
+        "characters": ["unicorn"]
+      },
+      {
+        "name": "land",
+        "description": "Glide down to the grass where you are.",
+        "characters": ["unicorn"]
+      },
+      {
+        "name": "hover",
+        "description": "Stop and hover where you are.",
+        "characters": ["unicorn"]
+      },
+      {
+        "name": "sparkle",
+        "description": "A burst of sparkles for a real small win or a happy moment, not every sentence.",
+        "params": {
+          "big": {
+            "type": "boolean",
+            "description": "true only for a special moment"
+          }
+        },
+        "characters": ["unicorn"]
+      },
+      {
+        "name": "twinkle_stars",
+        "description": "Make the stars twinkle at a magic moment in the story.",
+        "characters": ["moon-granny"]
+      }
+    ]
+  },
   "rooms": [
     {
       "id": "crystal-river",

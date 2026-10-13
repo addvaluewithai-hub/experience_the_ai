@@ -64,7 +64,12 @@ try {
     { functionCall: { name: 'play_routine', args: { routine: 'present', at: 'board' } } },
     { functionCall: { name: 'look_at', args: { target: 'omar' } } },
   ];
+  replies.unicorn = [
+    { text: 'يلا نطير!' },
+    { functionCall: { name: 'fly_to', args: { place: 'rainbow-bridge', speed: 1 } } },
+  ];
   const answers = {
+    unicorn: 'وصلنا الجسر ✨',
     zeezo: 'تمام يا بطل، الكوكب كبر!',
     guide: 'اتفضل على الكرار.',
     'ms-nour': 'شايفين؟ دي أول فكرة النهارده، وعمر عنده سؤال.',
@@ -181,6 +186,24 @@ try {
       document.querySelector('[data-prop="chalkboard"]')?.getAttribute('data-state') === 'written',
   );
 
+  // A room that draws its own world: Phaser loads here only, and the unicorn flies on request.
+  agentRequests.length = 0;
+  await page.goto(`${url}/#/room/rainbow-valley`);
+  await page.locator('[data-world="rainbow-valley"][data-status="ready"] canvas').waitFor();
+  const message = page.getByRole('textbox', { name: 'Message اليونيكورن' });
+  for (const text of ['طيري للجسر', 'وصلنا؟']) {
+    await message.fill(text);
+    await page.keyboard.press('Enter');
+    await page.getByText('وصلنا الجسر ✨').last().waitFor();
+  }
+  assert.match(agentRequests[0].world, /resting on the grass at المرج \(meadow\)/);
+  assert.deepEqual(
+    agentRequests[1].turns.at(-1).results.map((r) => r.response),
+    [{ ok: true }],
+  );
+  assert.match(agentRequests[2].world, /(flying to|hovering at) جسر قوس قزح \(rainbow-bridge\)/);
+  await page.screenshot({ path: 'test-results/rainbow-valley.png', fullPage: true });
+
   // Several characters each keep their own conversation.
   await page.goto(`${url}/#/room/study-room`);
   await page.getByRole('tab', { name: 'سلمى' }).click();
@@ -197,6 +220,7 @@ try {
       'kids-habit-planet',
       'self-growth-studio',
       'study-room',
+      'rainbow-valley',
     ]) {
       await page.goto(`${url}/#/room/${room}`);
       await page.locator('.room').waitFor();
@@ -215,7 +239,7 @@ try {
 
   assert.deepEqual(errors, []);
   console.log(
-    'Browser flow passed: rooms, nested rooms, handoff, panels, agent tool loop, characters, 320/390/1280.',
+    'Browser flow passed: rooms, nested rooms, handoff, panels, agent tool loop, characters, a Phaser world, 320/390/1280.',
   );
 } finally {
   await browser?.close();
