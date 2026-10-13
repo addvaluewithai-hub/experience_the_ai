@@ -8,6 +8,10 @@ acting, described by a room as data. Rooms never draw characters; they describe 
 
 - addvaluewithai-hub/pixilive `feat/character-engine` @ `ee91c77f`
 - addvaluewithai-hub/englishlive (Englotti) `main` @ `e57553b2`
+- addvaluewithai-hub/kidshabits `main` @ `c1ab8ce` (design only: world kits, sequences, priority)
+
+Where characters live and move (places, routines, free moves, sequences, AI tools) is in
+docs/stage.md.
 
 Keep these ideas:
 
