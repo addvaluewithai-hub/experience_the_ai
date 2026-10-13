@@ -23,7 +23,8 @@ const MAX_STEPS = 6;
 const MAX_TURNS = 40;
 let lineId = 0;
 let host: ConversationHost | undefined;
-let pending: { key: string; message: string; shown: string } | null = null;
+/** A note for the room the person was just taken into; `voice` when a call should carry on. */
+let pending: { key: string; message: string; shown: string; voice: boolean } | null = null;
 const conversations = new Map<string, Conversation>();
 
 export const setConversationHost = (value: ConversationHost) => (host = value);
@@ -103,14 +104,22 @@ export class Conversation {
     return { response: outcome.response, open: outcome.open, silent: Boolean(outcome.silent) };
   }
 
-  handOff(handoff: { path: string; note: string }) {
+  /**
+   * Takes the person into an inner room. A world may stage the way there: a scene named
+   * `to-<inner room id>` plays first (the character flies off, the camera follows).
+   */
+  async handOff(handoff: { path: string; note: string }, voice = false) {
     const { room, character } = this;
     const key = `${room.key}/${handoff.path}`;
     pending = {
       key,
       message: `HANDOFF from ${character.name} (${character.role}) in "${room.spec.title}": ${handoff.note}`,
       shown: `↪ ${character.name}: ${handoff.note}`,
+      voice,
     };
+    const departure = `to-${handoff.path.split('/')[0]}`;
+    if (room.spec.world?.scenes?.some((s) => s.id === departure))
+      await room.surface?.play?.(departure).catch(() => undefined);
     host?.open(key);
   }
 
@@ -136,7 +145,15 @@ export class Conversation {
   /** What a voice ticket needs to know about this conversation's room. */
   context() {
     const { room, character } = this;
+    const now = new Date();
+    const pad = (n: number) => String(n).padStart(2, '0');
     return {
+      // The person's own day and time, for habits that belong to their day.
+      now: {
+        date: `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`,
+        time: `${pad(now.getHours())}:${pad(now.getMinutes())}`,
+        weekday: now.toLocaleDateString('en-US', { weekday: 'long' }),
+      },
       room: room.spec,
       characterId: character.id,
       data: room.store.get(),
@@ -186,7 +203,7 @@ export class Conversation {
         if (step === MAX_STEPS - 1) this.add('error', 'Stopped after several actions in a row.');
       }
       if (history.at(-1)?.role !== 'tool') this.turns = history;
-      if (handoff) this.handOff(handoff);
+      if (handoff) void this.handOff(handoff);
     } catch (error) {
       if (!abort.signal.aborted)
         this.add('error', error instanceof Error ? error.message : 'Something went wrong.');

@@ -72,7 +72,8 @@ Accent: `#rrggbb`. Limits for a whole tree: 4 levels, 40 rooms.
   `VOICES` from `@experience/room-spec`; without it a default voice speaks.
 - `name`, `role` ≤ 60; `persona`, `greeting` ≤ 600. In Arabic, write greetings that do not
   assume the person's gender.
-- Every character can read its room's data and the data of all rooms inside it.
+- Every character can read its room's data and the data of all rooms inside it, and knows the
+  person's local date, weekday and time (for habits that belong to the person's day).
 - `data.write` lets it add, change and delete records of **its own room only**.
 - `ui.focus` lets it point at a panel while talking.
 - A character in a room with built inner rooms can take the person into one (`open_room`); the
@@ -164,6 +165,8 @@ tools and hands each accepted call to the room's surface.
 - `arrival` (optional): the id of the scene the surface plays when a person arrives, before
   anyone speaks. In an immersive room the way to begin appears when it ends; the surface may
   vary it (long the first time, short after) from the room's own data.
+- A scene named `to-<inner room id>` (e.g. `to-kitchen`) stages the way into that inner room:
+  when a character takes the person there with `open_room`, it plays first.
 
 The surface lives in the room's folder (or comes from a kit), may draw with `phaser` (import it
 lazily inside the view so only this room loads it), and implements `RoomSurface` from
@@ -189,7 +192,9 @@ starts a call and the character speaks first; what is said floats as captions ov
 world; a small keyboard stands in when voice cannot be used; with several characters, small
 name buttons choose who to talk to. Characters change everything through their tools (data,
 world actions, `open_room`), so the world must show what changed (a river that sparkles, a
-colour that returns). Rules: the room needs a `world`, and its only panel is the `world`
+colour that returns). When a character takes the person into an immersive inner room during a
+call, the call carries on: after that room's arrival scene its first character speaks first,
+from the note. Rules: the room needs a `world`, and its only panel is the `world`
 panel. A room meant for forms, lists and dashboards (a parents' corner) stays `panels`.
 
 ## Pulse

@@ -16,6 +16,8 @@ export function RoomPage(props: {
   const { room, rooms } = props;
   // A character above sent the person here: this room's first character picks up its note.
   useEffect(() => {
+    // An immersive room takes its handoff itself, once its arrival scene has played.
+    if (room.spec.layout === 'immersive') return;
     const handoff = takeHandoff(room.key);
     if (handoff)
       void conversationFor(room, room.spec.characters[0]).send(handoff.message, {

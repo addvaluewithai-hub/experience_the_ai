@@ -2,7 +2,9 @@ import { useCallback, useEffect, useState } from 'react';
 import type { RoomData } from '@experience/room-spec';
 import { useRoomData } from '@experience/room-runtime';
 import { roomHref, type OpenRoom } from '../../app/rooms';
+import { conversationFor, takeHandoff } from './conversation';
 import { PresenceLayer } from './PresenceLayer';
+import { startCall } from './voiceCall';
 import './immersive.css';
 
 /**
@@ -24,13 +26,30 @@ export function ImmersiveRoom(props: {
   const arrival = room.spec.world?.arrival;
   const [arriving, setArriving] = useState(Boolean(arrival && room.surface?.play));
   useEffect(() => {
-    if (!arrival || !room.surface?.play) return;
     let here = true;
-    setArriving(true);
-    void room.surface
-      .play(arrival)
-      .catch(() => undefined)
-      .then(() => here && setArriving(false));
+    const arrived = () => {
+      if (!here) return;
+      setArriving(false);
+      // A character above brought the person here: the first character here carries on, by
+      // voice when they came in a call, or in words.
+      const handoff = takeHandoff(room.key);
+      const first = room.spec.characters[0];
+      if (handoff?.voice) void startCall(room, first, { greet: handoff.message });
+      else if (handoff)
+        void conversationFor(room, first).send(handoff.message, {
+          kind: 'activity',
+          text: handoff.shown,
+        });
+    };
+    if (!arrival || !room.surface?.play) {
+      arrived();
+    } else {
+      setArriving(true);
+      void room.surface
+        .play(arrival)
+        .catch(() => undefined)
+        .then(arrived);
+    }
     return () => {
       here = false;
     };

@@ -28,7 +28,8 @@ const set = (next: Partial<Call>) => {
 export async function startCall(
   room: OpenRoom,
   character: Character,
-  options: { greet?: boolean } = {},
+  /** `true`: the character greets the person who just arrived; text: speaks first from it. */
+  options: { greet?: boolean | string } = {},
 ) {
   await endCall();
   const conversation = conversationFor(room, character);
@@ -43,16 +44,17 @@ export async function startCall(
     character: character.id,
     presence: room.surface,
     // In an immersive room the call is how the person arrives, so the character speaks first.
-    greet: options.greet
-      ? `ARRIVED: the person just came into "${room.spec.title}". Your usual first words: ${character.greeting}`
-      : undefined,
+    greet:
+      typeof options.greet === 'string'
+        ? options.greet
+        : options.greet
+          ? `ARRIVED: the person just came into "${room.spec.title}". Your usual first words: ${character.greeting}`
+          : undefined,
     ticket: () => post<LiveTicket>('/api/live', conversation.context()),
     runTool: (call) => {
       const { response, open, silent } = conversation.apply(call.name, call.args);
-      if (open) {
-        conversation.handOff(open);
-        void endCall();
-      }
+      // The call carries on into the inner room: its first character picks up the note.
+      if (open) void conversation.handOff(open, true);
       return { response, silent };
     },
     transcript: (role, text, final) =>
