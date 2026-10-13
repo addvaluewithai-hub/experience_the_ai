@@ -3,6 +3,7 @@ import { test } from 'node:test';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { addRecord, emptyData, validateRoom, type RoomSpec } from '@experience/room-spec';
 import { examples as rooms } from '../../../examples/index.ts';
+const byId = (id: string) => rooms.find((r) => (r.spec as { id: string }).id === id)!.spec;
 const exampleRooms = ['kids-habit-planet', 'self-growth-studio', 'study-room'].map(
   (id) => rooms.find((r) => (r.spec as { id: string }).id === id)!.spec,
 );
@@ -73,7 +74,7 @@ test('custom panels come from the room registry; a missing one says so', () => {
 });
 
 test('a world shows inner rooms lit by their pulse, planned ones as closed doors', () => {
-  const result = validateRoom(rooms[0].spec);
+  const result = validateRoom(byId('nested-house'));
   assert.ok(result.ok);
   const house = result.spec;
   const kitchen = house.rooms!.find((r) => r.id === 'kitchen')!;

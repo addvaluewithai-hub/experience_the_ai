@@ -31,3 +31,31 @@ export {
   type DataAt,
   type InnerRoom,
 } from './tree';
+export * from './kit';
+export { capabilitiesOf, type Capabilities, type CharacterLook } from './look';
+export {
+  parseStageCall,
+  STAGE_TOOLS,
+  stageBrief,
+  stageOf,
+  stageTools,
+  type Positions,
+  type StageCommand,
+} from './stage-agent';
+export {
+  affordancesAt,
+  propStateOf,
+  type CastMember,
+  type Place,
+  type PropBinding,
+  type Route,
+  type Stage,
+  type StageProp,
+} from './stage';
+export {
+  VISEMES,
+  type MouthFrame,
+  type Presence,
+  type PresenceMode,
+  type Viseme,
+} from './presence';

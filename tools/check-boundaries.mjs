@@ -5,7 +5,11 @@ const root = resolve(new URL('..', import.meta.url).pathname);
 /** Bare imports each area may use. Relative imports must stay inside the area. */
 const areas = [
   { path: 'packages/room-spec/src', allowed: [] },
-  { path: 'packages/room-runtime/src', allowed: ['react', 'react-dom', '@experience/room-spec'] },
+  {
+    path: 'packages/room-runtime/src',
+    allowed: ['react', 'react-dom', '@experience/room-spec', '@experience/stage-runtime'],
+  },
+  { path: 'packages/stage-runtime/src', allowed: ['react', 'react-dom', '@experience/room-spec'] },
   // Each room folder is self-contained content: base components only, no app or server code.
   {
     path: 'rooms',

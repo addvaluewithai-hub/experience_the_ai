@@ -7,6 +7,7 @@ import type {
   RoomData,
   RoomSpec,
 } from '@experience/room-spec';
+import type { StageController } from '@experience/stage-runtime';
 
 /** What the host gives a room about the rooms inside it. */
 export type RoomWorld = {
@@ -25,6 +26,8 @@ export type PanelProps = {
   /** A person's edit; the host applies it through the room data rules. */
   edit: (change: (data: RoomData) => RoomData) => void;
   world?: RoomWorld;
+  /** The room's stage, when it has one. */
+  stage?: StageController;
 };
 
 export type PanelComponent = ComponentType<PanelProps>;

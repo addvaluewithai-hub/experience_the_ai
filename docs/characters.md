@@ -1,8 +1,9 @@
 # Characters and stages (engine design)
 
-Status: design, not built. Goal: any character, in any theme, alone or with others on a 2.5D
-stage (three students in a classroom, one sitting on a desk), each with real lip sync and
-acting, described by a room as data. Rooms never draw characters; they describe them.
+Status: the humanoid plan, its parts kit and the SVG stage surface are built
+(packages/stage-runtime); the audio path, voice and other plans and surfaces are not yet.
+Goal: any character, in any theme, alone or with others, with real lip sync and acting,
+described by a room as data. Rooms never draw characters; they describe them.
 
 ## What we learned (references, not dependencies)
 

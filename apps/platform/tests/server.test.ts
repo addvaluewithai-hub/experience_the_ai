@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { afterEach, test } from 'node:test';
 import { examples as rooms } from '../../../examples/index.ts';
+const byId = (id: string) => rooms.find((r) => (r.spec as { id: string }).id === id)!.spec;
 const exampleRooms = ['kids-habit-planet', 'self-growth-studio', 'study-room'].map(
   (id) => rooms.find((r) => (r.spec as { id: string }).id === id)!.spec,
 );
@@ -112,7 +113,12 @@ test('provider failure is an error, not an invented reply', async () => {
 test('a character reads the rooms inside its own and can send the person there', async () => {
   const seen = provider([{ text: 'تمام' }]);
   const below = { kitchen: { tasks: [{ id: 't1', values: { task: 'غسيل', done: true } }] } };
-  const base = { room: rooms[0].spec, characterId: 'guide', data: {}, turns: say('عايز أطبخ') };
+  const base = {
+    room: byId('nested-house'),
+    characterId: 'guide',
+    data: {},
+    turns: say('عايز أطبخ'),
+  };
   assert.equal((await post('/api/agent', { ...base, below })).status, 200);
   const instruction = seen[0].systemInstruction.parts[0].text;
   assert.match(instruction, /<inner_rooms>/);
@@ -124,4 +130,31 @@ test('a character reads the rooms inside its own and can send the person there',
   assert.ok(names.includes('open_room') && !names.includes('add_tasks'));
   const bad = { kitchen: { tasks: [{ id: 't1', values: { task: 3 } }] } };
   assert.equal((await post('/api/agent', { ...base, below: bad })).status, 400);
+});
+
+test('a character on a stage gets the stage brief and stage tools; positions are filtered', async () => {
+  const seen = provider([{ text: 'يلا' }]);
+  const positions = {
+    omar: { at: 'front', pose: 'stand' },
+    'ms-nour': { at: 'roof', pose: 'fly' },
+    ghost: { at: 'board' },
+  };
+  const response = await post('/api/agent', {
+    room: byId('classroom-stage'),
+    characterId: 'ms-nour',
+    data: {},
+    positions,
+    turns: say('اشرحي لنا'),
+  });
+  assert.equal(response.status, 200);
+  const instruction = seen[0].systemInstruction.parts[0].text;
+  assert.match(
+    instruction,
+    /<stage>\nYou are on a classroom stage\. You can walk, run, hop; you are standing at between places\./,
+  );
+  assert.match(instruction, /omar \(عمر, طالب\) standing at قدام السبورة/);
+  assert.doesNotMatch(instruction, /ghost|roof/);
+  const names = seen[0].tools[0].functionDeclarations.map((t: { name: string }) => t.name);
+  for (const name of ['go_to', 'play_routine', 'look_at', 'set_pose', 'perform'])
+    assert.ok(names.includes(name));
 });

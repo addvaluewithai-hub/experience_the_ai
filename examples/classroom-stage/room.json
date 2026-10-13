@@ -1,0 +1,285 @@
+{
+  "schemaVersion": 1,
+  "id": "classroom-stage",
+  "title": "مثال: فصل 2.5D",
+  "icon": "🏫",
+  "purpose": "مثال للمحرك وليس أوضة حقيقية: مدرسة وتلات طلاب بأشكال مختلفة على مسرح واحد؛ واحد قاعد على الديسك، والسبورة بتتكتب لما فكرة تتشارك.",
+  "language": "ar",
+  "theme": {
+    "preset": "school",
+    "accent": "#7c5cff"
+  },
+  "characters": [
+    {
+      "id": "ms-nour",
+      "name": "مس نور",
+      "role": "مدرسة",
+      "persona": "مدرسة تجريبية مرحة. بتمشي للسبورة لما تشرح، وبتبص للطالب اللي بتكلمه.",
+      "greeting": "صباح الخير يا فصل! مين عنده فكرة النهارده؟",
+      "capabilities": ["data.write", "ui.focus"],
+      "look": {
+        "plan": "humanoid",
+        "age": "adult",
+        "palette": {
+          "skin": "#f1c3a0",
+          "hair": "#4a2f27",
+          "top": "#7c5cff",
+          "bottom": "#3b3550",
+          "shoes": "#3b3030",
+          "eyes": "#3a2a24"
+        },
+        "parts": {
+          "hair": "bun",
+          "eyes": "almond",
+          "top": "blazer",
+          "bottom": "skirt",
+          "accessories": ["glasses"]
+        },
+        "energy": 0.5
+      }
+    },
+    {
+      "id": "omar",
+      "name": "عمر",
+      "role": "طالب",
+      "persona": "طالب تجريبي فضولي وبيحب يقعد على الديسك.",
+      "greeting": "أنا عندي سؤال!",
+      "capabilities": ["data.write", "ui.focus"],
+      "look": {
+        "plan": "humanoid",
+        "age": "child",
+        "palette": {
+          "skin": "#c98d62",
+          "hair": "#2b1d18",
+          "top": "#ff8a3d",
+          "bottom": "#36507a",
+          "shoes": "#3b3030",
+          "eyes": "#3a2a24"
+        },
+        "parts": {
+          "hair": "curly",
+          "eyes": "sparkle",
+          "top": "hoodie",
+          "bottom": "jeans",
+          "accessories": ["glasses", "backpack"]
+        },
+        "energy": 0.8
+      }
+    },
+    {
+      "id": "laila",
+      "name": "ليلى",
+      "role": "طالبة",
+      "persona": "طالبة تجريبية هادية وبتحب تقرا.",
+      "greeting": "أنا جاهزة.",
+      "capabilities": ["data.write", "ui.focus"],
+      "look": {
+        "plan": "humanoid",
+        "age": "child",
+        "palette": {
+          "skin": "#e8b593",
+          "hair": "#e85d8a",
+          "top": "#5cc8b0",
+          "bottom": "#2f3a55",
+          "shoes": "#3b3030",
+          "eyes": "#3a2a24"
+        },
+        "parts": {
+          "hair": "hijab",
+          "eyes": "round",
+          "top": "dress",
+          "bottom": "pants",
+          "accessories": []
+        },
+        "energy": 0.4
+      }
+    },
+    {
+      "id": "karim",
+      "name": "كريم",
+      "role": "طالب",
+      "persona": "طالب تجريبي نشيط بيحب يشجع زمايله.",
+      "greeting": "يلا بينا!",
+      "capabilities": ["data.write", "ui.focus"],
+      "look": {
+        "plan": "humanoid",
+        "age": "teen",
+        "palette": {
+          "skin": "#8d5a3b",
+          "hair": "#1c1412",
+          "top": "#ffd166",
+          "bottom": "#2a9d8f",
+          "shoes": "#3b3030",
+          "eyes": "#3a2a24"
+        },
+        "parts": {
+          "hair": "spiky",
+          "eyes": "round",
+          "top": "tshirt",
+          "bottom": "shorts",
+          "accessories": ["cap"]
+        },
+        "energy": 0.9
+      }
+    }
+  ],
+  "collections": [
+    {
+      "id": "ideas",
+      "label": "أفكار الفصل",
+      "fields": [
+        {
+          "id": "idea",
+          "label": "الفكرة",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "shared",
+          "label": "اتشاركت",
+          "type": "boolean"
+        }
+      ]
+    }
+  ],
+  "panels": [
+    {
+      "id": "class",
+      "kind": "stage",
+      "title": "الفصل",
+      "wide": true,
+      "stage": {
+        "scene": "classroom",
+        "places": [
+          {
+            "id": "board",
+            "label": "السبورة",
+            "x": 0.5,
+            "depth": 0.92,
+            "means": "مكان الشرح"
+          },
+          {
+            "id": "front",
+            "label": "قدام السبورة",
+            "x": 0.5,
+            "depth": 0.72
+          },
+          {
+            "id": "desk-1",
+            "label": "ديسك عمر",
+            "x": 0.22,
+            "depth": 0.35
+          },
+          {
+            "id": "chair-2",
+            "label": "كرسي ليلى",
+            "x": 0.55,
+            "depth": 0.3
+          },
+          {
+            "id": "window",
+            "label": "الشباك",
+            "x": 0.86,
+            "depth": 0.85
+          },
+          {
+            "id": "door",
+            "label": "الباب",
+            "x": 0.1,
+            "depth": 0.9
+          },
+          {
+            "id": "corner",
+            "label": "ركن الشباك",
+            "x": 0.82,
+            "depth": 0.45
+          },
+          {
+            "id": "plant-spot",
+            "label": "الزرعة",
+            "x": 0.95,
+            "depth": 0.62
+          }
+        ],
+        "props": [
+          {
+            "id": "chalkboard",
+            "prop": "board",
+            "at": "board",
+            "bind": {
+              "collection": "ideas",
+              "field": "shared",
+              "on": "written",
+              "off": "clean"
+            }
+          },
+          {
+            "id": "desk",
+            "prop": "desk",
+            "at": "desk-1"
+          },
+          {
+            "id": "chair",
+            "prop": "chair",
+            "at": "chair-2"
+          },
+          {
+            "id": "win",
+            "prop": "window",
+            "at": "window",
+            "state": "day"
+          },
+          {
+            "id": "class-door",
+            "prop": "door",
+            "at": "door"
+          },
+          {
+            "id": "plant",
+            "prop": "plant",
+            "at": "plant-spot",
+            "state": "grown"
+          }
+        ],
+        "cast": [
+          {
+            "character": "ms-nour",
+            "at": "front",
+            "pose": "stand",
+            "facing": "left"
+          },
+          {
+            "character": "omar",
+            "at": "desk-1",
+            "pose": "sit"
+          },
+          {
+            "character": "laila",
+            "at": "chair-2",
+            "pose": "sit",
+            "facing": "left"
+          },
+          {
+            "character": "karim",
+            "at": "corner",
+            "pose": "stand",
+            "facing": "left"
+          }
+        ]
+      }
+    },
+    {
+      "id": "idea-list",
+      "kind": "list",
+      "title": "أفكار الفصل",
+      "collection": "ideas",
+      "field": "shared"
+    },
+    {
+      "id": "about",
+      "kind": "text",
+      "title": "عن المثال",
+      "text": "علّم على فكرة إنها اتشاركت والسبورة تتكتب. الشخصيات بتتحرك بأوامر المحرك (go_to، play_routine، look_at…)."
+    }
+  ]
+}

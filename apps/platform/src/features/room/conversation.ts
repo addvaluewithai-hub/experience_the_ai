@@ -94,6 +94,7 @@ export class Conversation {
     const abort = new AbortController();
     this.controller = abort;
     this.update({ busy: true });
+    this.room.stage?.setMode(this.character.id, 'thinking');
     this.add(shown?.kind ?? 'person', shown?.text ?? text);
     const { room, character } = this;
     const history: Turn[] = bounded([...this.turns, { role: 'user', text }]);
@@ -107,6 +108,7 @@ export class Conversation {
             characterId: character.id,
             data: room.store.get(),
             below: this.below(),
+            positions: room.stage?.positions(),
             turns: history,
           },
           abort.signal,
@@ -116,7 +118,10 @@ export class Conversation {
           .map((p) => p.text ?? '')
           .join('')
           .trim();
-        if (said) this.add('agent', said);
+        if (said) {
+          this.add('agent', said);
+          this.talk(said.length);
+        }
         const calls = parts.flatMap((p) => (p.functionCall ? [p.functionCall] : []));
         if (!calls.length) break;
         const results = calls.map((call) => {
@@ -130,6 +135,7 @@ export class Conversation {
           );
           room.store.set(outcome.data);
           if (outcome.focus) host?.focus(room.key, outcome.focus);
+          if (outcome.stage) room.stage?.dispatch(outcome.stage);
           if (outcome.open) handoff = outcome.open;
           if (outcome.activity) this.add('activity', outcome.activity);
           if ('error' in outcome.response)
@@ -159,7 +165,25 @@ export class Conversation {
     } finally {
       this.controller = null;
       this.update({ busy: false });
+      if (this.room.stage?.speaking !== this.character.id)
+        this.room.stage?.setMode(this.character.id, 'idle');
     }
+  }
+
+  /**
+   * On a stage, the character talks while its words appear: a text talk loop, not lip sync
+   * (lip sync comes with audio). Others turn to it until it is done.
+   */
+  private talkTimer = 0;
+  private talk(characters: number) {
+    const stage = this.room.stage;
+    if (!stage) return;
+    stage.speak(this.character.id);
+    clearTimeout(this.talkTimer);
+    const seconds = Math.min(8, Math.max(1.5, characters * 0.055));
+    this.talkTimer = window.setTimeout(() => {
+      if (stage.speaking === this.character.id) stage.speak(null);
+    }, seconds * 1000);
   }
 
   stop() {

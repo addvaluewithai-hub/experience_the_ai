@@ -86,8 +86,10 @@ export function validateRoom(value: unknown): Validation {
     }
     const panels = check
       .list(source.panels, at('panels'), 1, LIMITS.panels)
-      .map((p, i) => panel(check, p, at(`panels[${i}]`), owned, inner.length));
+      .map((p, i) => panel(check, p, at(`panels[${i}]`), owned, inner.length, people));
     check.unique(panels, at('panels'));
+    if (panels.filter((p) => p.kind === 'stage').length > 1)
+      check.at(at('panels'), 'a room has at most one stage');
 
     const spec: RoomSpec = { ...head, ...icon, characters: people, collections: owned, panels };
     if (source.pulse !== undefined) {

@@ -1,4 +1,5 @@
-import { validateRoom, type RoomSpec } from '@experience/room-spec';
+import { stageOf, validateRoom, type RoomSpec } from '@experience/room-spec';
+import { StageController } from '@experience/stage-runtime';
 import {
   createRoomStore,
   type CustomPanels,
@@ -19,7 +20,12 @@ export type OpenRoom = {
   panels: CustomPanels;
   parent?: OpenRoom;
   example: boolean;
+  /** The room's stage, when it has one; it keeps moving while the room is open. */
+  stage?: StageController;
 };
+
+const prefersLessMotion = () =>
+  typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /**
  * Rooms are compiled in; a tree that fails validation is reported and left out, never guessed.
@@ -30,6 +36,8 @@ export function loadRooms(): { top: OpenRoom[]; all: Map<string, OpenRoom> } {
   const add = (spec: RoomSpec, panels: CustomPanels, example: boolean, parent?: OpenRoom) => {
     const key = parent ? `${parent.key}/${spec.id}` : spec.id;
     const room: OpenRoom = { key, spec, store: createRoomStore(spec), panels, parent, example };
+    if (stageOf(spec))
+      room.stage = new StageController(spec, { reducedMotion: prefersLessMotion() });
     all.set(key, room);
     for (const inner of spec.rooms ?? []) if (!inner.planned) add(inner, panels, example, room);
     return room;

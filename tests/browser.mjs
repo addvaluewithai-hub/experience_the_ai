@@ -59,7 +59,16 @@ try {
       { functionCall: { name: 'open_room', args: { room: 'kitchen/pantry', note: 'ناقص رز' } } },
     ],
   };
-  const answers = { zeezo: 'تمام يا بطل، الكوكب كبر!', guide: 'اتفضل على الكرار.' };
+  replies['ms-nour'] = [
+    { text: 'تعالوا نشوف السبورة.' },
+    { functionCall: { name: 'play_routine', args: { routine: 'present', at: 'board' } } },
+    { functionCall: { name: 'look_at', args: { target: 'omar' } } },
+  ];
+  const answers = {
+    zeezo: 'تمام يا بطل، الكوكب كبر!',
+    guide: 'اتفضل على الكرار.',
+    'ms-nour': 'شايفين؟ دي أول فكرة النهارده، وعمر عنده سؤال.',
+  };
   await page.route('**/api/agent', (route) => {
     const request = route.request().postDataJSON();
     agentRequests.push(request);
@@ -73,7 +82,7 @@ try {
 
   await page.goto(url);
   await assert.doesNotReject(page.getByRole('link', { name: /كوكب العادات/ }).waitFor());
-  assert.equal(await page.locator('.card').count(), 4);
+  assert.equal(await page.locator('.card').count(), 6);
   await page.getByText('No rooms built yet.').waitFor();
   await page.screenshot({ path: 'test-results/home.png', fullPage: true });
 
@@ -140,6 +149,38 @@ try {
   await page.getByText('اتفضل على الكرار.').waitFor();
   assert.equal(agentRequests.length, 3, 'going back does not resend the handoff');
 
+  // A stage: the character's tool calls move its body; the others listen while it talks.
+  agentRequests.length = 0;
+  await page.goto(`${url}/#/room/classroom-stage`);
+  const teacher = page.locator('[data-character="ms-nour"]');
+  await teacher.waitFor();
+  assert.equal(await page.locator('[data-character="omar"]').getAttribute('data-pose'), 'sit');
+  await page.getByRole('textbox', { name: 'Message مس نور' }).fill('اشرحي لنا');
+  await page.keyboard.press('Enter');
+  await page.waitForFunction(
+    () => document.querySelector('[data-character="ms-nour"]')?.getAttribute('data-at') === 'board',
+  );
+  await page.getByText('شايفين؟ دي أول فكرة النهارده').waitFor();
+  assert.equal(await teacher.getAttribute('data-mode'), 'speaking');
+  assert.equal(
+    await page.locator('[data-character="karim"]').getAttribute('data-mode'),
+    'listening',
+  );
+  const [ask, answer] = agentRequests;
+  assert.deepEqual(ask.positions.omar, { at: 'desk-1', pose: 'sit' });
+  assert.deepEqual(
+    answer.turns.at(-1).results.map((r) => r.response),
+    [{ ok: true }, { ok: true }],
+  );
+  await page.screenshot({ path: 'test-results/classroom.png', fullPage: true });
+  await page.getByRole('textbox', { name: 'جديد: الفكرة' }).fill('الشمس نجم');
+  await page.getByRole('button', { name: 'إضافة' }).click();
+  await page.getByRole('checkbox', { name: 'الشمس نجم' }).check();
+  await page.waitForFunction(
+    () =>
+      document.querySelector('[data-prop="chalkboard"]')?.getAttribute('data-state') === 'written',
+  );
+
   // Several characters each keep their own conversation.
   await page.goto(`${url}/#/room/study-room`);
   await page.getByRole('tab', { name: 'سلمى' }).click();
@@ -149,6 +190,8 @@ try {
   for (const width of [320, 390]) {
     await page.setViewportSize({ width, height: 800 });
     for (const room of [
+      'classroom-stage',
+      'space-trip',
       'nested-house',
       'nested-house/kitchen',
       'kids-habit-planet',

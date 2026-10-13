@@ -14,6 +14,20 @@ Two kinds of work happen in this repository:
   docs/room-spec.md. Room builders never change the engine; they file engine requests in the
   room's brief.md.
 
+## Layers: brain, presence, surfaces
+
+The experience is the product; how it is drawn is a choice per room.
+
+- **Brain** (no rendering): conversations and voice, memory, room data and rules, the meaning
+  of places (docs/stage.md), authored sequences and their priority, the audio clock that turns
+  audible speech into mouth frames.
+- **Presence** (`Presence` in packages/room-spec/src/presence.ts): the only way the brain
+  touches a body: dispatch a stage command, give someone the floor, set a mode, send a mouth
+  frame, read positions.
+- **Surfaces**: anything that implements Presence and draws: the dashboard panels, the SVG
+  stage (packages/stage-runtime, built), and next a 3D place and a Phaser 2.5D world. A room
+  picks its surface; a room may ship its own.
+
 ## What came from new-learn
 
 addvaluewithai-hub/new-learn is a reference, not a dependency. Its proven patterns, reused:

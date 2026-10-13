@@ -1,6 +1,7 @@
 # Stages: worlds that characters understand (engine design)
 
-Status: design, not built. Companion to docs/characters.md (what a character is); this file is
+Status: contract, brief, tools, routines and the SVG surface are built; sequences, voice and
+other surfaces are next. Companion to docs/characters.md (what a character is); this file is
 where characters live and how they move, alone or together, scripted or free.
 
 References, not dependencies: pixilive `feat/character-engine` @ `ee91c77f` (bounded flight,

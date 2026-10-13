@@ -1,4 +1,6 @@
 import type { Checker } from './check';
+import { validateLook } from './look';
+import { validateStage } from './stage';
 import {
   CAPABILITIES,
   FIELD_TYPES,
@@ -55,6 +57,7 @@ export function characters(check: Checker, value: unknown, path: string): Charac
       persona: check.text(c.persona, `${at}.persona`, LIMITS.longText),
       greeting: check.text(c.greeting, `${at}.greeting`, LIMITS.longText),
       capabilities: [...new Set(capabilities)],
+      ...(c.look === undefined ? {} : { look: validateLook(check, c.look, `${at}.look`) }),
     };
   });
   check.unique(result, path);
@@ -82,6 +85,7 @@ export function panel(
   path: string,
   owned: Collection[],
   innerRooms: number,
+  people: Character[],
 ): Panel {
   const p = check.object(value, path);
   const result: Panel = {
@@ -92,6 +96,10 @@ export function panel(
   if (p.wide === true) result.wide = true;
   if (result.kind === 'text') {
     result.text = check.text(p.text, `${path}.text`, LIMITS.longText);
+    return result;
+  }
+  if (result.kind === 'stage') {
+    result.stage = validateStage(check, p.stage, `${path}.stage`, owned, people);
     return result;
   }
   if (result.kind === 'rooms') {

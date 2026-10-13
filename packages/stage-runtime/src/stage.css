@@ -1,0 +1,12 @@
+.stage-view {
+  position: relative;
+  border-radius: calc(var(--room-radius, 14px) * 0.7);
+  overflow: hidden;
+  background: #111;
+}
+.stage-view svg {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+  aspect-ratio: 1000 / 640;
+}

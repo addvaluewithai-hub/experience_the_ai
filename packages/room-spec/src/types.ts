@@ -1,3 +1,6 @@
+import type { CharacterLook } from './look';
+import type { Stage } from './stage';
+
 /**
  * A room is a declarative description, never code. It is the only building block: a room has
  * a look, characters and its own data, and may hold rooms of its own. Claude Code authors
@@ -16,7 +19,8 @@ export type FieldType = (typeof FIELD_TYPES)[number];
 /** list: records of a collection; stat: count or sum; progress: share of a boolean field done;
  * growth: a 2.5D world that grows with each done record; text: fixed words from the room;
  * custom: a component the room ships in its own folder (3D scenes, special dashboards);
- * rooms: the rooms inside this one, as doors or as a world, each lit by its pulse. */
+ * rooms: the rooms inside this one, as doors or as a world, each lit by its pulse;
+ * stage: a 2.5D scene where characters with a look live and move (docs/stage.md). */
 export const PANEL_KINDS = [
   'list',
   'stat',
@@ -25,6 +29,7 @@ export const PANEL_KINDS = [
   'text',
   'custom',
   'rooms',
+  'stage',
 ] as const;
 export type PanelKind = (typeof PANEL_KINDS)[number];
 
@@ -59,6 +64,8 @@ export type Character = {
   /** First line shown when the learner opens the room. */
   greeting: string;
   capabilities: Capability[];
+  /** How the character looks on a stage; without one it lives in the conversation only. */
+  look?: CharacterLook;
 };
 
 export type Panel = {
@@ -74,6 +81,8 @@ export type Panel = {
   component?: string;
   /** rooms only: how the inner rooms are shown (default doors). */
   view?: RoomsView;
+  /** stage only: the scene, its places, props, routes and cast. */
+  stage?: Stage;
   wide?: boolean;
 };
 
