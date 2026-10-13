@@ -7,6 +7,9 @@ Two roles work here; know which one you are in this session:
   (or the /build-room skill). One room per session, outside in. Work only under rooms/.
   Never edit packages/, apps/ or tools/; write engine requests in the room's brief.md.
 - Developing the engine: everything below.
+- While the first rooms are built, one session may play both roles on purpose: the room shows
+  what the engine lacks, the engine grows with tests, and the room's brief marks each engine
+  request as done. Keep the two kinds of change in separate commits.
 
 addvaluewithai-hub/new-learn is a reference for patterns, not a workspace dependency.
 
