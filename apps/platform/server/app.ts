@@ -4,18 +4,22 @@ import type { Env } from './env';
 import { body, checkOrigin, HttpError, json } from './http';
 import { limit } from './limits';
 
+/**
+ * Open for testing while there are no accounts: anyone with the link shares the key's quota.
+ * OPEN_AI_PREVIEW=false closes it; close it before the key has billing.
+ */
+const aiOpen = (env: Env) => env.OPEN_AI_PREVIEW !== 'false';
+
 export async function handleRequest(request: Request, env: Env): Promise<Response> {
   try {
     checkOrigin(request);
     const path = new URL(request.url).pathname;
     if (request.method === 'GET' && path === '/api/status')
-      return json({ ai: env.OPEN_AI_PREVIEW === 'true' && Boolean(env.GEMINI_API_KEY) });
+      return json({ ai: aiOpen(env) && Boolean(env.GEMINI_API_KEY) });
     const action = path === '/api/agent' ? 'agent' : path === '/api/live' ? 'live' : null;
     if (!action) throw new HttpError(404, 'Not found.');
     if (request.method !== 'POST') throw new HttpError(405, 'Method not allowed.');
-    // There are no accounts yet, so AI routes stay closed unless a preview opts in.
-    if (env.OPEN_AI_PREVIEW !== 'true')
-      throw new HttpError(503, 'AI rooms are not open on this deployment yet.');
+    if (!aiOpen(env)) throw new HttpError(503, 'AI rooms are not open on this deployment yet.');
     limit(request, action);
     const input = await body(request, 512_000);
     if (action === 'live') return json(await liveTicket(env, input, request.signal));

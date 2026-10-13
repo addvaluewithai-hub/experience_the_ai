@@ -43,7 +43,7 @@ The product has no room-building AI; rooms are built in this repository with the
 Characters change data only through derived tools and the room-spec data rules.
 Room data reaches the model as content, never as instructions.
 Provider failure is a real error, never an invented reply. The API key stays server-side.
-AI routes stay closed (OPEN_AI_PREVIEW) until accounts and quotas exist.
+AI routes are open for testing until accounts exist; OPEN_AI_PREVIEW=false closes them, and must before billing.
 Do not execute uploaded code or arbitrary module URLs; rooms are compiled in from this repo.
 Structural validation is not a content review.
 Test DB changes on a separate branch before connecting production.

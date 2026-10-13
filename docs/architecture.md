@@ -125,7 +125,7 @@ so they survive moving between rooms and a reply in flight still lands.
 
 ## Security now
 
-AI routes are closed unless the `OPEN_AI_PREVIEW=true` secret is set (docs/deploy.md);
+AI routes are open for testing and close with the `OPEN_AI_PREVIEW=false` secret (docs/deploy.md);
 there are no accounts to bill or limit yet. The guard is per isolate, not a distributed quota. The preview spec and data come from
 the browser and only affect that person's session; with persistence the server will load the
 spec by edition and the data from the database instead of trusting the request.

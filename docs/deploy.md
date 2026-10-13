@@ -21,7 +21,7 @@ plain variables cannot be edited in the dashboard; everything below is a secret.
 | Name                | Value                                     | Notes                                      |
 | ------------------- | ----------------------------------------- | ------------------------------------------ |
 | `GEMINI_API_KEY`    | key from Google AI Studio                 | Never in Git or the client bundle          |
-| `OPEN_AI_PREVIEW`   | `true` to let characters talk             | Anything else, or missing, keeps AI closed |
+| `OPEN_AI_PREVIEW`   | optional; `false` closes the AI           | Open by default while testing              |
 | `GEMINI_LIVE_MODEL` | optional, default `gemini-3.8-live`       | Voice calls; free tier: unlimited requests |
 | `GEMINI_CHAT_MODEL` | optional, default `gemini-3.5-flash-lite` | Must be a model the key's tier can use     |
 
@@ -31,14 +31,15 @@ apply to new deployments only.
 ## Free tier
 
 The default model is the free tier's largest text quota (15 requests a minute, 500 a day).
-One message can take several requests when a character uses tools. With `OPEN_AI_PREVIEW=true`
-and no accounts, anyone with the link spends the same daily quota, so share preview links
-only. On a free key that means "the AI is busy" errors, not charges. Before turning on billing,
-close the AI (`OPEN_AI_PREVIEW` removed) until accounts and per-account quotas exist.
+One message can take several requests when a character uses tools. The AI is open by default
+for testing and there are no accounts, so anyone with the link spends the same daily quota:
+share preview links only. On a free key that means "the AI is busy" errors, not charges.
+Before turning on billing, close the AI (`OPEN_AI_PREVIEW=false`) until accounts and
+per-account quotas exist.
 
 ## Check a deployment
 
-1. `https://<deployment>/api/status` returns `{"ai":true}` when both secrets are set.
+1. `https://<deployment>/api/status` returns `{"ai":true}` when the key is set and the AI is not closed.
 2. Open a room, talk to a character, ask it to add something, and see the panel change.
 3. If a character replies with an error, the message is the server's real reason (missing key,
    busy quota, provider failure). Nothing is invented.

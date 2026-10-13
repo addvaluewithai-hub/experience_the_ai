@@ -27,7 +27,6 @@ Rooms and panels work without any key. To talk to characters locally, create an 
 
 ```
 GEMINI_API_KEY=...
-OPEN_AI_PREVIEW=true
 ```
 
 ## Where things are
@@ -64,4 +63,4 @@ npm run test:browser
 ## Deploy (Cloudflare Pages)
 
 Build command `npm run build`, output `dist`, Functions from `functions/`.
-Secrets `GEMINI_API_KEY` and `OPEN_AI_PREVIEW=true` open the characters. Steps: [docs/deploy.md](docs/deploy.md).
+The secret `GEMINI_API_KEY` opens the characters (`OPEN_AI_PREVIEW=false` closes them). Steps: [docs/deploy.md](docs/deploy.md).

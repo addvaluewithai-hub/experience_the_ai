@@ -36,15 +36,19 @@ function post(path: string, payload: unknown, origin = 'http://app.test') {
 }
 const say = (text: string) => [{ role: 'user', text }];
 
-test('AI routes stay closed without the preview opt-in, and reject other origins', async () => {
+test('AI routes close with OPEN_AI_PREVIEW=false, and reject other origins', async () => {
   const closed = await handleRequest(
     new Request('http://app.test/api/agent', {
       method: 'POST',
       headers: { origin: 'http://app.test' },
     }),
-    { GEMINI_API_KEY: 'k' },
+    { GEMINI_API_KEY: 'k', OPEN_AI_PREVIEW: 'false' },
   );
   assert.equal(closed.status, 503);
+  const status = (env: object) =>
+    handleRequest(new Request('http://app.test/api/status'), env).then((r) => r.json());
+  assert.deepEqual(await status({ GEMINI_API_KEY: 'k' }), { ai: true });
+  assert.deepEqual(await status({}), { ai: false });
   assert.equal((await post('/api/agent', {}, 'http://evil.test')).status, 403);
   assert.equal((await post('/api/architect', {})).status, 404);
 });
