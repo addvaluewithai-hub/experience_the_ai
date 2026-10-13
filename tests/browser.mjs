@@ -189,9 +189,12 @@ try {
   // An immersive room: its own Phaser world on the whole screen, no forms; one tap begins, and
   // the keyboard stands in for voice. The unicorn flies when she is asked.
   agentRequests.length = 0;
+  // Reduced motion keeps the arrival scene short; the way to begin waits until it has played.
+  await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto(`${url}/#/room/rainbow-valley`);
   await page.locator('[data-world="rainbow-valley"][data-status="ready"] canvas').waitFor();
   assert.equal(await page.locator('.room, .room-bar, form').count(), 0, 'no page, no forms');
+  assert.equal(await page.getByRole('button', { name: 'يلا نبدأ ✨' }).count(), 0, 'scene first');
   await page.getByRole('button', { name: 'يلا نبدأ ✨' }).waitFor();
   await page.getByRole('button', { name: 'جدّة القمر' }).waitFor();
   await page.getByRole('button', { name: 'كتابة بدل الصوت' }).click();
@@ -201,13 +204,14 @@ try {
     await page.keyboard.press('Enter');
     await page.getByText('وصلنا الجسر ✨').last().waitFor();
   }
-  assert.match(agentRequests[0].world, /resting on the grass at المرج \(meadow\)/);
+  assert.match(agentRequests[0].world, /no name yet.*asleep on the grass at المرج \(meadow\)/);
   assert.deepEqual(
     agentRequests[1].turns.at(-1).results.map((r) => r.response),
     [{ ok: true }],
   );
   assert.match(agentRequests[2].world, /(flying to|hovering at) جسر قوس قزح \(rainbow-bridge\)/);
   await page.screenshot({ path: 'test-results/rainbow-valley.png', fullPage: true });
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
 
   // Several characters each keep their own conversation.
   await page.goto(`${url}/#/room/study-room`);

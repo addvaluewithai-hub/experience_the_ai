@@ -52,7 +52,13 @@ export function drawBackdrop(scene: Phaser.Scene): Backdrop {
         ? lerpColor(0x4a3a8c, 0xa98be6, t / 0.5)
         : lerpColor(0xa98be6, 0xffd3e4, (t - 0.5) / 0.5);
     sky.fillStyle(color, 1);
-    sky.fillRect(0, Math.floor((i * WORLD.height) / bands), WIDEST, WORLD.height / bands + 2);
+    // A margin either side covers the frame a fast camera move is ahead of the layers.
+    sky.fillRect(
+      -400,
+      Math.floor((i * WORLD.height) / bands),
+      WIDEST + 800,
+      WORLD.height / bands + 2,
+    );
   }
   const stars = Array.from({ length: 70 }, (_, i) => {
     const x = (i * 211) % 2100;

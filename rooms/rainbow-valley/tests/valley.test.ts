@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { agentTools, emptyData, runTool, validateRoom, type RoomSpec } from '@experience/room-spec';
+import { agentTools, runTool, validateRoom, type RoomSpec } from '@experience/room-spec';
+import { createRoomStore } from '@experience/room-runtime';
 import valley from '../index.ts';
 import { GROUND_IDS, PLACE_IDS } from '../world/places.ts';
 import { ValleySurface } from '../world/surface.tsx';
@@ -9,16 +10,18 @@ function open() {
   const result = validateRoom(valley.spec);
   assert.ok(result.ok, JSON.stringify(!result.ok && result.errors));
   const spec = result.spec;
-  const surface = new ValleySurface(spec, { reducedMotion: false });
+  const store = createRoomStore(spec);
+  const surface = new ValleySurface(spec, store, { reducedMotion: false });
   const who = (id: string) => spec.characters.find((c) => c.id === id)!;
   const call = (character: string, name: string, args: object = {}) => {
     const outcome = runTool(
       spec,
       who(character),
-      emptyData(spec),
+      store.get(),
       { name, args: { ...args } },
-      () => '',
+      () => `r${Math.random()}`,
     );
+    store.set(outcome.data);
     if (outcome.act) surface.act(outcome.act.character, outcome.act.action, outcome.act.args);
     return outcome;
   };
@@ -38,14 +41,64 @@ test('the valley declares its own world; its places match what the scene draws',
   assert.deepEqual(GROUND_IDS, ['crystal-river', 'meadow']);
   for (const id of PLACE_IDS) assert.ok(spec.world!.describe.includes(id), id);
   assert.ok(spec.world!.actions.every((a) => a.silent));
-  assert.deepEqual(tools(spec, 'unicorn').slice(-4), ['fly_to', 'land', 'hover', 'sparkle']);
-  assert.ok(tools(spec, 'moon-granny').includes('twinkle_stars'));
+  assert.deepEqual(tools(spec, 'unicorn').slice(-5), [
+    'fly_to',
+    'land',
+    'hover',
+    'sparkle',
+    'play_scene',
+  ]);
+  assert.deepEqual(tools(spec, 'moon-granny').slice(-2), ['twinkle_stars', 'play_scene']);
+  assert.equal(spec.world!.arrival, 'arrival');
   assert.equal(tools(spec, 'moon-granny').includes('fly_to'), false);
+});
+
+test('she sleeps until the first words, then wakes and flies close to Laila', () => {
+  const { surface, wait } = open();
+  assert.match(
+    surface.state(),
+    /^unicorn \(اليونيكورن, no name yet: Laila has not chosen one\) asleep on the grass at المرج/,
+  );
+  surface.speak('moon-granny');
+  assert.equal(surface.model.asleep, true, 'Grandma Moon does not wake her');
+  surface.speak('unicorn');
+  assert.equal(surface.model.asleep, false);
+  assert.deepEqual(surface.model.takeMoments(), [{ kind: 'wake' }]);
+  wait(0.5);
+  assert.match(surface.state(), /waking up and flying to قدام ليلى \(near-laila\)/);
+  wait(10);
+  assert.match(surface.state(), /hovering at قدام ليلى \(near-laila\)/);
+});
+
+test('the name Laila chooses is remembered and read back from the valley', () => {
+  const { surface, call } = open();
+  assert.equal(surface.model.nameOf(), null);
+  call('unicorn', 'add_memories', { fact: '  سكّرة  ', kind: 'اسم اليونيكورن' });
+  call('unicorn', 'add_memories', { fact: 'بنفسجي', kind: 'لون مفضل' });
+  assert.equal(surface.model.nameOf(), 'سكّرة');
+  assert.match(surface.state(), /unicorn \(اليونيكورن, named "سكّرة" by Laila\)/);
+});
+
+test('the director plays scenes on request; arrival waits until it has played', async () => {
+  const { surface, call } = open();
+  let arrived = false;
+  const arrival = surface.play('arrival').then(() => (arrived = true));
+  call('moon-granny', 'play_scene', { scene: 'name-in-stars' });
+  const asked = surface.model.takeScenes();
+  assert.deepEqual(
+    asked.map((s) => s.id),
+    ['arrival', 'name-in-stars'],
+  );
+  await Promise.resolve();
+  assert.equal(arrived, false);
+  asked[0].done();
+  await arrival;
+  assert.equal(arrived, true);
+  assert.equal(surface.model.asleep, true, 'a scene does not wake her');
 });
 
 test('the unicorn flies where she is asked, and the valley says where she is', () => {
   const { surface, call, wait } = open();
-  assert.match(surface.state(), /^unicorn \(اليونيكورن\) resting on the grass at المرج \(meadow\)/);
   assert.deepEqual(call('unicorn', 'fly_to', { place: 'rainbow-bridge', speed: 0.9 }).response, {
     ok: true,
   });

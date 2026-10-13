@@ -5,6 +5,6 @@ import { ValleySurface } from './world/surface';
 /** The valley and the world it draws itself (world/: Phaser, with the flight kit). */
 const rainbowValley: RoomEntry = {
   spec: room,
-  surface: (spec) => new ValleySurface(spec),
+  surface: (spec, store) => new ValleySurface(spec, store),
 };
 export default rainbowValley;

@@ -38,5 +38,5 @@ migration checklist line), and the parts that touch the valley's code were check
 - OpusGameLabs/game-creator (Phaser 3 era; no licence file) and Yakoub-ai/phaser4-gamedev (no
   licence file, stale v4 API, plugin hooks that run scripts): not copied.
 - Unlicensed Phaser 4 skill repos (chongdashu, jl-velasco): cannot be copied.
-- Lemo-Opuscar's 43 `styles/*/STYLE.md`: one will join this folder when the valley's art style
-  is chosen (crayon picture book, paper pop-up, watercolour…).
+- Lemo-Opuscar's 43 `styles/*/STYLE.md`: the father chose to keep the valley's own Phaser look,
+  so no film style was copied; its directing guide still shapes the scenes.

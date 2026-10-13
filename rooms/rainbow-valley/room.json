@@ -138,7 +138,22 @@
         "description": "Make the stars twinkle at a magic moment in the story.",
         "characters": ["moon-granny"]
       }
-    ]
+    ],
+    "scenes": [
+      {
+        "id": "arrival",
+        "description": "Laila arrives: the camera flies over the sleeping valley down to the sleeping unicorn (long the first time, short after)."
+      },
+      {
+        "id": "name-in-stars",
+        "description": "The camera looks up at the unicorn's name written in the stars above the meadow."
+      },
+      {
+        "id": "valley-tour",
+        "description": "The camera flies over the whole valley: the river, the meadow, the bridge and the sky by the moon."
+      }
+    ],
+    "arrival": "arrival"
   },
   "rooms": [
     {

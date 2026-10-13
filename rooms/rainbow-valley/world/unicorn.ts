@@ -20,8 +20,11 @@ export class Unicorn {
   private facing = 1;
   private time = 0;
   private blink = 3;
+  /** 1 asleep on the grass, 0 awake; eases between so she wakes with a stretch. */
+  private sleep = 1;
+  private snore = 0;
 
-  constructor(scene: Phaser.Scene) {
+  constructor(private scene: Phaser.Scene) {
     const add = scene.add;
     const g = () => add.graphics();
     const tail = g();
@@ -104,6 +107,30 @@ export class Unicorn {
     return scene.add.container(46, -30, [g, eye, mouth]);
   }
 
+  /** Little z's drifting up from her head while she sleeps. */
+  private dream(dt: number, reduced: boolean) {
+    this.snore -= dt;
+    if (this.snore > 0) return;
+    this.snore = reduced ? 3 : 1.6;
+    const from = this.head.getWorldTransformMatrix();
+    const z = this.scene.add
+      .text(from.tx + 10, from.ty - 30, 'z', {
+        fontFamily: 'system-ui',
+        fontSize: '22px',
+        color: '#fdf4ff',
+      })
+      .setAlpha(0.9);
+    this.scene.tweens.add({
+      targets: z,
+      x: z.x + 22,
+      y: z.y - 46,
+      alpha: 0,
+      scale: 1.5,
+      duration: 2000,
+      onComplete: () => z.destroy(),
+    });
+  }
+
   /** Places and poses the unicorn for this frame. */
   update(
     dt: number,
@@ -113,11 +140,16 @@ export class Unicorn {
     mode: PresenceMode,
     mouth: MouthFrame | null,
     reduced: boolean,
+    asleep: boolean,
   ) {
     this.time += dt;
+    this.sleep += ((asleep ? 1 : 0) - this.sleep) * Math.min(1, dt * 2.5);
+    const sleep = this.sleep;
     const lift = flight.lift;
+    const breathe = reduced ? 0 : Math.sin(this.time * 1.4) * 2 * sleep;
     const bob = reduced ? 0 : Math.sin(this.time * 2.2) * 5 * lift;
-    this.body.setPosition(at.x, at.y + bob);
+    this.body.setPosition(at.x, at.y + bob + 18 * sleep + breathe);
+    if (asleep) this.dream(dt, reduced);
     if (Math.abs(flight.vx) > 0.01) this.facing = flight.vx > 0 ? 1 : -1;
     const turn = this.body.scaleX + (this.facing * 0.85 - this.body.scaleX) * Math.min(1, dt * 8);
     this.body.setScale(Math.abs(turn) < 0.08 ? 0.08 * this.facing : turn, 0.85);
@@ -126,7 +158,10 @@ export class Unicorn {
     const flap = wing.beat * 0.55;
     this.wingFront.setRotation(-0.15 + flap - (1 - wing.open) * 0.6);
     this.wingBack.setRotation(-0.05 + flap * 0.8 - (1 - wing.open) * 0.6);
-    this.legs.forEach((leg, i) => leg.setRotation((i % 2 ? -0.9 : 0.9) * lift * (i < 2 ? 1 : 0.8)));
+    this.legs.forEach((leg, i) => {
+      const tucked = (i % 2 ? -0.9 : 0.9) * lift * (i < 2 ? 1 : 0.8);
+      leg.setRotation(tucked + (i < 2 ? -1.35 : 1.35) * sleep);
+    });
     const nod =
       mode === 'speaking'
         ? Math.sin(this.time * 7) * 0.05
@@ -135,10 +170,11 @@ export class Unicorn {
           : mode === 'thinking'
             ? -0.12
             : 0;
-    this.head.setRotation(this.head.rotation + (nod - this.head.rotation) * Math.min(1, dt * 6));
+    const rest = nod * (1 - sleep) + 0.38 * sleep;
+    this.head.setRotation(this.head.rotation + (rest - this.head.rotation) * Math.min(1, dt * 6));
     this.blink -= dt;
     if (this.blink < 0) this.blink = 2.5 + Math.random() * 3;
-    this.eye.setScale(1, this.blink < 0.12 ? 0.15 : 1);
+    this.eye.setScale(1, this.blink < 0.12 || sleep > 0.5 ? 0.15 : 1);
     drawMouth(this.mouth, mouth?.open ?? 0, 12, 0x6b4e9b);
   }
 }

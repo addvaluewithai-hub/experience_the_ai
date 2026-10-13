@@ -1,8 +1,10 @@
 import * as Phaser from 'phaser';
 import type { FlightState } from '@experience/kit-flight';
 import { drawBackdrop, VIEW, WORLD, type Backdrop } from './backdrop';
+import { Director } from './director';
 import type { ValleyModel, ValleyMoment } from './model';
 import { Moon } from './moon';
+import { NameInStars } from './stars';
 import { placeAt } from './places';
 import { Unicorn } from './unicorn';
 
@@ -23,6 +25,9 @@ class ValleyScene extends Phaser.Scene {
   private burst!: Phaser.GameObjects.Particles.ParticleEmitter;
   private focus = { x: 0, y: 0 };
   private reduced: boolean;
+  private director!: Director;
+  private name!: NameInStars;
+  private started = false;
 
   constructor(private model: ValleyModel) {
     super('rainbow-valley');
@@ -41,6 +46,8 @@ class ValleyScene extends Phaser.Scene {
 
     this.backdrop = drawBackdrop(this);
     this.moon = new Moon(this, this.backdrop.depth, 800, 86);
+    this.name = new NameInStars(this, { x: 960, y: 150 });
+    this.director = new Director(this, this.reduced);
     this.add.particles(0, 0, 'valley-spark', {
       x: { min: 0, max: WORLD.width },
       y: { min: 220, max: 520 },
@@ -104,6 +111,7 @@ class ValleyScene extends Phaser.Scene {
       this.model.modeOf('unicorn'),
       this.model.mouthOf('unicorn'),
       this.reduced,
+      this.model.asleep,
     );
     this.moon.update(
       dt,
@@ -112,16 +120,39 @@ class ValleyScene extends Phaser.Scene {
       this.reduced,
     );
     this.trail.emitting = Math.hypot(s.vx, s.vy) > 0.03;
-    this.focus.x = at.x;
-    this.focus.y = at.y;
-    const close = !s.moving && placeAt(s.x, s.y) === 'near-laila';
     const camera = this.cameras.main;
     // The valley's height always fills the screen: a wide screen sees more of it, a tall phone a
     // slice that the camera carries along with the unicorn.
     const fit = this.scale.height / WORLD.height;
-    const zoom = fit * (close ? 1.4 : 1);
-    camera.setZoom(camera.zoom + (zoom - camera.zoom) * Math.min(1, dt * 2));
-    for (const moment of this.model.takeMoments()) this.play(moment, at);
+    for (const scene of this.model.takeScenes()) {
+      // Arrival is long the first time (no name yet) and short every time after.
+      const id =
+        scene.id === 'arrival'
+          ? this.model.nameOf()
+            ? 'welcome-back'
+            : 'first-meeting'
+          : scene.id;
+      const from = { x: camera.midPoint.x, y: camera.midPoint.y, zoom: camera.zoom / fit };
+      this.director.run(id, from, scene.done);
+    }
+    if (this.name.update(dt, this.model.nameOf(), this.started)) {
+      const from = { x: camera.midPoint.x, y: camera.midPoint.y, zoom: camera.zoom / fit };
+      this.director.run('name-in-stars', from, () => undefined);
+    }
+    this.started = true;
+    if (this.director.active) {
+      // A scene owns the camera: it goes exactly where the shot says.
+      camera.setLerp(1, 1);
+      Object.assign(this.focus, { x: this.director.view.x, y: this.director.view.y });
+      camera.setZoom(fit * this.director.view.zoom);
+    } else {
+      camera.setLerp(0.06, 0.06);
+      Object.assign(this.focus, at);
+      const close = !s.moving && placeAt(s.x, s.y) === 'near-laila';
+      const zoom = fit * (close ? 1.4 : 1);
+      camera.setZoom(camera.zoom + (zoom - camera.zoom) * Math.min(1, dt * 2));
+    }
+    for (const moment of this.model.takeMoments()) this.moment(moment, at);
     for (const { layer, speed } of this.backdrop.clouds) {
       layer.x += speed * dt * (this.reduced ? 0.3 : 1);
       if (layer.x > WORLD.width + VIEW.width) layer.x = -160;
@@ -129,7 +160,11 @@ class ValleyScene extends Phaser.Scene {
     this.backdrop.depth.follow(camera.worldView);
   }
 
-  private play(moment: ValleyMoment, at: { x: number; y: number }) {
+  private moment(moment: ValleyMoment, at: { x: number; y: number }) {
+    if (moment.kind === 'wake') {
+      this.burst.explode(this.reduced ? 8 : 20, at.x, at.y - 30);
+      return;
+    }
     if (moment.kind === 'sparkle') {
       const count = (moment.big ? 48 : 18) * (this.reduced ? 0.4 : 1);
       this.burst.explode(Math.round(count), at.x, at.y - 20);

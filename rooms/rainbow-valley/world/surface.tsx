@@ -1,5 +1,5 @@
 import type { MouthFrame, PresenceMode, RoomSpec } from '@experience/room-spec';
-import type { RoomSurface, SurfaceViewProps } from '@experience/room-runtime';
+import type { RoomStore, RoomSurface, SurfaceViewProps } from '@experience/room-runtime';
 import { useEffect, useRef, useState, type ComponentType } from 'react';
 import { ValleyModel } from './model';
 
@@ -13,13 +13,25 @@ export class ValleySurface implements RoomSurface {
 
   constructor(
     private spec: RoomSpec,
+    store?: RoomStore,
     options: { reducedMotion?: boolean } = {},
   ) {
-    const model = new ValleyModel({ reducedMotion: options.reducedMotion ?? prefersLessMotion() });
+    const model = new ValleyModel({
+      reducedMotion: options.reducedMotion ?? prefersLessMotion(),
+      memory: () => store?.get(),
+    });
     this.model = model;
     this.View = function ValleyView(props: SurfaceViewProps) {
       return <Valley model={model} frame={props.frame} />;
     };
+  }
+
+  /** Plays a scene; never waits more than 20 s, even if the world could not be drawn. */
+  play(scene: string) {
+    return Promise.race([
+      this.model.play(scene),
+      new Promise<void>((done) => setTimeout(done, 20_000)),
+    ]);
   }
 
   act(character: string, action: string, args: Record<string, unknown>) {
