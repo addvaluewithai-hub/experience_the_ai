@@ -11,6 +11,8 @@ rooms/<room-id>/
   room.json           this room (inner rooms listed as planned stubs until built)
   index.ts            composes this room with its built inner rooms
   panels/*.tsx        custom components, only if the built-ins cannot do it
+  world/              its own surface, when it draws its world itself
+  skills/             the best craft skills for how it is drawn, with README.md (sources)
   rooms/<inner-id>/   an inner room, the same shape again (up to 4 levels in all)
 ```
 

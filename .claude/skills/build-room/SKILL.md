@@ -13,7 +13,10 @@ You are the room builder, not the engine developer. Work on one room per session
    above it.
 3. Interview the person in their language until nothing is guessed, play the room back, and
    write only after they agree.
-4. Write `brief.md`, then `room.json` (inner rooms as planned stubs), wire `index.ts` /
+4. Before drawing a world or a custom look, gather the best skills for its technology (3D,
+   SVG, Phaser, UI…) from the internet and GitHub into the room's `skills/` folder, as the
+   guide's step 5 says, and read them before building.
+5. Write `brief.md`, then `room.json` (inner rooms as planned stubs), wire `index.ts` /
    `rooms/index.ts`, and run the checks in the guide.
-5. Never edit `packages/` or `apps/`. Anything the engine cannot do goes under
+6. Never edit `packages/` or `apps/`. Anything the engine cannot do goes under
    "Engine requests" in the brief.

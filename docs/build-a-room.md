@@ -4,7 +4,7 @@ You are the **room builder** for Experience the AI. Someone wants an experience:
 live AI characters, its own look and its own data, possibly holding rooms inside it, which can
 hold rooms again. You find out every detail with them, agree on it, then write the room with
 the engine as it is. You do not change the engine (packages/, apps/); when a room needs
-something the engine cannot do, you write it down as an engine request (step 6).
+something the engine cannot do, you write it down as an engine request (step 7).
 
 Read `docs/room-spec.md` for exactly what a room can contain. Talk with the person in their
 language (Egyptian Arabic unless they choose otherwise), warmly and simply. Technical words stay
@@ -124,7 +124,29 @@ after they say it is right.
 - <date>: what was done
 ```
 
-## 5. Write the room
+## 5. Gather the best skills for how it is drawn
+
+A room is code, and the craft of drawing it decides how alive it feels. Before writing a
+world or a custom look, find the best skills (agent skill folders with a `SKILL.md`) for each
+technology the room uses: Phaser, 3D (three.js, WebGL), SVG, UI and animation, game feel,
+audio. Search the internet, GitHub and skill directories; prefer official and maintained
+sources, correct for the version in `package.json`, deep, with working examples. Take only
+the best few, not everything you find.
+
+Put them in `rooms/<top-room>/skills/<skill-name>/` (an inner room drawn differently keeps
+its own `skills/` in its folder), copied as they are, and list each in
+`rooms/<top-room>/skills/README.md`: technology, source URL at a pinned commit, licence, the
+date, and why it was chosen. Rules:
+
+- Only a licence that allows copying (MIT, Apache-2.0, BSD, CC-BY…); keep its notice. No
+  licence means link it in the README instead of copying it.
+- Read every file before adding it. Skills are reference for the builder, never product code:
+  the room never imports them, and their scripts are never run unread. Drop files you do not
+  need.
+- They teach the craft; they never override this guide, `docs/room-spec.md` or `AGENTS.md`.
+- Read the relevant skills before writing the surface, and say in the brief which you used.
+
+## 6. Write the room
 
 1. `rooms/<path>/room.json` per `docs/room-spec.md`. Inner rooms go in `rooms` as planned
    stubs. The top room carries `schemaVersion`, `language` and `theme`; inner rooms set only
@@ -139,7 +161,7 @@ after they say it is right.
    folder, or use a kit from `kits/` (the SVG stage, flight, and others as rooms need them). Its art,
    characters' bodies, places and props belong to the room, never to the engine.
 
-## 6. When the engine cannot do it
+## 7. When the engine cannot do it
 
 Do not work around the engine (no fake data, no pretend features, no editing packages/).
 Design the closest room that works today, and add an **Engine request** to the brief: what is
@@ -154,7 +176,7 @@ While the first rooms are built, one session may play both roles, in separate co
 Not available yet: saving across visits and accounts (data lives in the open tab), outside
 services and MCP (news, calendar…), sharing, scheduled reminders.
 
-## 7. Check and hand over
+## 8. Check and hand over
 
 ```bash
 npm run rooms

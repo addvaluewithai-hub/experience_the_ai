@@ -72,6 +72,8 @@ async function scan(folder) {
     }
     const name = relative(root, path).split(sep).join('/');
     if (!sourceExtensions.test(name) || generated.has(name)) continue;
+    // Skills a room gathered are copied as their authors wrote them; they are not our code.
+    if (/^rooms\/(?:.+\/)?skills\//.test(name)) continue;
     const content = await readFile(path, 'utf8');
     const lines = content.trimEnd().split('\n').length;
     count++;
