@@ -5,23 +5,25 @@ const root = resolve(new URL('..', import.meta.url).pathname);
 /** Bare imports each area may use. Relative imports must stay inside the area. */
 const areas = [
   { path: 'packages/room-spec/src', allowed: [] },
+  { path: 'packages/room-runtime/src', allowed: ['react', 'react-dom', '@experience/room-spec'] },
+  // Kits are optional libraries for rooms: they build on the engine, never the other way.
   {
-    path: 'packages/room-runtime/src',
-    allowed: ['react', 'react-dom', '@experience/room-spec', '@experience/stage-runtime'],
+    path: 'kits',
+    perFolder: true,
+    allowed: ['react', 'react-dom', '@experience/room-spec', '@experience/room-runtime'],
   },
-  { path: 'packages/stage-runtime/src', allowed: ['react', 'react-dom', '@experience/room-spec'] },
   // Voice and audio: browser APIs only, no React and no drawing.
   { path: 'packages/live-runtime/src', allowed: ['@experience/room-spec'] },
   // Each room folder is self-contained content: base components only, no app or server code.
   {
     path: 'rooms',
     perFolder: true,
-    allowed: ['react', '@experience/room-spec', '@experience/room-runtime'],
+    allowed: ['react', '@experience/room-spec', '@experience/room-runtime', '@experience/kit-'],
   },
   {
     path: 'examples',
     perFolder: true,
-    allowed: ['react', '@experience/room-spec', '@experience/room-runtime'],
+    allowed: ['react', '@experience/room-spec', '@experience/room-runtime', '@experience/kit-'],
   },
 ];
 const excluded = new Set([
@@ -79,7 +81,12 @@ async function scan(folder) {
       if (specifier.startsWith('.')) {
         if (!resolve(dirname(path), specifier).startsWith(area.base + sep))
           errors.push(`${name}: import escapes its area: ${specifier}`);
-      } else if (!area.allowed.some((a) => specifier === a || specifier.startsWith(`${a}/`))) {
+      } else if (
+        // A name ending in "-" allows a family of packages, e.g. every @experience/kit-*.
+        !area.allowed.some(
+          (a) => specifier === a || specifier.startsWith(a.endsWith('-') ? a : `${a}/`),
+        )
+      ) {
         errors.push(`${name}: cannot depend on ${specifier}`);
       }
     }

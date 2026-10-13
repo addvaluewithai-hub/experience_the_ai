@@ -132,34 +132,26 @@ test('a character reads the rooms inside its own and can send the person there',
   assert.equal((await post('/api/agent', { ...base, below: bad })).status, 400);
 });
 
-test('a character on a stage gets the stage brief and stage tools; positions are filtered', async () => {
+test('a character in a world gets its description, the surface state and world tools', async () => {
   const seen = provider([{ text: 'يلا' }]);
-  const positions = {
-    omar: { at: 'front', pose: 'stand' },
-    'ms-nour': { at: 'roof', pose: 'fly' },
-    ghost: { at: 'board' },
-  };
   const response = await post('/api/agent', {
     room: byId('classroom-stage'),
     characterId: 'ms-nour',
     data: {},
-    positions,
+    world: `omar (عمر) standing at قدام السبورة. ${'x'.repeat(3000)}`,
     turns: say('اشرحي لنا'),
   });
   assert.equal(response.status, 200);
   const instruction = seen[0].systemInstruction.parts[0].text;
-  assert.match(
-    instruction,
-    /<stage>\nYou are on a classroom stage\. You can walk, run, hop; you are standing at between places\./,
-  );
-  assert.match(instruction, /omar \(عمر, طالب\) standing at قدام السبورة/);
-  assert.doesNotMatch(instruction, /ghost|roof/);
+  assert.match(instruction, /<world>\nA classroom stage\.\nPlaces: board "السبورة"/);
+  assert.match(instruction, /\nNow: omar \(عمر\) standing at قدام السبورة\. x+\n/);
+  assert.ok(!instruction.includes('x'.repeat(2001)), 'the surface state is bounded');
   const names = seen[0].tools[0].functionDeclarations.map((t: { name: string }) => t.name);
   for (const name of ['go_to', 'play_routine', 'look_at', 'set_pose', 'perform'])
     assert.ok(names.includes(name));
 });
 
-test('a voice ticket locks the character, its voice, instruction and silent stage tools', async () => {
+test('a voice ticket locks the character, its voice, instruction and silent world tools', async () => {
   const seen: { url: string; body: any }[] = [];
   globalThis.fetch = (async (url: string, init: RequestInit) => {
     seen.push({ url, body: JSON.parse(String(init.body)) });
@@ -180,7 +172,7 @@ test('a voice ticket locks the character, its voice, instruction and silent stag
     setup.generationConfig.speechConfig.voiceConfig.prebuiltVoiceConfig.voiceName,
     'Puck',
   );
-  assert.match(setup.systemInstruction.parts[0].text, /<stage>[\s\S]*live voice call/);
+  assert.match(setup.systemInstruction.parts[0].text, /<world>[\s\S]*live voice call/);
   const tools = setup.tools[0].functionDeclarations;
   const go = tools.find((t: { name: string }) => t.name === 'go_to');
   assert.equal(go.behavior, 'NON_BLOCKING');

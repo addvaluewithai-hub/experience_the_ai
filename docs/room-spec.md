@@ -31,21 +31,22 @@ once in `rooms/index.ts`: `{ spec: <its default export>, panels: { ... } }`.
 
 ## The room
 
-| Key             | Required               | Meaning                                                                               |
-| --------------- | ---------------------- | ------------------------------------------------------------------------------------- |
-| `schemaVersion` | top room only          | `1`                                                                                   |
-| `id`            | yes                    | kebab-case, unique among its siblings; part of the room's path                        |
-| `title`         | yes                    | ≤ 60 characters                                                                       |
-| `purpose`       | yes                    | ≤ 600; what the room is for and who it serves (characters read it)                    |
-| `language`      | top room; inherited    | `ar` (right to left, Egyptian Arabic characters) or `en`                              |
-| `theme`         | top room; inherited    | `{ preset, accent }`; an inner room may set either or both                            |
-| `icon`          | no                     | an emoji ≤ 8 characters; how the room looks as a door in its parent                   |
-| `characters`    | yes, 1–4               | who lives here                                                                        |
-| `collections`   | yes, 0–6 (may be `[]`) | what the room remembers: its own database                                             |
-| `panels`        | yes, 1–8               | what the person sees                                                                  |
-| `pulse`         | no                     | `{ collection, field }`: a boolean field whose share of true is how alive the room is |
-| `rooms`         | no, 0–8                | inner rooms (built or planned)                                                        |
-| `planned`       | inner rooms only       | `true`: agreed but not built; only `id`, `title`, `purpose`, `icon`                   |
+| Key             | Required               | Meaning                                                                                |
+| --------------- | ---------------------- | -------------------------------------------------------------------------------------- |
+| `schemaVersion` | top room only          | `1`                                                                                    |
+| `id`            | yes                    | kebab-case, unique among its siblings; part of the room's path                         |
+| `title`         | yes                    | ≤ 60 characters                                                                        |
+| `purpose`       | yes                    | ≤ 600; what the room is for and who it serves (characters read it)                     |
+| `language`      | top room; inherited    | `ar` (right to left, Egyptian Arabic characters) or `en`                               |
+| `theme`         | top room; inherited    | `{ preset, accent }`; an inner room may set either or both                             |
+| `icon`          | no                     | an emoji ≤ 8 characters; how the room looks as a door in its parent                    |
+| `characters`    | yes, 1–4               | who lives here                                                                         |
+| `collections`   | yes, 0–6 (may be `[]`) | what the room remembers: its own database                                              |
+| `panels`        | yes, 1–8               | what the person sees                                                                   |
+| `pulse`         | no                     | `{ collection, field }`: a boolean field whose share of true is how alive the room is  |
+| `world`         | no                     | a place its characters act in, drawn by the room's own surface (see World and surface) |
+| `rooms`         | no, 0–8                | inner rooms (built or planned)                                                         |
+| `planned`       | inner rooms only       | `true`: agreed but not built; only `id`, `title`, `purpose`, `icon`                    |
 
 Theme presets: `school`, `studio`, `habit`, `kids`, `planet` (dark, space), `office`, `calm`.
 Accent: `#rrggbb`. Limits for a whole tree: 4 levels, 40 rooms.
@@ -59,10 +60,13 @@ Accent: `#rrggbb`. Limits for a whole tree: 4 levels, 40 rooms.
   "role": "مدرب صحة",
   "persona": "How it thinks and talks, what it cares about, what it refuses, when it sends the person to an inner room.",
   "greeting": "The first line the person sees.",
-  "capabilities": ["data.write", "ui.focus"]
+  "capabilities": ["data.write", "ui.focus"],
+  "voice": "Leda"
 }
 ```
 
+- `voice` (optional) is the character's spoken voice in a voice call, one of the names in
+  `VOICES` from `@experience/room-spec`; without it a default voice speaks.
 - `name`, `role` ≤ 60; `persona`, `greeting` ≤ 600. In Arabic, write greetings that do not
   assume the person's gender.
 - Every character can read its room's data and the data of all rooms inside it.
@@ -110,10 +114,56 @@ Accent: `#rrggbb`. Limits for a whole tree: 4 levels, 40 rooms.
 | `growth`   | `collection`; boolean `field`          | a 2.5D planet growing one plant per true record                   |
 | `text`     | `text` (≤ 600)                         | fixed words                                                       |
 | `rooms`    | `view`: `doors` (default) or `world`   | the inner rooms, lit by their pulse; planned ones as closed doors |
+| `world`    | none                                   | the room's world, drawn by its surface                            |
 | `custom`   | `component` id; optional `collection`  | a component from the room's `panels/` folder                      |
 
 Every panel has `id`, `kind`, `title` (≤ 60) and optional `wide: true` (full row).
-A `rooms` panel needs at least one inner room.
+A `rooms` panel needs at least one inner room. A `world` panel needs the room to declare a
+`world`, and a room shows its world at most once.
+
+## World and surface
+
+A room that is a place (a game, a 3D scene, a stage, a showroom, a sky to fly in) declares
+its `world`: which surface draws it, how it looks in words, and what its characters may do
+there. The engine knows no places, bodies or props; it turns the declared actions into checked
+tools and hands each accepted call to the room's surface.
+
+```json
+"world": {
+  "surface": "valley-phaser",
+  "describe": "A rainbow valley: a crystal river, a meadow, clouds above.",
+  "actions": [
+    {
+      "name": "fly_to",
+      "description": "Fly to a place in the valley while you keep talking.",
+      "params": {
+        "place": { "type": "choice", "options": ["river", "meadow", "clouds"] },
+        "speed": { "type": "number", "min": 0.2, "max": 1 }
+      },
+      "required": ["place"],
+      "characters": ["unicorn"]
+    }
+  ]
+}
+```
+
+- Action and param names are snake*case and never a data tool name (`list*`, `add*`,
+`update*`, `remove\_`, `open_room`). Up to 16 actions, 8 params each; `describe` ≤ 1500.
+- Param types: `text` (≤ 300), `number` (`min`/`max`, values outside are clamped), `boolean`,
+  `choice` (1–40 `options`). The model names things by option, never by coordinates.
+- `characters` limits an action to some characters; all may use it when absent.
+- `silent` (default `true`): presentation only, answered without interrupting speech. Set
+  `false` when the character needs the result to continue.
+
+The surface lives in the room's folder (or comes from a kit) and implements `RoomSurface` from
+`@experience/room-runtime`: `View` (what the `world` panel shows), `act(character, action,
+args)`, `speak(character | null)`, `setMode(character, mode)`, `mouth(character, frame)` (lip
+shapes during voice) and `state()` (the world now, in words, read before each turn). Register
+the room with it: `{ spec, surface: (spec, store, path) => new MySurface(spec, store) }`.
+
+A kit can build both halves. The SVG stage kit: `stageRoom(room, stageConfig)` from
+`@experience/kit-stage-svg` returns the entry with its world declared (see
+`examples/classroom-stage` and `kits/stage-svg/docs`).
 
 ## Pulse
 
@@ -126,7 +176,7 @@ are alive. Choose the field that means "this part of life is being looked after"
 
 `rooms/<top-room>/panels/<Name>.tsx` exporting a React component that receives
 `{ spec, panel, collection, data, edit, world }`. Change data only through `edit` with
-`addRecord`, `updateRecord`, `removeRecord` from `@experience/room-spec`. Import only `react`,
+`addRecord`, `updateRecord`, `removeRecord` from `@experience/room-spec`. Import only `react`, the kits,
 `@experience/room-spec` and `@experience/room-runtime`. Register it in `rooms/index.ts` under
 the id that the panel's `component` names; one map serves the whole tree. A failing
 component is contained by the panel boundary. A component two rooms need belongs in the engine:

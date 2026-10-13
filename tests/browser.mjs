@@ -82,8 +82,8 @@ try {
 
   await page.goto(url);
   await assert.doesNotReject(page.getByRole('link', { name: /كوكب العادات/ }).waitFor());
-  assert.equal(await page.locator('.card').count(), 6);
-  await page.getByText('No rooms built yet.').waitFor();
+  assert.equal(await page.locator('.card').count(), 7);
+  await page.getByRole('link', { name: /وادي قوس قزح/ }).waitFor();
   await page.screenshot({ path: 'test-results/home.png', fullPage: true });
 
   // A person's own edits go through the room rules and every panel agrees.
@@ -167,7 +167,7 @@ try {
     'listening',
   );
   const [ask, answer] = agentRequests;
-  assert.deepEqual(ask.positions.omar, { at: 'desk-1', pose: 'sit' });
+  assert.match(ask.world, /omar \(عمر\) sitting at ديسك عمر/);
   assert.deepEqual(
     answer.turns.at(-1).results.map((r) => r.response),
     [{ ok: true }, { ok: true }],

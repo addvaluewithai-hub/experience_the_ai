@@ -1,9 +1,7 @@
-import type { Positions, StageCommand } from './stage-agent';
-
 /**
- * The contract between the brain (conversations, voice, memory, room logic) and any surface
- * that shows characters: an SVG stage, a Phaser world, a 3D place. The brain only calls
- * these; how a surface draws, moves and lip-syncs is its own business.
+ * The contract between the brain (conversations, voice, memory, room logic) and a room's
+ * surface, whatever draws it: a Phaser world, a 3D place, an SVG stage, a dashboard. The brain
+ * only calls these; what an action looks like is the surface's own business.
  */
 export const VISEMES = [
   'REST',
@@ -33,14 +31,14 @@ export type MouthFrame = {
 export type PresenceMode = 'idle' | 'listening' | 'thinking' | 'speaking';
 
 export interface Presence {
-  /** A semantic stage command from a tool call or an authored sequence. */
-  dispatch(command: StageCommand): void;
-  /** One character holds the floor; the others listen and turn to it. null ends it. */
+  /** A world action the room declared, already checked against its params. */
+  act(character: string, action: string, args: Record<string, unknown>): void;
+  /** One character holds the floor; the others may listen and turn to it. null ends it. */
   speak(character: string | null): void;
   readonly speaking: string | null;
   setMode(character: string, mode: PresenceMode): void;
   /** Lip sync: the mouth for what is audible now; null returns to the surface's own mouth. */
   mouth(character: string, frame: MouthFrame | null): void;
-  /** Where the cast is, for the stage brief a character reads. */
-  positions(): Positions;
+  /** The world now, in a few words for the characters' brief (who is where, what changed). */
+  state(): string;
 }

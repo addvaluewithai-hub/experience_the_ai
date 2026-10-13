@@ -6,5 +6,7 @@ export type {
   PanelProps,
   PanelRegistry,
   RoomEntry,
+  RoomSurface,
   RoomWorld,
+  SurfaceViewProps,
 } from './panels/types';

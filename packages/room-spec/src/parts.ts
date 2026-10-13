@@ -1,7 +1,5 @@
 import type { Checker } from './check';
-import { VOICES } from './kit';
-import { validateLook } from './look';
-import { validateStage } from './stage';
+import { VOICES } from './voices';
 import {
   CAPABILITIES,
   FIELD_TYPES,
@@ -58,7 +56,6 @@ export function characters(check: Checker, value: unknown, path: string): Charac
       persona: check.text(c.persona, `${at}.persona`, LIMITS.longText),
       greeting: check.text(c.greeting, `${at}.greeting`, LIMITS.longText),
       capabilities: [...new Set(capabilities)],
-      ...(c.look === undefined ? {} : { look: validateLook(check, c.look, `${at}.look`) }),
       ...(c.voice === undefined ? {} : { voice: check.oneOf(c.voice, VOICES, `${at}.voice`) }),
     };
   });
@@ -87,7 +84,7 @@ export function panel(
   path: string,
   owned: Collection[],
   innerRooms: number,
-  people: Character[],
+  hasWorld: boolean,
 ): Panel {
   const p = check.object(value, path);
   const result: Panel = {
@@ -100,8 +97,8 @@ export function panel(
     result.text = check.text(p.text, `${path}.text`, LIMITS.longText);
     return result;
   }
-  if (result.kind === 'stage') {
-    result.stage = validateStage(check, p.stage, `${path}.stage`, owned, people);
+  if (result.kind === 'world') {
+    if (!hasWorld) check.at(path, 'a world panel needs the room to declare a world');
     return result;
   }
   if (result.kind === 'rooms') {

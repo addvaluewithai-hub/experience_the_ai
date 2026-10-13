@@ -89,18 +89,18 @@ export class Conversation {
   }
 
   /**
-   * Runs one tool call through the room rules and applies it: data to the store, stage
-   * commands to the presence, focus and activity to the page. Text turns and voice share it.
+   * Runs one tool call through the room rules and applies it: data to the store, world
+   * actions to the surface, focus and activity to the page. Text turns and voice share it.
    */
   apply(name: string, args: Record<string, unknown>) {
     const { room, character } = this;
     const outcome = runTool(room.spec, character, room.store.get(), { name, args }, newRecordId);
     room.store.set(outcome.data);
     if (outcome.focus) host?.focus(room.key, outcome.focus);
-    if (outcome.stage) room.stage?.dispatch(outcome.stage);
+    if (outcome.act) room.surface?.act(outcome.act.character, outcome.act.action, outcome.act.args);
     if (outcome.activity) this.add('activity', outcome.activity);
     if ('error' in outcome.response) this.add('activity', `⚠ ${String(outcome.response.error)}`);
-    return { response: outcome.response, open: outcome.open, silent: Boolean(outcome.stage) };
+    return { response: outcome.response, open: outcome.open, silent: Boolean(outcome.silent) };
   }
 
   handOff(handoff: { path: string; note: string }) {
@@ -141,7 +141,7 @@ export class Conversation {
       characterId: character.id,
       data: room.store.get(),
       below: this.below(),
-      positions: room.stage?.positions(),
+      world: room.surface?.state(),
     };
   }
 
@@ -151,7 +151,7 @@ export class Conversation {
     const abort = new AbortController();
     this.controller = abort;
     this.update({ busy: true });
-    this.room.stage?.setMode(this.character.id, 'thinking');
+    this.room.surface?.setMode(this.character.id, 'thinking');
     this.add(shown?.kind ?? 'person', shown?.text ?? text);
     const { room, character } = this;
     const history: Turn[] = bounded([...this.turns, { role: 'user', text }]);
@@ -193,8 +193,8 @@ export class Conversation {
     } finally {
       this.controller = null;
       this.update({ busy: false });
-      if (this.room.stage?.speaking !== this.character.id)
-        this.room.stage?.setMode(this.character.id, 'idle');
+      if (this.room.surface?.speaking !== this.character.id)
+        this.room.surface?.setMode(this.character.id, 'idle');
     }
   }
 
@@ -204,7 +204,7 @@ export class Conversation {
    */
   private talkTimer = 0;
   private talk(characters: number) {
-    const stage = this.room.stage;
+    const stage = this.room.surface;
     if (!stage) return;
     stage.speak(this.character.id);
     clearTimeout(this.talkTimer);

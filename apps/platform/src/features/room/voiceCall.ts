@@ -37,7 +37,7 @@ export async function startCall(room: OpenRoom, character: Character) {
   });
   const current = new VoiceSession({
     character: character.id,
-    presence: room.stage,
+    presence: room.surface,
     ticket: () => post<LiveTicket>('/api/live', conversation.context()),
     runTool: (call) => {
       const { response, open, silent } = conversation.apply(call.name, call.args);

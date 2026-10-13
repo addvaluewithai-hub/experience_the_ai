@@ -116,7 +116,7 @@ try {
     .click();
   await page.getByText('على الخط').waitFor();
   assert.equal(ticket.characterId, 'ms-nour');
-  assert.deepEqual(ticket.positions.omar, { at: 'desk-1', pose: 'sit' });
+  assert.match(ticket.world, /omar \(عمر\) sitting at ديسك عمر/);
   assert.deepEqual(sent.setup, { model: 'models/gemini-3.8-live', tools: [] });
 
   // While the audio plays: she has the floor, her lips follow the sound, she walks to the board.

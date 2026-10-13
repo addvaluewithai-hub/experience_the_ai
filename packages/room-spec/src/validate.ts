@@ -1,5 +1,6 @@
 import { Checker } from './check';
 import { characters, collections, panel, yesNoField } from './parts';
+import { validateWorld } from './world';
 import {
   LANGUAGES,
   LIMITS,
@@ -58,7 +59,7 @@ export function validateRoom(value: unknown): Validation {
     const icon = source.icon === undefined ? {} : { icon: check.text(source.icon, at('icon'), 8) };
     if (source.planned === true) {
       if (!parent) check.at(at('planned'), 'only a room inside another can be planned');
-      for (const key of ['characters', 'collections', 'panels', 'rooms', 'pulse'])
+      for (const key of ['characters', 'collections', 'panels', 'rooms', 'pulse', 'world'])
         if (source[key] !== undefined)
           check.at(
             at(key),
@@ -86,16 +87,20 @@ export function validateRoom(value: unknown): Validation {
     }
     const panels = check
       .list(source.panels, at('panels'), 1, LIMITS.panels)
-      .map((p, i) => panel(check, p, at(`panels[${i}]`), owned, inner.length, people));
+      .map((p, i) =>
+        panel(check, p, at(`panels[${i}]`), owned, inner.length, source.world !== undefined),
+      );
     check.unique(panels, at('panels'));
-    if (panels.filter((p) => p.kind === 'stage').length > 1)
-      check.at(at('panels'), 'a room has at most one stage');
+    if (panels.filter((p) => p.kind === 'world').length > 1)
+      check.at(at('panels'), 'a room shows its world at most once');
 
     const spec: RoomSpec = { ...head, ...icon, characters: people, collections: owned, panels };
     if (source.pulse !== undefined) {
       const pulse = check.object(source.pulse, at('pulse'));
       spec.pulse = yesNoField(check, owned, pulse.collection, pulse.field, at('pulse'));
     }
+    if (source.world !== undefined)
+      spec.world = validateWorld(check, source.world, at('world'), people);
     if (inner.length) spec.rooms = inner;
     return spec;
   };

@@ -48,7 +48,7 @@ export function RoomPage(props: {
         store={room.store}
         focus={props.focus}
         custom={room.panels}
-        stage={room.stage}
+        surface={room.surface}
         world={{
           dataAt: (path) => rooms.get(`${room.key}/${path}`)?.store.get(),
           open: (path) => (location.hash = roomHref(`${room.key}/${path}`)),

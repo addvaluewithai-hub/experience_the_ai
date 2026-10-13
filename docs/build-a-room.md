@@ -131,6 +131,10 @@ after they say it is right.
    parent's `index.ts` the first time one of its inner rooms is built.
 3. A new top room: register it once in `rooms/index.ts`.
 4. Custom component only if no built-in panel can show it, in `rooms/<top-room>/panels/`.
+5. A world (a game, a 3D place, a stage, a scene to fly in): declare `world` in `room.json`
+   (see "World and surface" in `docs/room-spec.md`) and ship its surface from the room's
+   folder, or use a kit from `kits/` (the SVG stage, and later flight and others). Its art,
+   characters' bodies, places and props belong to the room, never to the engine.
 
 ## 6. When the engine cannot do it
 
@@ -138,8 +142,14 @@ Do not work around the engine (no fake data, no pretend features, no editing pac
 Design the closest room that works today, and add an **Engine request** to the brief: what is
 needed, why, and for which room. The engine developer picks these up.
 
-Not available yet: saving across visits and accounts (data lives in the open tab), voice,
-outside services and MCP (news, calendar…), sharing, 3D scenes, scheduled reminders.
+The engine is architecture only: rooms inside rooms, the brain (characters, tools, memory),
+voice, and the contracts a room fills (data, world, surface). A request is for a missing
+contract or capability, never for content: a character's look, a place or a prop is built
+in the room's folder; motion or drawing that several rooms reuse becomes a kit in `kits/`.
+While the first rooms are built, one session may play both roles, in separate commits.
+
+Not available yet: saving across visits and accounts (data lives in the open tab), outside
+services and MCP (news, calendar…), sharing, scheduled reminders.
 
 ## 7. Check and hand over
 

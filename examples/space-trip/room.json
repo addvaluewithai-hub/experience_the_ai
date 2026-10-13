@@ -16,27 +16,7 @@
       "role": "رائد فضاء",
       "persona": "رائد فضاء تجريبي متحمس، بيطير للمكان اللي بيحكي عنه.",
       "greeting": "جاهز للإطلاق؟",
-      "capabilities": ["data.write", "ui.focus"],
-      "look": {
-        "plan": "humanoid",
-        "age": "child",
-        "palette": {
-          "skin": "#f0b48e",
-          "hair": "#5a3a2a",
-          "top": "#ff6b6b",
-          "bottom": "#c9d2df",
-          "shoes": "#e9edf3",
-          "eyes": "#3a2a24"
-        },
-        "parts": {
-          "hair": "short",
-          "eyes": "sparkle",
-          "top": "spacesuit",
-          "bottom": "pants",
-          "accessories": ["jetpack"]
-        },
-        "energy": 0.85
-      }
+      "capabilities": ["data.write", "ui.focus"]
     }
   ],
   "collections": [
@@ -61,95 +41,9 @@
   "panels": [
     {
       "id": "sky",
-      "kind": "stage",
+      "kind": "world",
       "title": "الفضاء",
-      "wide": true,
-      "stage": {
-        "scene": "space",
-        "places": [
-          {
-            "id": "pad",
-            "label": "منصة الإطلاق",
-            "x": 0.25,
-            "depth": 0.3,
-            "means": "البداية والنهاية",
-            "affords": ["launch", "land"]
-          },
-          {
-            "id": "moon",
-            "label": "القمر",
-            "x": 0.78,
-            "depth": 0.6,
-            "height": 0.55,
-            "means": "أول رحلة"
-          },
-          {
-            "id": "mars",
-            "label": "المريخ",
-            "x": 0.42,
-            "depth": 0.85,
-            "height": 0.62,
-            "means": "رحلة بعيدة"
-          },
-          {
-            "id": "base",
-            "label": "القاعدة",
-            "x": 0.65,
-            "depth": 0.25
-          },
-          {
-            "id": "flag-hill",
-            "label": "تل العلم",
-            "x": 0.88,
-            "depth": 0.15
-          }
-        ],
-        "props": [
-          {
-            "id": "rocket",
-            "prop": "rocket",
-            "at": "pad",
-            "state": "parked"
-          },
-          {
-            "id": "the-moon",
-            "prop": "planet",
-            "at": "moon",
-            "bind": {
-              "collection": "trips",
-              "field": "done",
-              "on": "lit",
-              "off": "dark"
-            }
-          },
-          {
-            "id": "the-mars",
-            "prop": "planet",
-            "at": "mars",
-            "state": "dark"
-          },
-          {
-            "id": "beacon",
-            "prop": "flag",
-            "at": "flag-hill",
-            "state": "up"
-          }
-        ],
-        "routes": [
-          {
-            "id": "grand-tour",
-            "label": "الجولة الكبيرة",
-            "through": ["pad", "moon", "mars", "pad"]
-          }
-        ],
-        "cast": [
-          {
-            "character": "zeezo",
-            "at": "base",
-            "pose": "stand"
-          }
-        ]
-      }
+      "wide": true
     },
     {
       "id": "trip-list",

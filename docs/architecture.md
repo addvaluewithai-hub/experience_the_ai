@@ -5,31 +5,39 @@ planner, news anchor, project manager…) help a person, with interactive panels
 own data. A room may hold rooms, which may hold rooms: a life, a house, a school are all one
 room with rooms inside. The product runs rooms; it has no AI that builds them.
 
-Two kinds of work happen in this repository:
+Three kinds of code live here, and they never mix:
 
-- **Engine** (packages/, apps/, tools/): what any room can be and do. Changed by the engine
-  developer, with tests and browser checks.
-- **Rooms** (rooms/): built with the person who wants them, one room per session from the
-  outside in, by any capable chat or model following docs/build-a-room.md and
-  docs/room-spec.md. Room builders never change the engine; they file engine requests in the
-  room's brief.md.
+- **Engine** (packages/, apps/, tools/): architecture only. A room alone or with inner rooms
+  and parents; its data, rules and tools; the brain (conversations, voice, lip sync, memory,
+  persistence, sources); and the contracts a room's world and surface plug into. The engine
+  knows no characters, places, props or themes beyond the room's own declarations.
+- **Kits** (kits/): optional libraries a room may use, built on the engine, never inside it:
+  a 2.5D SVG stage with recipe-drawn humanoids (kits/stage-svg), and next motion kits such as
+  flight. A kit can be replaced or ignored by any room.
+- **Rooms** (rooms/, and synthetic examples/): the content. A room's characters, world,
+  surface and drawings live in its folder, built with the person who wants it
+  (docs/build-a-room.md). While the first rooms are built, the same session may grow the
+  engine they need, in separate commits.
 
-## Layers: brain, presence, surfaces
+## Layers: brain, world, presence, surface
 
-The experience is the product; how it is drawn is a choice per room.
+The experience is the product; how it is drawn is the room's choice.
 
-- **Brain** (no rendering): conversations and voice, memory, room data and rules, the meaning
-  of places (docs/stage.md), authored sequences and their priority, the audio clock that turns
-  audible speech into mouth frames.
-- **Presence** (`Presence` in packages/room-spec/src/presence.ts): the only way the brain
-  touches a body: dispatch a stage command, give someone the floor, set a mode, send a mouth
-  frame, read positions.
+- **Brain** (engine, no rendering): conversations and voice, memory, room data and rules,
+  inner rooms, the audio clock that turns audible speech into mouth frames.
+- **World** (`world` in a room's spec, packages/room-spec/src/world.ts): the room declares
+  which surface draws it, how it looks in words, and the actions its characters may take
+  (names, typed params, who may use them, silent or not). The engine turns them into checked
+  tools and a brief; it never knows what an action looks like.
+- **Presence** (packages/room-spec/src/presence.ts): the only way the brain touches a body:
+  an accepted action, who holds the floor, modes, mouth frames, and the surface's account of
+  its world now (`state()`), which goes into the brief.
+- **Surface** (`RoomSurface` in packages/room-runtime): whatever draws the world (Phaser, 3D,
+  SVG, plain UI) plus its Presence. A room ships it from its folder or takes one from a kit;
+  the host creates it once per open room and shows it in a `world` panel.
 - **Voice** (packages/live-runtime): Gemini Live calls with a server-locked ticket per
   character (`/api/live`), one playback clock whose audible PCM yields mouth frames for the
-  presence, microphone capture, stage tools answered silently. One call at a time.
-- **Surfaces**: anything that implements Presence and draws: the dashboard panels, the SVG
-  stage (packages/stage-runtime, built), and next a 3D place and a Phaser 2.5D world. A room
-  picks its surface; a room may ship its own.
+  presence, microphone capture, silent world actions as non-blocking tools. One call at a time.
 
 ## What came from new-learn
 
@@ -54,13 +62,16 @@ Not taken: Remotion playback, curriculum import, lesson editions and the old Lea
 
 ```
 apps/platform          host: navigation, conversations, server routes, persistence adapters
-packages/room-spec     contract, validation, data rules, room trees, derived tools (no deps)
-packages/room-runtime  RoomView, built-in panels, themes, store interface (React only)
-rooms/<id>             a real room tree: brief.md, room.json, inner rooms, custom panels
-examples/<id>          synthetic rooms exercising the engine (nested-house shows a tree)
+packages/room-spec     contract: rooms, data, tools, world, presence (no dependencies)
+packages/room-runtime  RoomView, built-in panels, themes, store, surface contract (React)
+packages/live-runtime  voice: Live connection, playback clock, visemes, microphone
+kits/<kit>             optional libraries for rooms (stage-svg)
+rooms/<id>             a real room tree: brief.md, room.json, inner rooms, its own code
+examples/<id>          synthetic rooms exercising the engine and kits
 ```
 
-Platform → room-runtime → room-spec. Rooms and examples may import room-runtime and room-spec only.
+Platform → room-runtime → room-spec. Kits build on room-runtime and room-spec. Rooms and
+examples may import those and any kit; the engine never imports a kit or a room.
 The runtime never decides where data lives: the host passes a `RoomStore`.
 
 ## A room

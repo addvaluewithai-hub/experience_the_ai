@@ -2,7 +2,8 @@
 
 Rooms with live AI characters. Each room is built for one need: who lives there (a teacher,
 coach, CEO, friend, planner, news anchor, project manager), what the room remembers in its own
-data, and how it looks: a dashboard, a 2.5D world that grows, and later 3D scenes.
+data, and how it looks: a dashboard, a stage, a game or a cinematic world drawn by the room's
+own surface.
 Characters act on the room through tools derived from it.
 
 A room can hold rooms, which can hold rooms: a whole life, a house, a school. Rooms are built
@@ -31,15 +32,17 @@ OPEN_AI_PREVIEW=true
 
 ## Where things are
 
-| Path                  | Responsibility                                                  |
-| --------------------- | --------------------------------------------------------------- |
-| packages/room-spec    | Room contract, validation, data rules, room trees, agent tools  |
-| packages/room-runtime | RoomView, panels (list, stat, progress, growth, text, rooms)    |
-| rooms                 | Real rooms, one folder per top room (empty until built)         |
-| examples              | Synthetic engine examples, including a nested room tree         |
-| apps/platform         | The app, agent conversation and server routes (Pages Functions) |
-| tools                 | Boundary/line-limit check and the local dev server              |
-| tests                 | Browser flow check                                              |
+| Path                  | Responsibility                                                                               |
+| --------------------- | -------------------------------------------------------------------------------------------- |
+| packages/room-spec    | Room contract, validation, data rules, room trees, agent tools                               |
+| packages/room-runtime | RoomView, panels (list, stat, progress, growth, text, rooms, world) and the surface contract |
+| packages/live-runtime | Voice calls: Gemini Live, microphone, playback clock, lip visemes                            |
+| kits                  | Optional reusable surfaces and motion (the SVG stage)                                        |
+| rooms                 | Real rooms, one folder per top room                                                          |
+| examples              | Synthetic engine examples, including a nested room tree                                      |
+| apps/platform         | The app, agent conversation and server routes (Pages Functions)                              |
+| tools                 | Boundary/line-limit check and the local dev server                                           |
+| tests                 | Browser flow check                                                                           |
 
 ## Rooms
 

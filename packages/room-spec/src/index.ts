@@ -31,27 +31,19 @@ export {
   type DataAt,
   type InnerRoom,
 } from './tree';
-export * from './kit';
-export { capabilitiesOf, type Capabilities, type CharacterLook } from './look';
+export { VOICES, type VoiceName } from './voices';
 export {
-  parseStageCall,
-  STAGE_TOOLS,
-  stageBrief,
-  stageOf,
-  stageTools,
-  type Positions,
-  type StageCommand,
-} from './stage-agent';
-export {
-  affordancesAt,
-  propStateOf,
-  type CastMember,
-  type Place,
-  type PropBinding,
-  type Route,
-  type Stage,
-  type StageProp,
-} from './stage';
+  PARAM_TYPES,
+  parseWorldCall,
+  validateWorld,
+  WORLD_LIMITS,
+  worldBrief,
+  worldTools,
+  type World,
+  type WorldAct,
+  type WorldAction,
+  type WorldParam,
+} from './world';
 export {
   VISEMES,
   type MouthFrame,
@@ -59,3 +51,4 @@ export {
   type PresenceMode,
   type Viseme,
 } from './presence';
+export { Checker, type Input } from './check';

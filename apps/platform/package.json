@@ -7,7 +7,6 @@
     "@experience/room-runtime": "0.1.0",
     "@experience/live-runtime": "0.1.0",
     "@experience/room-spec": "0.1.0",
-    "@experience/stage-runtime": "0.1.0",
     "react": "19.2.8",
     "react-dom": "19.2.8"
   }

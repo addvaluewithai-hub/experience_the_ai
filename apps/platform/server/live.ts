@@ -1,10 +1,10 @@
-import { STAGE_TOOLS, type ToolDeclaration } from '@experience/room-spec';
+import type { RoomSpec, ToolDeclaration } from '@experience/room-spec';
 import { characterContext } from './agent';
 import type { Env } from './env';
 import { gemini } from './gemini';
 import { HttpError } from './http';
 
-const SPOKEN = `This is a live voice call: you are heard, not read. Speak naturally and briefly (one to three spoken sentences), let the person interrupt you, and never read lists, ids, JSON or tool names aloud. Stage tools are silent and non-blocking: call them while you talk, at the moment the action belongs to, and keep talking from the next unsaid word.`;
+const SPOKEN = `This is a live voice call: you are heard, not read. Speak naturally and briefly (one to three spoken sentences), let the person interrupt you, and never read lists, ids, JSON or tool names aloud. World tools are silent and non-blocking: call them while you talk, at the moment the action belongs to, and keep talking from the next unsaid word.`;
 
 /** JSON Schema (lowercase types) to the Live API's OpenAPI subset (uppercase types). */
 function schema(value: unknown): unknown {
@@ -18,12 +18,13 @@ function schema(value: unknown): unknown {
   );
 }
 
-export function liveTools(tools: ToolDeclaration[]) {
+export function liveTools(spec: RoomSpec, tools: ToolDeclaration[]) {
+  const silent = new Set(spec.world?.actions.filter((a) => a.silent).map((a) => a.name));
   return tools.map((tool) => ({
     name: tool.name,
     description: tool.description,
     parameters: schema(tool.parameters),
-    ...(STAGE_TOOLS.includes(tool.name) ? { behavior: 'NON_BLOCKING' } : {}),
+    ...(silent.has(tool.name) ? { behavior: 'NON_BLOCKING' } : {}),
   }));
 }
 
@@ -33,7 +34,7 @@ export function liveTools(tools: ToolDeclaration[]) {
  * character is or what it may do (new-learn's Nova pattern).
  */
 export async function liveTicket(env: Env, input: Record<string, unknown>, signal?: AbortSignal) {
-  const { character, instruction, tools } = characterContext(input);
+  const { spec, character, instruction, tools } = characterContext(input);
   const model = env.GEMINI_LIVE_MODEL || 'gemini-3.8-live';
   const config = {
     generationConfig: {
@@ -43,7 +44,7 @@ export async function liveTicket(env: Env, input: Record<string, unknown>, signa
       },
     },
     systemInstruction: { parts: [{ text: `${instruction}\n${SPOKEN}` }] },
-    tools: [{ functionDeclarations: liveTools(tools) }],
+    tools: [{ functionDeclarations: liveTools(spec, tools) }],
     inputAudioTranscription: {},
     outputAudioTranscription: {},
   };

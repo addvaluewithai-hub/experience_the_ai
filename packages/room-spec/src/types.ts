@@ -1,6 +1,5 @@
-import type { VoiceName } from './kit';
-import type { CharacterLook } from './look';
-import type { Stage } from './stage';
+import type { VoiceName } from './voices';
+import type { World } from './world';
 
 /**
  * A room is a declarative description, never code. It is the only building block: a room has
@@ -21,7 +20,7 @@ export type FieldType = (typeof FIELD_TYPES)[number];
  * growth: a 2.5D world that grows with each done record; text: fixed words from the room;
  * custom: a component the room ships in its own folder (3D scenes, special dashboards);
  * rooms: the rooms inside this one, as doors or as a world, each lit by its pulse;
- * stage: a 2.5D scene where characters with a look live and move (docs/stage.md). */
+ * world: the room's own surface (a game world, a 3D place, a stage…), declared in `world`. */
 export const PANEL_KINDS = [
   'list',
   'stat',
@@ -30,7 +29,7 @@ export const PANEL_KINDS = [
   'text',
   'custom',
   'rooms',
-  'stage',
+  'world',
 ] as const;
 export type PanelKind = (typeof PANEL_KINDS)[number];
 
@@ -65,8 +64,6 @@ export type Character = {
   /** First line shown when the learner opens the room. */
   greeting: string;
   capabilities: Capability[];
-  /** How the character looks on a stage; without one it lives in the conversation only. */
-  look?: CharacterLook;
   /** The character's voice in live calls. */
   voice?: VoiceName;
 };
@@ -84,8 +81,6 @@ export type Panel = {
   component?: string;
   /** rooms only: how the inner rooms are shown (default doors). */
   view?: RoomsView;
-  /** stage only: the scene, its places, props, routes and cast. */
-  stage?: Stage;
   wide?: boolean;
 };
 
@@ -109,6 +104,8 @@ export type RoomSpec = {
   /** Rooms inside this one. In authored JSON an inner room may leave out language and theme
    * (or either theme key) to inherit them; validation fills them in. */
   rooms?: RoomSpec[];
+  /** The room's world: the surface that draws it and the actions characters may take there. */
+  world?: World;
   /** An inner room agreed on but not built yet: only id, title, purpose and icon. It shows as
    * a closed door, so a world can be built from the outside in, one room at a time. */
   planned?: true;

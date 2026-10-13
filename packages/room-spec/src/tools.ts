@@ -1,5 +1,5 @@
 import { addRecord, describeData, removeRecord, updateRecord, type RoomData } from './data';
-import { parseStageCall, STAGE_TOOLS, stageTools, type StageCommand } from './stage-agent';
+import { parseWorldCall, worldTools, type WorldAct } from './world';
 import { innerRooms } from './tree';
 import type { Character, Field, RoomSpec } from './types';
 
@@ -23,8 +23,10 @@ export type ToolOutcome = {
   focus?: string;
   /** open_room: the inner room to take the person to, with a note for its character. */
   open?: { path: string; note: string };
-  /** A stage tool: what the character's rig should do. Presentation only, never data. */
-  stage?: StageCommand;
+  /** A world action for the room's surface. Presentation only, never data. */
+  act?: WorldAct;
+  /** Answer it silently, without blocking speech (world actions declared silent). */
+  silent?: boolean;
 };
 
 const key = (id: string) => id.replaceAll('-', '_');
@@ -99,7 +101,7 @@ export function agentTools(spec: RoomSpec, character: Character): ToolDeclaratio
         required: ['room', 'note'],
       },
     });
-  return [...tools, ...stageTools(spec, character)];
+  return [...tools, ...worldTools(spec, character)];
 }
 
 /** Runs one call against the data. Errors become tool responses so the agent can recover. */
@@ -112,10 +114,10 @@ export function runTool(
 ): ToolOutcome {
   const allowed = agentTools(spec, character).some((t) => t.name === call.name);
   if (!allowed) return { data, response: { error: `Tool ${call.name} is not available` } };
-  if (STAGE_TOOLS.includes(call.name)) {
-    const command = parseStageCall(spec, character, call.name, call.args);
-    if ('error' in command) return { data, response: { error: command.error } };
-    return { data, response: { ok: true }, stage: command };
+  if (spec.world?.actions.some((a) => a.name === call.name)) {
+    const parsed = parseWorldCall(spec, character, call.name, call.args);
+    if ('error' in parsed) return { data, response: { error: parsed.error } };
+    return { data, response: { ok: true }, act: parsed.act, silent: parsed.silent };
   }
   if (call.name === 'open_room') {
     const room = innerRooms(spec).find((r) => r.path === call.args.room && !r.spec.planned);

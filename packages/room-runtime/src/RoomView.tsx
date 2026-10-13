@@ -3,10 +3,9 @@ import type { RoomData, RoomSpec } from '@experience/room-spec';
 import { GrowthPanel } from './panels/GrowthPanel';
 import { ListPanel } from './panels/ListPanel';
 import { RoomsPanel } from './panels/RoomsPanel';
-import { StagePanel } from './panels/StagePanel';
+import { WorldPanel } from './panels/WorldPanel';
 import { ProgressPanel, StatPanel, TextPanel } from './panels/SummaryPanels';
-import type { StageController } from '@experience/stage-runtime';
-import type { CustomPanels, PanelRegistry, RoomWorld } from './panels/types';
+import type { CustomPanels, PanelRegistry, RoomSurface, RoomWorld } from './panels/types';
 import { PanelBoundary } from './PanelBoundary';
 import { wordsFor } from './words';
 import { useRoomData, type RoomStore } from './store';
@@ -18,7 +17,7 @@ export const builtInPanels: PanelRegistry = {
   growth: GrowthPanel,
   text: TextPanel,
   rooms: RoomsPanel,
-  stage: StagePanel,
+  world: WorldPanel,
 };
 
 export type RoomViewProps = {
@@ -34,13 +33,22 @@ export type RoomViewProps = {
   custom?: CustomPanels;
   /** The rooms inside this one: their data and a way in. Needed for rooms panels. */
   world?: RoomWorld;
-  /** The controller of the room's stage panel, owned by the host. */
-  stage?: StageController;
+  /** The room's surface, owned by the host for as long as the room is open. */
+  surface?: RoomSurface;
 };
 
 /** Renders a room: theme, header and a responsive grid of panels from a fixed registry. */
 export function RoomView(props: RoomViewProps) {
-  const { spec, store, focus, aside, registry = builtInPanels, custom = {}, world, stage } = props;
+  const {
+    spec,
+    store,
+    focus,
+    aside,
+    registry = builtInPanels,
+    custom = {},
+    world,
+    surface,
+  } = props;
   const words = wordsFor(spec.language);
   const data = useRoomData(store);
   const edit = useCallback(
@@ -85,7 +93,7 @@ export function RoomView(props: RoomViewProps) {
                       data={data}
                       edit={edit}
                       world={world}
-                      stage={stage}
+                      surface={surface}
                     />
                   ) : (
                     <p className="room-error">{words.missing}</p>
