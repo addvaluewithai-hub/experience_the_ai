@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "id": "day-board",
+  "title": "مثال: لوحة اليوم",
+  "icon": "🧲",
+  "purpose": "مثال للمحرك: شخصية مديرة يوم جنب واجهة شغل (presence dock). بتخطط وجبات من لستة أكل، وبتطلّع المشتريات، وبتتابع خمس عادات يومية. مش أوضة حقيقية لحد.",
+  "language": "ar",
+  "theme": {
+    "preset": "calm",
+    "accent": "#2f7d5b"
+  },
+  "layout": "immersive",
+  "presence": "dock",
+  "characters": [
+    {
+      "id": "hala",
+      "name": "هالة",
+      "role": "مديرة اليوم",
+      "persona": "إنتي هالة، مديرة يوم الشخص: بتخططي وبتجهزي وبتتابعي، صاحبة مش دكتورة. أول ما الشخص تيجي قولي خطة دلوقتي في جملتين حسب الساعة: الصبح المية والفيتامينات والفطار، وبعد 10 بليل اسألي عن المطبخ (بيقفل 9) والمية. سجّلي في سجل النهارده (سجل واحد لكل يوم، حدّثيه) أول ما الشخص تقول، والمية بالكوبايات من 8. لما تقول خططيلي، حطي وجبات سهلة من الأكل ده بس: عيش حبة كاملة، فلفل ألوان، كزبرة، بقدونس، خس، خيار، طماطم، بطاطس، كوسة، قرنبيط، بروكلي، جزر، تفاح، وطلّعي المشتريات. مصري بسيط وقصير، من غير لوم، ولا سعرات ولا وزن إلا لو اتسألتي، ولا جرعات ولا نصايح طبية.",
+      "greeting": "صباح الخير ☀️ أنا هالة. يلا نشوف اليوم ماشي إزاي.",
+      "capabilities": ["data.write", "ui.focus"],
+      "voice": "Aoede"
+    }
+  ],
+  "collections": [
+    {
+      "id": "days",
+      "label": "سجل الأيام",
+      "fields": [
+        {
+          "id": "day",
+          "label": "اليوم",
+          "type": "date",
+          "required": true
+        },
+        {
+          "id": "water",
+          "label": "كوبايات مية",
+          "type": "number"
+        },
+        {
+          "id": "vitamins",
+          "label": "الفيتامينات",
+          "type": "boolean"
+        },
+        {
+          "id": "breakfast",
+          "label": "الفطار متجهز",
+          "type": "boolean"
+        },
+        {
+          "id": "gym",
+          "label": "الجيم",
+          "type": "choice",
+          "options": ["فكرت", "خططت", "رحت"]
+        },
+        {
+          "id": "kitchen",
+          "label": "المطبخ اتقفل بعد العشا",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "id": "meals",
+      "label": "خطة الأسبوع",
+      "fields": [
+        {
+          "id": "day",
+          "label": "اليوم",
+          "type": "date",
+          "required": true
+        },
+        {
+          "id": "meal",
+          "label": "الوجبة",
+          "type": "choice",
+          "options": ["فطار", "غدا", "عشا"],
+          "required": true
+        },
+        {
+          "id": "dish",
+          "label": "الأكلة",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "done",
+          "label": "اتعملت",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "id": "shopping",
+      "label": "المشتريات",
+      "fields": [
+        {
+          "id": "item",
+          "label": "الحاجة",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "bought",
+          "label": "اتجابت",
+          "type": "boolean"
+        }
+      ]
+    }
+  ],
+  "panels": [
+    {
+      "id": "board",
+      "kind": "world",
+      "title": "يومي",
+      "wide": true
+    }
+  ],
+  "world": {
+    "surface": "day-board",
+    "describe": "A person's day on a fridge door. Today: a tall glass of water filling in 8 glasses, the vitamins, breakfast ready, the gym step (فكرت / خططت / رحت) and the kitchen closing after dinner at 9 pm. Beside it this week's meal plan (today and the next six days) and the shopping list. Everything on it comes from the room's data, and the person can tap it too.",
+    "actions": [
+      {
+        "name": "show",
+        "description": "Bring a part of the board forward while you talk about it.",
+        "params": {
+          "section": {
+            "type": "choice",
+            "options": ["today", "week", "shopping"]
+          }
+        },
+        "required": ["section"]
+      }
+    ]
+  }
+}

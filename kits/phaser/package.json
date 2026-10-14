@@ -1,0 +1,16 @@
+{
+  "name": "@experience/kit-phaser",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./game": "./src/game.ts"
+  },
+  "dependencies": {
+    "@experience/room-spec": "0.1.0",
+    "@experience/room-runtime": "0.1.0",
+    "phaser": "4.2.1",
+    "react": "19.2.8"
+  }
+}

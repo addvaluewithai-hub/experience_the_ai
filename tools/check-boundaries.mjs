@@ -10,7 +10,7 @@ const areas = [
   {
     path: 'kits',
     perFolder: true,
-    allowed: ['react', 'react-dom', '@experience/room-spec', '@experience/room-runtime'],
+    allowed: ['react', 'react-dom', '@experience/room-spec', '@experience/room-runtime', 'phaser'],
   },
   // Voice and audio: browser APIs only, no React and no drawing.
   { path: 'packages/live-runtime/src', allowed: ['@experience/room-spec'] },

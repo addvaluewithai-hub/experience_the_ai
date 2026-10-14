@@ -170,7 +170,9 @@ tools and hands each accepted call to the room's surface.
   when a character takes the person there with `open_room`, it plays first.
 
 The surface lives in the room's folder (or comes from a kit), may draw with `phaser` (import it
-lazily inside the view so only this room loads it), and implements `RoomSurface` from
+lazily inside the view so only this room loads it; `@experience/kit-phaser` gives the frame,
+the director, pinned interface and who holds the floor, and `kit-phaser/game` the sharp,
+resizing game for the lazy scene module), and implements `RoomSurface` from
 `@experience/room-runtime`: `View` (what the `world` panel shows), `act(character, action,
 args)`, `speak(character | null)`, `setMode(character, mode)`, `mouth(character, frame)` (lip
 shapes during voice), `state()` (the world now, in words, read before each turn) and, with

@@ -1,6 +1,6 @@
 import { Flight, Wings, type WingFrame } from '@experience/kit-flight';
 import type { Character, RoomData } from '@experience/room-spec';
-import { Cast } from '../../../world/cast';
+import { Cast } from '@experience/kit-phaser';
 import type { SceneRequest } from '../../../world/model';
 
 /** The three crystals, left to right, each woken by one time of day (the `when` choice). */

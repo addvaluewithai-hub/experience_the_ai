@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import type { SurfaceViewProps } from '@experience/room-runtime';
 
 /** Starts a drawn world inside the element it is given; returns how to stop it. */
@@ -14,6 +14,11 @@ export function PhaserFrame(props: {
   background: string;
   frame: SurfaceViewProps['frame'];
   load: () => Promise<Starter>;
+  /** Interface pinned over the world (see Anchors), drawn above the canvas. */
+  children?: ReactNode;
+  /** Words while it loads and if it cannot (in the room's language). */
+  waking?: string;
+  failed?: string;
 }) {
   const host = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState<'waking' | 'ready' | 'failed'>('waking');
@@ -50,6 +55,7 @@ export function PhaserFrame(props: {
       }}
     >
       <div ref={host} style={{ position: 'absolute', inset: 0 }} />
+      {status === 'ready' && props.children}
       {status !== 'ready' && (
         <p
           style={{
@@ -61,7 +67,9 @@ export function PhaserFrame(props: {
             color: '#fdf4ff',
           }}
         >
-          {status === 'failed' ? 'المكان ده مش راضي يفتح دلوقتي.' : 'بيصحى… ✨'}
+          {status === 'failed'
+            ? (props.failed ?? 'This place could not open.')
+            : (props.waking ?? '…')}
         </p>
       )}
     </div>

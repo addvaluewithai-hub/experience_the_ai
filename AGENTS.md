@@ -20,7 +20,7 @@ addvaluewithai-hub/new-learn is a reference for patterns, not a workspace depend
 - packages/room-runtime renders rooms; it imports only React, React DOM and room-spec.
 - packages/live-runtime owns the voice call (Gemini Live socket, microphone, playback clock, lip visemes); it imports only room-spec.
 - The engine is architecture only: no character catalogues, looks, places, props or scenes in packages/.
-- kits/<name> holds optional reusable surfaces and motion (kit-stage-svg, kit-flight); a kit imports React, room-spec and room-runtime, never the app.
+- kits/<name> holds optional reusable surfaces and motion (kit-stage-svg, kit-flight, kit-phaser); a kit imports React, room-spec and room-runtime, never the app.
 - rooms/<id> holds one real room tree: brief.md, room.json, inner rooms, custom panels, its own world surface and the craft skills gathered for it (skills/, copied as written, never imported), importing only React, room-spec, room-runtime, kits and an approved renderer (phaser).
 - examples/ holds synthetic rooms that exercise the engine; they are not product rooms.
 - Room-specific components and parameters belong to the room's folder, not engine switches.

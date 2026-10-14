@@ -1,7 +1,7 @@
 import { Flight, Wings, type FlightPath, type WingFrame } from '@experience/kit-flight';
 import type { Character, RoomData } from '@experience/room-spec';
 import { awakeToday } from '../rooms/crystal-river/world/model';
-import { Cast } from './cast';
+import { Cast } from '@experience/kit-phaser';
 import { isPlace, PLACES, placeAt } from './places';
 
 /** The name Laila chose for the unicorn, from the valley's memories; null until she does. */

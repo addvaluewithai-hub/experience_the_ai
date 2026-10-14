@@ -2,7 +2,7 @@ import type { MouthFrame, PresenceMode, RoomSpec } from '@experience/room-spec';
 import type { RoomData } from '@experience/room-spec';
 import type { RoomStore, RoomSurface, SurfaceViewProps } from '@experience/room-runtime';
 import type { ComponentType } from 'react';
-import { PhaserFrame } from './frame';
+import { PhaserFrame } from '@experience/kit-phaser';
 import { ValleyModel } from './model';
 
 const prefersLessMotion = () =>
@@ -38,6 +38,8 @@ export class ValleySurface implements RoomSurface {
           background="#4a3a8c"
           frame={props.frame}
           load={load}
+          waking="بيصحى… ✨"
+          failed="المكان ده مش راضي يفتح دلوقتي."
         />
       );
     };

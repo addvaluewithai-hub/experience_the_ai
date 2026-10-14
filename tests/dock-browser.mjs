@@ -3,7 +3,7 @@ import { spawn } from 'node:child_process';
 import { mkdir } from 'node:fs/promises';
 import { chromium } from 'playwright';
 
-// A docked room (يومي مع نور) against the built app and a scripted agent: the character speaks
+// A docked room (the day-board example) against the built app and a scripted agent: the character speaks
 // first on arrival, the person taps the board and talks, the character plans through its
 // tools and brings a part of the board forward. It proves the client, not a real model.
 const url = 'http://127.0.0.1:5192';
@@ -68,11 +68,11 @@ try {
       return route.fulfill({ json: { parts } });
     });
     asks.length = 0;
-    await page.goto(`${url}/#/room/noor-day`);
+    await page.goto(`${url}/#/room/day-board`);
     await page.getByText('صباح الخير، نبدأ بكوباية مية.').waitFor();
-    assert.match(asks[0].turns[0].text, /^ARRIVED: the person just came into "يومي مع نور"/);
+    assert.match(asks[0].turns[0].text, /^ARRIVED: the person just came into "مثال: لوحة اليوم"/);
     assert.equal(
-      await page.getByText('أنا نور. يلا نشوف اليوم').count(),
+      await page.getByText('أنا هالة. يلا نشوف اليوم').count(),
       0,
       'her own words, not the fixed greeting',
     );
@@ -89,7 +89,7 @@ try {
     await page.getByText('٢ من ٨ كوبايات').waitFor();
 
     // Talking: the character plans through its tools and shows the week.
-    await page.getByRole('textbox', { name: 'اكتب هنا… نور' }).fill('خططيلي الأسبوع');
+    await page.getByRole('textbox', { name: 'اكتب هنا… هالة' }).fill('خططيلي الأسبوع');
     await page.keyboard.press('Enter');
     await page.getByText('الخطة جاهزة 👇').waitFor();
     await page.locator('section.plan[data-lit="true"]').waitFor();
@@ -104,7 +104,7 @@ try {
     assert.equal(plan.data.days.length, 1, 'one record for the day');
     const wide = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth);
     assert.equal(wide, false, `no horizontal overflow at ${width}px`);
-    await page.screenshot({ path: `test-results/noor-day-${width}.png` });
+    await page.screenshot({ path: `test-results/day-board-${width}.png` });
     await page.close();
   }
   assert.deepEqual(errors, []);

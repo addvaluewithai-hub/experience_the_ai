@@ -1,7 +1,7 @@
 import type { MouthFrame, PresenceMode, RoomSpec } from '@experience/room-spec';
 import type { RoomStore, RoomSurface, SurfaceViewProps } from '@experience/room-runtime';
 import type { ComponentType } from 'react';
-import { PhaserFrame } from '../../../world/frame';
+import { PhaserFrame } from '@experience/kit-phaser';
 import { RiverModel } from './model';
 
 const prefersLessMotion = () =>
@@ -38,6 +38,8 @@ export class RiverSurface implements RoomSurface {
           background="#5b4a9e"
           frame={props.frame}
           load={load}
+          waking="بيصحى… ✨"
+          failed="المكان ده مش راضي يفتح دلوقتي."
         />
       );
     };

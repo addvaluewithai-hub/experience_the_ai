@@ -1,5 +1,6 @@
 import type { RoomEntry } from '@experience/room-runtime';
 import classroomStage from './classroom-stage';
+import dayBoard from './day-board';
 import kidsHabitPlanet from './kids-habit-planet/room.json';
 import nestedHouse from './nested-house';
 import selfGrowthStudio from './self-growth-studio/room.json';
@@ -17,4 +18,5 @@ export const examples: RoomEntry[] = [
   { spec: kidsHabitPlanet },
   { spec: selfGrowthStudio },
   { spec: studyRoom },
+  dayBoard,
 ];

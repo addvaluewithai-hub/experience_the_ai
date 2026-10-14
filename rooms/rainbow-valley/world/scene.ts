@@ -1,8 +1,9 @@
 import * as Phaser from 'phaser';
 import type { FlightState } from '@experience/kit-flight';
 import { drawBackdrop, VIEW, WORLD, type Backdrop } from './backdrop';
-import { Director } from './director';
-import { startGame } from './game';
+import { Director } from '@experience/kit-phaser';
+import { startGame } from '@experience/kit-phaser/game';
+import { SHOTS } from './director';
 import type { ValleyModel, ValleyMoment } from './model';
 import { Moon } from './moon';
 import { NameInStars } from './stars';
@@ -49,7 +50,7 @@ class ValleyScene extends Phaser.Scene {
     this.backdrop = drawBackdrop(this);
     this.moon = new Moon(this, this.backdrop.depth, 800, 86);
     this.name = new NameInStars(this, { x: 960, y: 150 });
-    this.director = new Director(this, this.reduced);
+    this.director = new Director(this, this.reduced, SHOTS);
     this.add.particles(0, 0, 'valley-spark', {
       x: { min: 0, max: WORLD.width },
       y: { min: 220, max: 520 },

@@ -1,8 +1,8 @@
 import * as Phaser from 'phaser';
 import type { FlightState } from '@experience/kit-flight';
 import { hillPoints, fillShape, lerpColor } from '../../../world/draw';
-import { Director, type Shots } from '../../../world/director';
-import { startGame } from '../../../world/game';
+import { Director, type Shots } from '@experience/kit-phaser';
+import { startGame } from '@experience/kit-phaser/game';
 import { Unicorn } from '../../../world/unicorn';
 import { drawCrystal, drawIcon, drawWater, RAINBOW } from './draw';
 import { CRYSTALS, type RiverModel } from './model';

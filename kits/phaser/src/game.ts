@@ -6,8 +6,10 @@ const FALLBACK = { width: 960, height: 540 };
  * Runs one scene inside parent, drawn at the screen's real pixel density (up to 2x) so it
  * stays sharp, and following the parent's size. stop() frees the canvas and its GPU memory.
  */
+import { pixelDensity } from './density';
+
 export function startGame(parent: HTMLElement, scene: Phaser.Scene, background: string) {
-  const density = Math.min(2, Math.max(1, globalThis.devicePixelRatio || 1));
+  const density = pixelDensity();
   const size = () => ({
     width: Math.round((parent.clientWidth || FALLBACK.width) * density),
     height: Math.round((parent.clientHeight || FALLBACK.height) * density),
