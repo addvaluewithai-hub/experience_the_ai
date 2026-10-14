@@ -4,7 +4,7 @@ import { addRecord, agentTools, emptyData, validateRoom } from '@experience/room
 import { createRoomStore } from '@experience/room-runtime';
 import noorDay from '../index.ts';
 import { describeDay, mealsOn, setToday, todayOf } from '../world/day.ts';
-import { DaySurface } from '../world/surface.tsx';
+import { KitchenSurface } from '../world/surface.tsx';
 
 function room() {
   const result = validateRoom(noorDay.spec);
@@ -14,10 +14,11 @@ function room() {
 let n = 0;
 const id = () => `r${++n}`;
 
-test('a docked immersive room: Noor beside a board that is the world', () => {
+test('an immersive kitchen: Noor lives in it, met by voice, no chat', () => {
   const spec = room();
   assert.equal(spec.layout, 'immersive');
-  assert.equal(spec.presence, 'dock');
+  assert.equal(spec.presence, undefined, 'captions over the world, not a docked chat');
+  assert.equal(spec.world!.arrival, 'arrival');
   assert.ok(spec.characters[0].persona.includes('بروكلي'), 'she knows the food list');
   const tools = agentTools(spec, spec.characters[0]).map((t) => t.name);
   assert.ok(
@@ -71,17 +72,56 @@ test('the board in words: habits, the kitchen after nine, the week and the shopp
   );
 });
 
-test('Noor shows a part of the board; the surface reads the board for her', () => {
+test('Noor walks, points and opens a fridge note; the kitchen reads itself to her', () => {
   const spec = room();
   const store = createRoomStore(spec);
-  const surface = new DaySurface(store, () => new Date(2026, 9, 14, 9, 0));
+  const surface = new KitchenSurface(spec, store, {
+    reducedMotion: false,
+    now: () => new Date(2026, 9, 14, 22, 0),
+  });
+  const model = surface.model;
+  const wait = (seconds: number) => {
+    for (let i = 0; i < seconds * 60; i++) model.step(1 / 60);
+  };
+  assert.match(
+    surface.state(),
+    /^noor \(نور\) at الشباك \(window\)\. It is night in the kitchen; the kitchen is closed\./,
+  );
   let heard = 0;
-  surface.spotlight.listeners.add(() => heard++);
-  surface.act('noor', 'show', { section: 'shopping' });
-  assert.equal(surface.spotlight.section, 'shopping');
+  model.subscribe(() => heard++);
+  surface.act('noor', 'show', { thing: 'shopping' });
+  assert.equal(model.note, 'shopping');
+  assert.equal(model.gesture, 'point');
   assert.equal(heard, 1);
-  surface.act('noor', 'show', { section: 7 });
-  assert.equal(heard, 1, 'only a checked section');
+  wait(3);
+  assert.match(surface.state(), /at التلاجة \(fridge\).*The shopping note is open big\./);
+  model.open(null);
+  surface.act('noor', 'show', { thing: 'habits' });
+  assert.equal(model.boardLit, true);
+  wait(4);
+  assert.equal(model.boardLit, false, 'the board lights for a moment');
+  assert.match(surface.state(), /at السبورة \(chalkboard\)/);
+  surface.act('noor', 'go_to', { place: 'roof' });
+  surface.act('noor', 'gesture', { kind: 'cheer' });
+  assert.equal(model.gesture, 'cheer');
   store.set(setToday(spec, store.get(), '2026-10-14', { water: 5 }, id));
   assert.match(surface.state(), /water 5 of 8 glasses/);
+});
+
+test('the arrival waits for its scene; a scene asked by Noor waits too', async () => {
+  const spec = room();
+  const surface = new KitchenSurface(spec, createRoomStore(spec), { reducedMotion: true });
+  let arrived = false;
+  const arrival = surface.play('arrival').then(() => (arrived = true));
+  surface.act('noor', 'play_scene', { scene: 'kitchen-tour' });
+  const asked = surface.model.takeScenes();
+  assert.deepEqual(
+    asked.map((s) => s.id),
+    ['arrival', 'kitchen-tour'],
+  );
+  await Promise.resolve();
+  assert.equal(arrived, false);
+  asked[0].done();
+  await arrival;
+  assert.equal(arrived, true);
 });

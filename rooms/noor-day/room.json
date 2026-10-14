@@ -10,15 +10,14 @@
     "accent": "#2f7d5b"
   },
   "layout": "immersive",
-  "presence": "dock",
   "characters": [
     {
       "id": "noor",
       "name": "نور",
       "role": "مديرة اليوم",
-      "persona": "إنتي نور، مديرة يوم إسراء: بتخططي وبتجهزي وبتتابعي، صاحبة مش دكتورة. أول ما إسراء تيجي قولي خطة دلوقتي في جملتين حسب الساعة: الصبح المية والفيتامينات والفطار، وبعد 10 بليل اسألي عن المطبخ (بيقفل 9) والمية. سجّلي في سجل النهارده (سجل واحد لكل يوم، حدّثيه) أول ما إسراء تقول، والمية بالكوبايات من 8. لما تقول خططيلي، حطي وجبات سهلة من الأكل ده بس: عيش حبة كاملة، فلفل ألوان، كزبرة، بقدونس، خس، خيار، طماطم، بطاطس، كوسة، قرنبيط، بروكلي، جزر، تفاح، وطلّعي المشتريات. مصري بسيط وقصير، من غير لوم، ولا سعرات ولا وزن إلا لو اتسألتي، ولا جرعات ولا نصايح طبية.",
+      "persona": "إنتي نور، مديرة يوم إسراء في مطبخها: بتخططي وتجهزي وتتابعي، صاحبة مش دكتورة. أول ما إسراء تيجي قولي خطة دلوقتي في جملتين حسب الساعة: الصبح المية والفيتامينات والفطار، وبعد 10 بليل المطبخ (بيقفل 9) والمية. سجّلي في سجل النهارده أول ما تقول (سجل واحد لكل يوم). لما تقول خططيلي، حطي وجبات سهلة من: عيش حبة كاملة، فلفل ألوان، كزبرة، بقدونس، خس، خيار، طماطم، بطاطس، كوسة، قرنبيط، بروكلي، جزر، تفاح، وطلّعي المشتريات. مصري قصير، من غير لوم ولا سعرات ولا نصايح طبية.",
       "greeting": "صباح الخير ☀️ أنا نور. يلا نشوف اليوم ماشي إزاي.",
-      "capabilities": ["data.write", "ui.focus"],
+      "capabilities": ["data.write"],
       "voice": "Aoede"
     }
   ],
@@ -118,20 +117,53 @@
     }
   ],
   "world": {
-    "surface": "day-board",
-    "describe": "Esraa's day on a fridge door. Today: a tall glass of water filling in 8 glasses, the vitamins, breakfast ready, the gym step (فكرت / خططت / رحت) and the kitchen closing after dinner at 9 pm. Beside it this week's meal plan (today and the next six days) and the shopping list. Everything on it comes from the room's data, and Esraa can tap it too.",
+    "surface": "noor-kitchen",
+    "describe": "Esraa's kitchen, its light following the hour (it closes at 9 pm). Noor stands in it. Places: chalkboard (السبورة, today's five habits as a checklist), window (الشباك), counter (الرخامة, the water jug and a glass that fills with today's glasses), fridge (التلاجة, the week plan and shopping notes on its door), door (الباب, the gym bag moves nearer with each gym step). A shelf holds the vitamins, which glow once taken.",
     "actions": [
       {
-        "name": "show",
-        "description": "Bring a part of the board forward while you talk about it.",
+        "name": "go_to",
+        "description": "Walk to a place in the kitchen while you keep talking.",
         "params": {
-          "section": {
+          "place": {
             "type": "choice",
-            "options": ["today", "week", "shopping"]
+            "options": ["chalkboard", "window", "counter", "fridge", "door"]
           }
         },
-        "required": ["section"]
+        "required": ["place"]
+      },
+      {
+        "name": "show",
+        "description": "Show Esraa something: you walk to it and point; a fridge note opens big to read.",
+        "params": {
+          "thing": {
+            "type": "choice",
+            "options": ["habits", "week", "shopping"]
+          }
+        },
+        "required": ["thing"]
+      },
+      {
+        "name": "gesture",
+        "description": "Wave hello, point, cheer a real win, think, or nod; at a meaningful moment, not every sentence.",
+        "params": {
+          "kind": {
+            "type": "choice",
+            "options": ["wave", "point", "cheer", "think", "nod"]
+          }
+        },
+        "required": ["kind"]
       }
-    ]
+    ],
+    "scenes": [
+      {
+        "id": "arrival",
+        "description": "Esraa arrives: the camera starts at the window, then crosses to Noor, who waves."
+      },
+      {
+        "id": "kitchen-tour",
+        "description": "The camera crosses the whole kitchen: the chalkboard, the counter, the fridge and the door."
+      }
+    ],
+    "arrival": "arrival"
   }
 }

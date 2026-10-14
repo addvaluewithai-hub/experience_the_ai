@@ -1,41 +1,96 @@
+import { Anchors, PhaserFrame } from '@experience/kit-phaser';
 import type { MouthFrame, PresenceMode, RoomSpec } from '@experience/room-spec';
 import type { RoomStore, RoomSurface, SurfaceViewProps } from '@experience/room-runtime';
 import type { ComponentType } from 'react';
-import { Board, type Spotlight } from './Board';
-import { describeDay } from './day';
+import { PINNED } from './layout';
+import { KitchenModel } from './model';
+import { kitchenStyle } from './style';
+import { Chalkboard, FridgeNote, Magnets, OpenNote } from './ui';
+
+const prefersLessMotion = () =>
+  typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /**
- * Esraa's day as a room surface. It is a working interface, not a scene: Noor's world
- * action brings a part forward, and the state is the board read aloud.
+ * Esraa's kitchen as a room surface: Noor lives in it, and the habits, the week and the
+ * shopping are interface pinned to the chalkboard and the fridge.
  */
-export class DaySurface implements RoomSurface {
+export class KitchenSurface implements RoomSurface {
+  readonly model: KitchenModel;
+  readonly anchors = new Anchors();
   readonly View: ComponentType<SurfaceViewProps>;
-  readonly spotlight: Spotlight = { section: null, listeners: new Set() };
-  speaking: string | null = null;
 
   constructor(
-    private store: RoomStore,
-    private now: () => Date = () => new Date(),
+    private spec: RoomSpec,
+    store: RoomStore,
+    options: { reducedMotion?: boolean; now?: () => Date } = {},
   ) {
-    const spotlight = this.spotlight;
-    this.View = function DayView(props: SurfaceViewProps) {
-      return <Board {...props} spotlight={spotlight} />;
+    const model = new KitchenModel({
+      reducedMotion: options.reducedMotion ?? prefersLessMotion(),
+      data: () => store.get(),
+      now: options.now,
+    });
+    this.model = model;
+    const anchors = this.anchors;
+    const load = () =>
+      import('./scene').then(
+        ({ startKitchen }) =>
+          (el: HTMLElement) =>
+            startKitchen(el, model, anchors).stop,
+      );
+    this.View = function KitchenView(props: SurfaceViewProps) {
+      const ui = { spec: props.spec, data: props.data, edit: props.edit, model };
+      return (
+        <PhaserFrame
+          world="noor-kitchen"
+          label="مطبخ إسراء: نور، وسبورة العادات، وخطة الأسبوع والمشتريات على التلاجة"
+          background="#dbe4dc"
+          frame={props.frame}
+          load={load}
+          waking="المطبخ بيصحى…"
+          failed="المطبخ مش راضي يفتح دلوقتي."
+        >
+          <style>{kitchenStyle}</style>
+          <div className="pin" ref={(el) => anchors.pin('board', el, PINNED.board)}>
+            <Chalkboard {...ui} />
+          </div>
+          <div className="pin" ref={(el) => anchors.pin('week', el, PINNED.week)}>
+            <FridgeNote note="week" data={props.data} model={model} />
+          </div>
+          <div className="pin" ref={(el) => anchors.pin('shopping', el, PINNED.shopping)}>
+            <FridgeNote note="shopping" data={props.data} model={model} />
+          </div>
+          <Magnets data={props.data} model={model} />
+          <OpenNote {...ui} />
+        </PhaserFrame>
+      );
     };
   }
 
-  act(_character: string, action: string, args: Record<string, unknown>) {
-    if (action !== 'show' || typeof args.section !== 'string') return;
-    this.spotlight.section = args.section;
-    for (const listener of this.spotlight.listeners) listener();
+  /** Plays a scene; never waits more than 20 s, even if the kitchen could not be drawn. */
+  play(scene: string) {
+    return Promise.race([
+      this.model.play(scene),
+      new Promise<void>((done) => setTimeout(done, 20_000)),
+    ]);
+  }
+  act(character: string, action: string, args: Record<string, unknown>) {
+    this.model.act(character, action, args);
   }
   speak(character: string | null) {
-    this.speaking = character;
+    this.model.speak(character);
   }
-  setMode(_character: string, _mode: PresenceMode) {}
-  mouth(_character: string, _frame: MouthFrame | null) {}
+  get speaking() {
+    return this.model.speaker;
+  }
+  setMode(character: string, mode: PresenceMode) {
+    this.model.setMode(character, mode);
+  }
+  mouth(character: string, frame: MouthFrame | null) {
+    this.model.mouth(character, frame);
+  }
   state() {
-    return describeDay(this.store.get(), this.now());
+    return this.model.state(this.spec.characters);
   }
 }
 
-export const daySurface = (_spec: RoomSpec, store: RoomStore) => new DaySurface(store);
+export const kitchenSurface = (spec: RoomSpec, store: RoomStore) => new KitchenSurface(spec, store);
