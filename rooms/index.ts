@@ -1,4 +1,5 @@
 import type { RoomEntry } from '@experience/room-runtime';
+import noorDay from './noor-day';
 import rainbowValley from './rainbow-valley';
 
 /**
@@ -6,4 +7,4 @@ import rainbowValley from './rainbow-valley';
  * each top room here with its index.ts export (`{ spec, panels?, surface? }`).
  * Engine examples live in examples/, not here.
  */
-export const rooms: RoomEntry[] = [rainbowValley];
+export const rooms: RoomEntry[] = [rainbowValley, noorDay];

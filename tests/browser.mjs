@@ -87,7 +87,7 @@ try {
 
   await page.goto(url);
   await assert.doesNotReject(page.getByRole('link', { name: /كوكب العادات/ }).waitFor());
-  assert.equal(await page.locator('.card').count(), 7);
+  assert.equal(await page.locator('.card').count(), 8);
   await page.getByRole('link', { name: /وادي قوس قزح/ }).waitFor();
   await page.screenshot({ path: 'test-results/home.png', fullPage: true });
 
