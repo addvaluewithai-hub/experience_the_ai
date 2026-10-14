@@ -37,6 +37,10 @@ export function takeHandoff(roomKey: string) {
   return handoff;
 }
 
+/** The cue that lets a character speak first when the person arrives. */
+export const arrivalCue = (room: OpenRoom, character: Character) =>
+  `ARRIVED: the person just came into "${room.spec.title}". Your usual first words: ${character.greeting}`;
+
 /** Keeps the latest turns, always starting at something the person said. */
 function bounded(turns: Turn[]) {
   let start = Math.max(0, turns.length - MAX_TURNS);
@@ -162,14 +166,15 @@ export class Conversation {
     };
   }
 
-  async send(message: string, shown?: { kind: Line['kind']; text: string }) {
+  /** `shown` replaces the person's line on screen; `null` shows none (a cue, not words said). */
+  async send(message: string, shown?: { kind: Line['kind']; text: string } | null) {
     const text = message.trim();
     if (!text || this.controller) return;
     const abort = new AbortController();
     this.controller = abort;
     this.update({ busy: true });
     this.room.surface?.setMode(this.character.id, 'thinking');
-    this.add(shown?.kind ?? 'person', shown?.text ?? text);
+    if (shown !== null) this.add(shown?.kind ?? 'person', shown?.text ?? text);
     const { room, character } = this;
     const history: Turn[] = bounded([...this.turns, { role: 'user', text }]);
     let handoff: { path: string; note: string } | undefined;

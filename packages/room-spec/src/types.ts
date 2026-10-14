@@ -111,6 +111,11 @@ export type RoomSpec = {
    * world, a small keyboard when voice cannot be used) and characters change everything through
    * their tools, so there are no forms. Needs a world, shown by its only panel. */
   layout?: 'panels' | 'immersive';
+  /** Immersive rooms only. `overlay` (default): captions float over a world you live in.
+   * `dock`: the characters sit beside a world that is a working interface (a planner, a
+   * tracker): their conversation, a voice call and typing are always at hand, and on arrival
+   * the first character speaks first in words. */
+  presence?: 'overlay' | 'dock';
   /** An inner room agreed on but not built yet: only id, title, purpose and icon. It shows as
    * a closed door, so a world can be built from the outside in, one room at a time. */
   planned?: true;

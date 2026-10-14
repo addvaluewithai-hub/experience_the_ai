@@ -1,11 +1,14 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, type CSSProperties } from 'react';
 import type { RoomData } from '@experience/room-spec';
 import { useRoomData } from '@experience/room-runtime';
 import { roomHref, type OpenRoom } from '../../app/rooms';
-import { conversationFor, takeHandoff } from './conversation';
+import { arrivalCue, conversationFor, takeHandoff } from './conversation';
+import { PresenceDock } from './PresenceDock';
 import { PresenceLayer } from './PresenceLayer';
 import { startCall } from './voiceCall';
 import './immersive.css';
+
+const briefed = new Set<string>();
 
 /**
  * A room that is its world: the surface fills the screen and the characters are met by voice
@@ -54,14 +57,28 @@ export function ImmersiveRoom(props: {
       here = false;
     };
   }, [room, arrival]);
+  // A docked room opens with its first character speaking first, once per visit in this tab.
+  const docked = room.spec.presence === 'dock';
+  useEffect(() => {
+    if (!docked || !props.ai || arriving || briefed.has(room.key)) return;
+    briefed.add(room.key);
+    const first = room.spec.characters[0];
+    void conversationFor(room, first).send(arrivalCue(room, first), null);
+  }, [docked, props.ai, arriving, room]);
   const View = room.surface?.View;
+  const leave = room.parent ? roomHref(room.parent.key) : '#/';
   const ar = room.spec.language === 'ar';
   return (
     <div
-      className="immersive"
+      className={docked ? 'immersive immersive-docked' : 'immersive'}
       dir={ar ? 'rtl' : 'ltr'}
       lang={room.spec.language}
-      style={{ background: room.spec.theme.accent }}
+      style={
+        {
+          background: room.spec.theme.accent,
+          '--room-accent': room.spec.theme.accent,
+        } as CSSProperties
+      }
     >
       <h1 className="immersive-title">{room.spec.title}</h1>
       <div className="immersive-world">
@@ -78,14 +95,16 @@ export function ImmersiveRoom(props: {
           />
         )}
       </div>
-      <a
-        className="immersive-exit"
-        href={room.parent ? roomHref(room.parent.key) : '#/'}
-        aria-label={ar ? 'خروج' : 'Leave'}
-      >
-        {room.parent ? (ar ? '›' : '‹') : '⌂'}
-      </a>
-      <PresenceLayer room={room} ai={props.ai} hidden={arriving} />
+      {docked ? (
+        <PresenceDock room={room} ai={props.ai} leave={leave} />
+      ) : (
+        <>
+          <a className="immersive-exit" href={leave} aria-label={ar ? 'خروج' : 'Leave'}>
+            {room.parent ? (ar ? '›' : '‹') : '⌂'}
+          </a>
+          <PresenceLayer room={room} ai={props.ai} hidden={arriving} />
+        </>
+      )}
     </div>
   );
 }

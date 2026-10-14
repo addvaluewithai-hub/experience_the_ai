@@ -70,6 +70,7 @@ export function validateRoom(value: unknown): Validation {
         'pulse',
         'world',
         'layout',
+        'presence',
       ])
         if (!empty(source[key]))
           check.at(
@@ -117,6 +118,11 @@ export function validateRoom(value: unknown): Validation {
       spec.layout = check.oneOf(source.layout, ['panels', 'immersive'] as const, at('layout'));
       if (spec.layout === 'immersive' && (panels.length !== 1 || panels[0].kind !== 'world'))
         check.at(at('layout'), 'an immersive room is its world: its only panel is the world');
+    }
+    if (source.presence !== undefined) {
+      spec.presence = check.oneOf(source.presence, ['overlay', 'dock'] as const, at('presence'));
+      if (spec.layout !== 'immersive')
+        check.at(at('presence'), 'only an immersive room has a presence');
     }
     return spec;
   };

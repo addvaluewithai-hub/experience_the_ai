@@ -36,7 +36,8 @@ The experience is the product; how it is drawn is the room's choice.
   SVG, plain UI) plus its Presence. A room ships it from its folder or takes one from a kit;
   the host creates it once per open room and shows it in a `world` panel, or on the whole
   screen when the room is `immersive`: then the app adds only a voice-first presence layer
-  (one tap begins, the character speaks first, captions over the world, a small keyboard).
+  (one tap begins, the character speaks first, captions over the world, a small keyboard), or,
+  with `presence: "dock"`, a docked conversation beside a world that is a working interface.
 - **Director** (`scenes` and `arrival` in a room's world, `RoomSurface.play`): named moments
   the surface directs. The arrival scene plays before anyone speaks; characters play the
   others with one derived `play_scene` tool. The engine knows the names, never the shots.

@@ -33,23 +33,24 @@ once in `rooms/index.ts`: `{ spec: <its default export>, panels: { ... } }`.
 
 ## The room
 
-| Key             | Required               | Meaning                                                                                |
-| --------------- | ---------------------- | -------------------------------------------------------------------------------------- |
-| `schemaVersion` | top room only          | `1`                                                                                    |
-| `id`            | yes                    | kebab-case, unique among its siblings; part of the room's path                         |
-| `title`         | yes                    | ≤ 60 characters                                                                        |
-| `purpose`       | yes                    | ≤ 600; what the room is for and who it serves (characters read it)                     |
-| `language`      | top room; inherited    | `ar` (right to left, Egyptian Arabic characters) or `en`                               |
-| `theme`         | top room; inherited    | `{ preset, accent }`; an inner room may set either or both                             |
-| `icon`          | no                     | an emoji ≤ 8 characters; how the room looks as a door in its parent                    |
-| `characters`    | yes, 1–4               | who lives here                                                                         |
-| `collections`   | yes, 0–6 (may be `[]`) | what the room remembers: its own database                                              |
-| `panels`        | yes, 1–8               | what the person sees                                                                   |
-| `layout`        | no                     | `panels` (default, a page) or `immersive` (the room is its world; see Immersive rooms) |
-| `pulse`         | no                     | `{ collection, field }`: a boolean field whose share of true is how alive the room is  |
-| `world`         | no                     | a place its characters act in, drawn by the room's own surface (see World and surface) |
-| `rooms`         | no, 0–8                | inner rooms (built or planned)                                                         |
-| `planned`       | inner rooms only       | `true`: agreed but not built; only `id`, `title`, `purpose`, `icon`                    |
+| Key             | Required               | Meaning                                                                                 |
+| --------------- | ---------------------- | --------------------------------------------------------------------------------------- |
+| `schemaVersion` | top room only          | `1`                                                                                     |
+| `id`            | yes                    | kebab-case, unique among its siblings; part of the room's path                          |
+| `title`         | yes                    | ≤ 60 characters                                                                         |
+| `purpose`       | yes                    | ≤ 600; what the room is for and who it serves (characters read it)                      |
+| `language`      | top room; inherited    | `ar` (right to left, Egyptian Arabic characters) or `en`                                |
+| `theme`         | top room; inherited    | `{ preset, accent }`; an inner room may set either or both                              |
+| `icon`          | no                     | an emoji ≤ 8 characters; how the room looks as a door in its parent                     |
+| `characters`    | yes, 1–4               | who lives here                                                                          |
+| `collections`   | yes, 0–6 (may be `[]`) | what the room remembers: its own database                                               |
+| `panels`        | yes, 1–8               | what the person sees                                                                    |
+| `layout`        | no                     | `panels` (default, a page) or `immersive` (the room is its world; see Immersive rooms)  |
+| `presence`      | immersive rooms only   | `overlay` (default, captions over the world) or `dock` (characters beside a working UI) |
+| `pulse`         | no                     | `{ collection, field }`: a boolean field whose share of true is how alive the room is   |
+| `world`         | no                     | a place its characters act in, drawn by the room's own surface (see World and surface)  |
+| `rooms`         | no, 0–8                | inner rooms (built or planned)                                                          |
+| `planned`       | inner rooms only       | `true`: agreed but not built; only `id`, `title`, `purpose`, `icon`                     |
 
 Theme presets: `school`, `studio`, `habit`, `kids`, `planet` (dark, space), `office`, `calm`.
 Accent: `#rrggbb`. Limits for a whole tree: 4 levels, 40 rooms.
@@ -196,6 +197,13 @@ colour that returns). When a character takes the person into an immersive inner 
 call, the call carries on: after that room's arrival scene its first character speaks first,
 from the note. Rules: the room needs a `world`, and its only panel is the `world`
 panel. A room meant for forms, lists and dashboards (a parents' corner) stays `panels`.
+
+With `"presence": "dock"` the world is a working interface in the room's own style (a day
+planner, a tracker) rather than a place to live in: the person taps it as well as talking,
+and the characters sit beside it (a side column on wide screens, a sheet that opens at the
+bottom of a phone) with their conversation, typing and a voice call always at hand. On
+arrival the first character speaks first in words, once per visit, from its persona and the
+data. Choose it for adults who need someone to manage, plan and follow up.
 
 ## Pulse
 

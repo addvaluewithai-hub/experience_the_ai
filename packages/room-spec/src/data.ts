@@ -25,8 +25,17 @@ export function collectionOf(spec: RoomSpec, collectionId: unknown): Collection 
 }
 
 function checkValue(field: Field, value: unknown): RecordValue {
+  // Say exactly what is accepted, so a character can correct its own call.
+  const kind =
+    field.type === 'choice'
+      ? `one of ${(field.options ?? []).join(', ')}`
+      : field.type === 'date'
+        ? 'a date (YYYY-MM-DD)'
+        : field.type === 'text'
+          ? `text of 1 to ${LIMITS.longText} characters`
+          : `a ${field.type}`;
   const fail = (): never => {
-    throw new DataError(`${field.label} must be ${field.type}`);
+    throw new DataError(`${field.label} must be ${kind}`);
   };
   switch (field.type) {
     case 'number':

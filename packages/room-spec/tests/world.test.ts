@@ -181,6 +181,9 @@ test('an immersive room is its world: one world panel and nothing else', () => {
     /layout: an immersive room is its world/,
   );
   assert.match(errorsOf(room(world, { layout: 'cinema' })), /layout: must be one of/);
+  assert.equal(valid(room(world, { layout: 'immersive', presence: 'dock' })).presence, 'dock');
+  assert.match(errorsOf(room(world, { presence: 'dock' })), /presence: only an immersive room/);
+  assert.match(errorsOf(room(world, { layout: 'immersive', presence: 'side' })), /must be one of/);
 });
 
 test('the brief carries the description, the surface state and the rules', () => {

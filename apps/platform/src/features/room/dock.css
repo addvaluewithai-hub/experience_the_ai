@@ -1,0 +1,156 @@
+/* A docked presence: the world is a working interface, and the characters sit beside it. */
+.immersive-docked {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+}
+.immersive-docked .immersive-world {
+  position: relative;
+  inset: auto;
+  min-height: 0;
+  overflow: auto;
+}
+.dock {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--room-accent, #3f8f4a) 10%, #fff);
+  border-inline-start: 1px solid color-mix(in srgb, var(--room-accent, #3f8f4a) 25%, transparent);
+  color: #1f2a26;
+}
+.dock-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+}
+.dock-leave {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  color: inherit;
+  text-decoration: none;
+  background: rgb(255 255 255 / 0.7);
+}
+.dock-cast {
+  display: flex;
+  flex: 1;
+  gap: 6px;
+  min-width: 0;
+}
+.dock-cast button {
+  display: grid;
+  padding: 4px 10px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+}
+.dock-cast button[aria-pressed='true'] {
+  background: rgb(255 255 255 / 0.8);
+}
+.dock-cast small {
+  opacity: 0.7;
+}
+.dock-fold {
+  display: none;
+}
+.dock-lines {
+  flex: 1;
+  margin: 0;
+  padding: 4px 12px 12px;
+  overflow-y: auto;
+  list-style: none;
+}
+.dock-line {
+  max-width: 88%;
+  margin: 6px 0;
+  padding: 8px 12px;
+  border-radius: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+.dock-agent {
+  background: #fff;
+}
+.dock-person {
+  margin-inline-start: auto;
+  background: var(--room-accent, #3f8f4a);
+  color: #fff;
+}
+.dock-activity {
+  max-width: none;
+  padding: 2px 4px;
+  font-size: 13px;
+  opacity: 0.7;
+}
+.dock-error {
+  background: #fde8e6;
+  color: #8a1c12;
+}
+.dock-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  padding: 12px;
+  border-top: 1px solid rgb(0 0 0 / 0.06);
+}
+.dock-type {
+  display: flex;
+  gap: 6px;
+}
+.dock-type input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 14px;
+  border: 1px solid rgb(0 0 0 / 0.12);
+  border-radius: 999px;
+  font: inherit;
+}
+.dock-controls button {
+  padding: 9px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--room-accent, #3f8f4a);
+  color: #fff;
+  font: inherit;
+}
+.dock-call {
+  display: flex;
+  gap: 6px;
+}
+.dock-call[data-status='connecting'] {
+  opacity: 0.6;
+}
+@media (max-width: 760px) {
+  .immersive-docked {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+  .dock {
+    max-height: 46dvh;
+    border-inline-start: 0;
+    border-top: 1px solid rgb(0 0 0 / 0.08);
+  }
+  .dock[data-open='false'] .dock-lines {
+    flex: none;
+    max-height: 4.2em;
+  }
+  .dock-fold {
+    display: block;
+    padding: 6px 10px;
+    border: 0;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.8);
+    font: inherit;
+    font-size: 13px;
+  }
+  .dock-cast small {
+    display: none;
+  }
+}

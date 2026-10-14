@@ -3,7 +3,7 @@ import type { OpenRoom } from '../../app/rooms';
 import { conversationFor, useConversation, type Line } from './conversation';
 import { endCall, sayInCall, startCall, toggleMute, useCall } from './voiceCall';
 
-const words = {
+export const words = {
   ar: {
     begin: 'يلا نبدأ ✨',
     waking: 'لحظة…',

@@ -3,7 +3,7 @@ import type { Character } from '@experience/room-spec';
 import { VoiceSession, type LiveTicket, type VoiceStatus } from '@experience/live-runtime';
 import type { OpenRoom } from '../../app/rooms';
 import { post } from '../../shared/api';
-import { conversationFor } from './conversation';
+import { arrivalCue, conversationFor } from './conversation';
 
 export type Call = {
   status: VoiceStatus | 'idle';
@@ -48,7 +48,7 @@ export async function startCall(
       typeof options.greet === 'string'
         ? options.greet
         : options.greet
-          ? `ARRIVED: the person just came into "${room.spec.title}". Your usual first words: ${character.greeting}`
+          ? arrivalCue(room, character)
           : undefined,
     ticket: () => post<LiveTicket>('/api/live', conversation.context()),
     runTool: (call) => {
