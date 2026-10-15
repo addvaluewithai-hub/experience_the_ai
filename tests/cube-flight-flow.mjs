@@ -2,7 +2,12 @@ import assert from 'node:assert/strict';
 
 /** Real-browser smoke: full-screen room, original Lumi SVG, game inputs and a memory scaffold. */
 export async function cubeFlightFlow(page, url) {
+  page.on('pageerror', console.error);
+  page.on('console', (message) => {
+    if (message.type() === 'error') console.error('Cube browser console:', message.text());
+  });
   await page.goto(`${url}/#/room/cube-flight`);
+  await page.waitForTimeout(600);
   await page.locator('[data-world="cube-flight"]').waitFor();
   await page.locator('.cf-avatar svg').waitFor();
   assert.equal(await page.locator('.dock').count(), 0, 'Lumi lives in-game, not in side chat');
