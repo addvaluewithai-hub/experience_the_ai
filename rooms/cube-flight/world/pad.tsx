@@ -47,4 +47,3 @@ export function NumberPad(props: {
     </form>
   );
 }
-

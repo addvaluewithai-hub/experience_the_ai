@@ -1,4 +1,9 @@
-import { parseData, type MouthFrame, type PresenceMode, type RoomSpec } from '@experience/room-spec';
+import {
+  parseData,
+  type MouthFrame,
+  type PresenceMode,
+  type RoomSpec,
+} from '@experience/room-spec';
 import type { RoomStore, RoomSurface, SurfaceViewProps } from '@experience/room-runtime';
 import type { ComponentType } from 'react';
 import { LumiAvatar } from './avatar';

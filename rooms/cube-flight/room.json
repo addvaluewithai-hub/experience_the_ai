@@ -67,11 +67,7 @@
           "id": "stage",
           "label": "مرحلة الذاكرة",
           "type": "choice",
-          "options": [
-            "learning",
-            "review",
-            "strong"
-          ]
+          "options": ["learning", "review", "strong"]
         }
       ]
     }
@@ -94,47 +90,31 @@
         "params": {
           "place": {
             "type": "choice",
-            "options": [
-              "left",
-              "middle",
-              "right"
-            ]
+            "options": ["left", "middle", "right"]
           }
         },
-        "required": [
-          "place"
-        ],
-        "characters": [
-          "lumi"
-        ]
+        "required": ["place"],
+        "characters": ["lumi"]
       },
       {
         "name": "cheer",
         "description": "Celebrate a completed challenge with an expressive gesture and flight. Does not award points or judge answers.",
-        "characters": [
-          "lumi"
-        ]
+        "characters": ["lumi"]
       },
       {
         "name": "show_hint",
         "description": "Show a recall-friendly mathematical hint for the current question, but only on child's request. Marks the attempt as assisted.",
-        "characters": [
-          "lumi"
-        ]
+        "characters": ["lumi"]
       },
       {
         "name": "reveal_array",
         "description": "Show a visual array scaffold for the current question on request. Marks attempt as assisted.",
-        "characters": [
-          "lumi"
-        ]
+        "characters": ["lumi"]
       },
       {
         "name": "advance",
         "description": "Start a new round if waiting, or advance only after the player has submitted a correct answer or revealed the solution. Never skips unanswered questions.",
-        "characters": [
-          "lumi"
-        ]
+        "characters": ["lumi"]
       },
       {
         "name": "remember_player",
@@ -145,12 +125,8 @@
             "description": "Short preferred nickname, 2 to 24 characters, explicitly supplied by the child."
           }
         },
-        "required": [
-          "nickname"
-        ],
-        "characters": [
-          "lumi"
-        ]
+        "required": ["nickname"],
+        "characters": ["lumi"]
       },
       {
         "name": "name_companion",
@@ -161,12 +137,8 @@
             "description": "Name chosen by the child for her flying companion, 2 to 24 characters."
           }
         },
-        "required": [
-          "nickname"
-        ],
-        "characters": [
-          "lumi"
-        ]
+        "required": ["nickname"],
+        "characters": ["lumi"]
       }
     ]
   }

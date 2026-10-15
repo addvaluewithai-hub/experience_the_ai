@@ -9,7 +9,6 @@ type Outcome = 'memory' | 'helped' | 'shown' | null;
 type Props = SurfaceViewProps & { model: CubeModel };
 const keys = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
 
-
 export function GameBoard({ spec, data, edit, model }: Props) {
   const [plan, setPlan] = useState<Question[]>([]);
   const [index, setIndex] = useState(0);
@@ -78,10 +77,14 @@ export function GameBoard({ spec, data, edit, model }: Props) {
 
   useEffect(() => {
     if (!current || outcome || !entry) return;
-    const timer = setTimeout(() => model.emit({
-      kind: 'selection',
-      detail: { digits: entry },
-    }), 600);
+    const timer = setTimeout(
+      () =>
+        model.emit({
+          kind: 'selection',
+          detail: { digits: entry },
+        }),
+      600,
+    );
     return () => clearTimeout(timer);
   }, [current, entry, model, outcome]);
 
@@ -95,8 +98,7 @@ export function GameBoard({ spec, data, edit, model }: Props) {
       setHinted(true);
       setArray(true);
       model.hint();
-    }
-    else if (command.action === 'advance') {
+    } else if (command.action === 'advance') {
       if (!plan.length || complete) begin();
       else if (outcome) next();
     }
@@ -122,8 +124,13 @@ export function GameBoard({ spec, data, edit, model }: Props) {
     model.emit({
       kind: 'answer',
       detail: {
-        a: current.a, b: current.b, revealed: true, answer: current.a * current.b,
-        expected: current.a * current.b, correct: false, independent: false,
+        a: current.a,
+        b: current.b,
+        revealed: true,
+        answer: current.a * current.b,
+        expected: current.a * current.b,
+        correct: false,
+        independent: false,
         strategy: hintFor(current.a, current.b),
       },
     });
@@ -140,8 +147,12 @@ export function GameBoard({ spec, data, edit, model }: Props) {
       model.emit({
         kind: 'answer',
         detail: {
-          a: current.a, b: current.b, answer: Number(entry),
-          expected: current.a * current.b, correct: false, independent: false,
+          a: current.a,
+          b: current.b,
+          answer: Number(entry),
+          expected: current.a * current.b,
+          correct: false,
+          independent: false,
           strategy: hintFor(current.a, current.b),
         },
       });
@@ -166,8 +177,12 @@ export function GameBoard({ spec, data, edit, model }: Props) {
     model.emit({
       kind: 'answer',
       detail: {
-        a: current.a, b: current.b, answer: Number(entry),
-        expected: current.a * current.b, correct: true, independent: unassisted,
+        a: current.a,
+        b: current.b,
+        answer: Number(entry),
+        expected: current.a * current.b,
+        correct: true,
+        independent: unassisted,
         strategy: hintFor(current.a, current.b),
       },
     });
@@ -178,10 +193,17 @@ export function GameBoard({ spec, data, edit, model }: Props) {
   return (
     <main className="cf-arena" dir="rtl" aria-label="Cube Flight multiplication game">
       {plan.length > 0 && !complete && (
-        <div className="cf-progress-pips" role="progressbar"
-          aria-label="تقدم اللعب" aria-valuenow={index}
-          aria-valuemin={0} aria-valuemax={plan.length}>
-          {plan.map((_, i) => <i key={i} className={i < index ? 'lit' : ''} />)}
+        <div
+          className="cf-progress-pips"
+          role="progressbar"
+          aria-label="تقدم اللعب"
+          aria-valuenow={index}
+          aria-valuemin={0}
+          aria-valuemax={plan.length}
+        >
+          {plan.map((_, i) => (
+            <i key={i} className={i < index ? 'lit' : ''} />
+          ))}
         </div>
       )}
 
@@ -214,7 +236,6 @@ export function GameBoard({ spec, data, edit, model }: Props) {
         </section>
       ) : current ? (
         <section className="cf-play">
-
           <div className="cf-equation" aria-label={`${current.a} في ${current.b}`}>
             <span className="cf-big-cube">{current.a}</span>
             <span className="cf-operator">×</span>
@@ -225,14 +246,21 @@ export function GameBoard({ spec, data, edit, model }: Props) {
             </span>
           </div>
           <span className="sr-only" aria-live="polite">
-            {outcome === 'memory' ? 'إجابة صح من الذاكرة'
-              : outcome === 'helped' ? 'إجابة صح بمساعدة'
-              : outcome === 'shown' ? 'تم عرض الحل'
-              : wrong ? 'جرّبي تاني مع التلميح' : ''}
+            {outcome === 'memory'
+              ? 'إجابة صح من الذاكرة'
+              : outcome === 'helped'
+                ? 'إجابة صح بمساعدة'
+                : outcome === 'shown'
+                  ? 'تم عرض الحل'
+                  : wrong
+                    ? 'جرّبي تاني مع التلميح'
+                    : ''}
           </span>
-          {outcome && <div className={`cf-result-flash ${outcome}`} aria-hidden="true">
-            {outcome === 'shown' ? '✦' : '✓'}
-          </div>}
+          {outcome && (
+            <div className={`cf-result-flash ${outcome}`} aria-hidden="true">
+              {outcome === 'shown' ? '✦' : '✓'}
+            </div>
+          )}
           {hinted && (
             <aside className="cf-help-panel" aria-label="تلميح">
               <span className="cf-hint-title">✧ مفتاح الذاكرة</span>

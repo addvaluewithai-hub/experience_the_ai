@@ -2,7 +2,13 @@ import { Cast } from '@experience/kit-phaser';
 import type { MouthFrame, PresenceMode } from '@experience/room-spec';
 
 export interface SpriteRig {
-  setFlight(command: { action: 'move' | 'hover'; x?: number; y?: number; speed?: number; path?: 'arc' | 'direct' | 'swoop' }): boolean;
+  setFlight(command: {
+    action: 'move' | 'hover';
+    x?: number;
+    y?: number;
+    speed?: number;
+    path?: 'arc' | 'direct' | 'swoop';
+  }): boolean;
   setGesture(name: string, duration?: number): void;
   setEmotion(name: string): void;
   setMouthPose(frame: MouthFrame | null): void;
@@ -20,7 +26,12 @@ export type GameEvent = {
 export type PlayerProfile = { player: string; companion: string };
 const PROFILE_KEY = 'experience_the_ai:cube-flight:profile:v1';
 const cleanName = (value: unknown) =>
-  typeof value === 'string' ? value.trim().replace(/[<>\u0000-\u001f]/g, '').slice(0, 24) : '';
+  typeof value === 'string'
+    ? value
+        .trim()
+        .replace(/[<>\u0000-\u001f]/g, '')
+        .slice(0, 24)
+    : '';
 
 function readProfile(): PlayerProfile {
   try {
@@ -47,12 +58,16 @@ export class CubeModel extends Cast {
 
   subscribeCommand = (listener: () => void) => {
     this.listeners.add(listener);
-    return () => { this.listeners.delete(listener); };
+    return () => {
+      this.listeners.delete(listener);
+    };
   };
   getCommand = () => this.command;
   subscribeGame = (listener: (event: GameEvent) => void) => {
     this.gameListeners.add(listener);
-    return () => { this.gameListeners.delete(listener); };
+    return () => {
+      this.gameListeners.delete(listener);
+    };
   };
   emit(event: GameEvent) {
     for (const listener of this.gameListeners) listener(event);
@@ -64,7 +79,8 @@ export class CubeModel extends Cast {
     const next = { ...this.getProfile(), [which]: value };
     this.profile = next;
     try {
-      if (typeof localStorage !== 'undefined') localStorage.setItem(PROFILE_KEY, JSON.stringify(next));
+      if (typeof localStorage !== 'undefined')
+        localStorage.setItem(PROFILE_KEY, JSON.stringify(next));
     } catch {
       // Private mode or blocked storage: still remember it for this tab.
     }
@@ -103,9 +119,7 @@ export class CubeModel extends Cast {
     this.go('left');
   }
   answer(correct: boolean, helped: boolean) {
-    this.phase = correct
-      ? helped ? 'صح بمساعدة' : 'صح من الذاكرة'
-      : 'لسه بتتعلم وبتحاول';
+    this.phase = correct ? (helped ? 'صح بمساعدة' : 'صح من الذاكرة') : 'لسه بتتعلم وبتحاول';
     if (correct) {
       this.successes++;
       this.avatar?.setEmotion('excited');
@@ -118,8 +132,10 @@ export class CubeModel extends Cast {
   }
   act(character: string, action: string, args: Record<string, unknown>) {
     if (character !== 'lumi') return;
-    if (action === 'fly_to' &&
-      (args.place === 'left' || args.place === 'middle' || args.place === 'right'))
+    if (
+      action === 'fly_to' &&
+      (args.place === 'left' || args.place === 'middle' || args.place === 'right')
+    )
       this.go(args.place);
     else if (action === 'show_hint') this.request('hint');
     else if (action === 'reveal_array') this.request('array');
