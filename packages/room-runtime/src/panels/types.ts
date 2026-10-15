@@ -42,7 +42,14 @@ export type SurfaceViewProps = Pick<PanelProps, 'spec' | 'data' | 'edit' | 'worl
  * A room's surface: whatever draws its world (Phaser, 3D, SVG, plain UI), plus the Presence
  * the brain drives. Rooms ship their own; the engine only mounts and talks to it.
  */
+export type RoomInteractionEvent = {
+  kind: string;
+  detail: Record<string, string | number | boolean>;
+};
+
 export type RoomSurface = Presence & {
+  /** Optional, non-authoritative game events for a voice character to react to. */
+  onGameEvent?(listener: (event: RoomInteractionEvent) => void): () => void;
   View: ComponentType<SurfaceViewProps>;
   /** The director: plays one of the world's scenes; resolves when it is over. */
   play?(scene: string): Promise<void>;
