@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { emptyData, validateRoom } from '@experience/room-spec';
 import cubeFlight from '../index.ts';
+import { CubeModel } from '../world/model.ts';
 import {
   canonical,
   dateOf,
@@ -94,4 +95,22 @@ test('scaffolds help without replacing the need for recall', () => {
   assert.match(hintFor(7, 8), /56/);
   assert.match(hintFor(6, 12), /10/);
   assert.match(dateOf(new Date(2026, 9, 15)), /^2026-10-15$/);
+});
+
+test('Lumi tools request safe game actions without writing answers or awarding points', () => {
+  const model = new CubeModel();
+  const commands: string[] = [];
+  const stop = model.subscribeCommand(() => {
+    const action = model.getCommand()?.action;
+    if (action) commands.push(action);
+  });
+  model.act('lumi', 'show_hint', {});
+  model.act('lumi', 'reveal_array', {});
+  model.act('lumi', 'advance', {});
+  model.act('someone-else', 'advance', {});
+  assert.deepEqual(commands, ['hint', 'array', 'advance']);
+  assert.match(model.state(), /do not guess correctness/);
+  stop();
+  model.act('lumi', 'advance', {});
+  assert.equal(commands.length, 3, 'disposed listener receives no more commands');
 });
