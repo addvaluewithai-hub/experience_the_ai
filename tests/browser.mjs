@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { mkdir } from 'node:fs/promises';
 import { chromium } from 'playwright';
+import { cubeFlightFlow } from './cube-flight-flow.mjs';
 
 // Built app + mocked API: this checks rooms, panels and the agent tool loop in a real browser.
 // It does not prove a real model's behaviour; that needs a live check on a preview deployment.
@@ -91,23 +92,7 @@ try {
   await page.getByRole('link', { name: /وادي قوس قزح/ }).waitFor();
   await page.screenshot({ path: 'test-results/home.png', fullPage: true });
 
-  // The new multiplication room reuses Lumi's original SVG rig and grades locally.
-  await page.goto(`${url}/#/room/cube-flight`);
-  await page.locator('[data-world="cube-flight"]').waitFor();
-  await page.locator('.cf-avatar svg').waitFor();
-  await page.getByRole('button', { name: /يلا نطير ونلعب/ }).click();
-  const firstFactors = await page.locator('.cf-equation .cf-cube').allTextContents();
-  assert.equal(firstFactors.length, 3);
-  const product = Number(firstFactors[0]) * Number(firstFactors[1]);
-  await page.getByRole('textbox', { name: 'الناتج' }).fill(String(product));
-  await page.getByRole('button', { name: /اتأكدّي/ }).click();
-  await page.getByText(/الإجابة طلعت من غير مساعدة/).waitFor();
-  await page.getByRole('button', { name: /السؤال اللي بعده/ }).click();
-  await page.getByRole('button', { name: /تلميح/ }).click();
-  await page.getByText('رابط للذاكرة').waitFor();
-  await page.getByRole('button', { name: /ورّيني الـ Array/ }).click();
-  assert.ok((await page.locator('.cf-array i').count()) > 0);
-  await page.screenshot({ path: 'test-results/cube-flight.png', fullPage: true });
+  await cubeFlightFlow(page, url);
 
   // A person's own edits go through the room rules and every panel agrees.
   await page.getByRole('link', { name: /كوكب العادات/ }).click();
