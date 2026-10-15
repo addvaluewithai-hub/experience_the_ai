@@ -1,23 +1,22 @@
 {
   "schemaVersion": 1,
   "id": "cube-flight",
-  "title": "رحلة المكعبات",
+  "title": "Cube Flight — المكعبات الطايرة",
   "icon": "🧊",
-  "purpose": "لعبة قصيرة لطفلة عمرها 8 سنين فاهمة الضرب بالـ arrays، وتحتاج تسترجع نتائج 2 إلى 12 من الذاكرة. المكعبات والتلميحات جسر مؤقت للحفظ، ولومي رفيقتها الطايرة؛ لا ضغط سرعة أو عقوبات.",
+  "purpose": "لعبة تحدّي مكعبات ضخمة ذات إحساس 3D، لطفلة 8 سنين فاهمة الضرب لحد 12 × 12 وعايزة تحفظ النتائج. لومي الطايرة شريكة اللعب بصوت وتعبيرات وأدوات حقيقية، مش شات جانبي. المراجعة تعتمد على الاسترجاع بدون عقاب أو سباق مؤقت.",
   "language": "ar",
   "theme": {
     "preset": "kids",
     "accent": "#7467d9"
   },
   "layout": "immersive",
-  "presence": "dock",
   "characters": [
     {
       "id": "lumi",
       "name": "لومي",
-      "role": "رفيقة المكعبات الطايرة",
-      "persona": "إنتِ لومي، رفيقة طفلة عمرها 8 سنين بتفهم الضرب بالفعل. اتكلمي مصري قصير ومرح. دورك اللعب والتشجيع، مش امتحان أو شرح طويل. لما تحاول استرجاع ناتج من غير عد شجعيها، ولما تحتاج تلميح قولي إن ده طبيعي. اللعبة نفسها بتصحح الإجابات وتحسب التقدم؛ لا تقولي إن الإجابة صح أو غلط من نفسك، ولا تغيّري سجلها، ولا تدي ناتج العملية الظاهرة قبل ما تحاول أو تطلب مساعدة. لو سألت عن الحل ساعديها تربطه بعملية معروفة، وارجعيها للمكعبات. ما تطلبيش أي معلومات شخصية أو ترابطي حبك بالنجاح. تقدري تطيري وتحتفلي بأدوات العالم.",
-      "greeting": "يا أهلاً! أنا لومي 🪽 هنلعب بالمكعبات ونخلي الأرقام تثبت في دماغنا. مستعدة؟",
+      "role": "شريكة لعبة Cube Flight",
+      "persona": "إنتِ لومي، شخصية طايرة ذكية ومرحة جوا لعبة Cube Flight لطفلة 8 سنين بتفهم الضرب وعايزة تحفظه. اتكلمي مصري طبيعي وناضج، جمل قصيرة فيها هزار وتحدي لطيف بلا تصغير أو كلام طفولي. اسأليها تتذكر النواتج بدل العد الطويل؛ التلميح يظهر فقط بطلبها. استعملي أدواتك fly_to، cheer، show_hint، reveal_array، advance لما يكون مناسبًا. show_hint وreveal_array بيظهروا أدوات مساعدة ولازم الطفلة تحاول بنفسها. advance لا يشتغل قبل الرد. ما تعتمديش على نفسك في تصحيح الإجابة؛ اللعبة وحدها بتحدد الصحيح وتحتفظ بالتقدم. ما تكشفيش الإجابة من نفسك قبل محاولة أو طلب مساعدة. ما تطلبيش بيانات شخصية ولا تعاقبيها أو تضغطي عليها بالوقت.",
+      "greeting": "أنا لومي! جاهزة لتحدّي المكعبات؟ اختاري الأرقام وخلّينا نشوف ذاكرتك بتتطور إزاي!",
       "capabilities": [],
       "voice": "Leda"
     }
@@ -27,40 +26,115 @@
       "id": "facts",
       "label": "ذاكرة عمليات الضرب",
       "fields": [
-        { "id": "a", "label": "العامل الأول", "type": "number", "required": true },
-        { "id": "b", "label": "العامل الثاني", "type": "number", "required": true },
-        { "id": "attempts", "label": "المحاولات", "type": "number" },
-        { "id": "independent", "label": "الاسترجاعات المستقلة", "type": "number" },
-        { "id": "streak", "label": "أيام ناجحة متتالية", "type": "number" },
-        { "id": "last", "label": "آخر تدريب", "type": "date" },
-        { "id": "due", "label": "مراجعة يوم", "type": "date" },
+        {
+          "id": "a",
+          "label": "العامل الأول",
+          "type": "number",
+          "required": true
+        },
+        {
+          "id": "b",
+          "label": "العامل الثاني",
+          "type": "number",
+          "required": true
+        },
+        {
+          "id": "attempts",
+          "label": "المحاولات",
+          "type": "number"
+        },
+        {
+          "id": "independent",
+          "label": "الاسترجاعات المستقلة",
+          "type": "number"
+        },
+        {
+          "id": "streak",
+          "label": "أيام ناجحة متتالية",
+          "type": "number"
+        },
+        {
+          "id": "last",
+          "label": "آخر تدريب",
+          "type": "date"
+        },
+        {
+          "id": "due",
+          "label": "مراجعة يوم",
+          "type": "date"
+        },
         {
           "id": "stage",
           "label": "مرحلة الذاكرة",
           "type": "choice",
-          "options": ["learning", "review", "strong"]
+          "options": [
+            "learning",
+            "review",
+            "strong"
+          ]
         }
       ]
     }
   ],
-  "panels": [{ "id": "play", "kind": "world", "title": "رحلة المكعبات", "wide": true }],
+  "panels": [
+    {
+      "id": "play",
+      "kind": "world",
+      "title": "رحلة المكعبات",
+      "wide": true
+    }
+  ],
   "world": {
     "surface": "cube-flight-svg",
-    "describe": "Simple bright cube-play desk with Zuzu, a friendly winged creature hovering above it. The deterministic game shows the current multiplication question, accepts number cubes as answers, offers a scaffold hint or reveal, and records independent recalls. Zuzu should react to the game rather than determine correct answers.",
+    "describe": "Immersive fullscreen arcade-toy multiplication challenge with oversized dimensional number cubes, a tactile keypad and Lumi, an original expressive flying PixiLive sprite in-world. No sidebar chat or dashboard. The deterministic game tracks the displayed question, checks answers and schedules reviews. Lumi may fly and use show_hint, reveal_array or advance to help the player; never guess correctness or override scoring.",
     "actions": [
       {
         "name": "fly_to",
-        "description": "Fly playfully to the left, middle or right above the cubes.",
+        "description": "Move across the game arena near the big number blocks; non-blocking and works while speaking.",
         "params": {
-          "place": { "type": "choice", "options": ["left", "middle", "right"] }
+          "place": {
+            "type": "choice",
+            "options": [
+              "left",
+              "middle",
+              "right"
+            ]
+          }
         },
-        "required": ["place"],
-        "characters": ["lumi"]
+        "required": [
+          "place"
+        ],
+        "characters": [
+          "lumi"
+        ]
       },
       {
         "name": "cheer",
-        "description": "A small joyful spin and sparkle after a real achievement.",
-        "characters": ["lumi"]
+        "description": "Celebrate a completed challenge with an expressive gesture and flight. Does not award points or judge answers.",
+        "characters": [
+          "lumi"
+        ]
+      },
+      {
+        "name": "show_hint",
+        "description": "Show a recall-friendly mathematical hint for the current question, but only on child's request. Marks the attempt as assisted.",
+        "characters": [
+          "lumi"
+        ]
+      },
+      {
+        "name": "reveal_array",
+        "description": "Show a visual array scaffold for the current question on request. Marks attempt as assisted.",
+        "characters": [
+          "lumi"
+        ]
+      },
+      {
+        "name": "advance",
+        "description": "Start a new round if waiting, or advance only after the player has submitted a correct answer or revealed the solution. Never skips unanswered questions.",
+        "characters": [
+          "lumi"
+        ]
       }
     ]
   }
