@@ -1,4 +1,8 @@
 import { useEffect, useRef } from 'react';
+import geometryUrl from '../character/geometry.js?url';
+import engineUrl from '../character/engine.js?url';
+import flightUrl from '../character/flight.js?url';
+import motionUrl from '../character/motion.js?url';
 import type { CubeModel, SpriteRig } from './model';
 
 interface CharacterRecipe {
@@ -20,18 +24,36 @@ declare global {
   }
 }
 
-/** PixiLive source modules are browser-only IIFEs; load them after mount, in dependency order. */
-async function loadPixiLive() {
-  // @ts-ignore PixiLive ships original JavaScript globals, not a typed ES module.
-  await import('../character/geometry.js');
-  // @ts-ignore PixiLive ships original JavaScript globals, not a typed ES module.
-  await import('../character/engine.js');
-  // @ts-ignore PixiLive ships original JavaScript globals, not a typed ES module.
-  await import('../character/flight.js');
-  // @ts-ignore PixiLive ships original JavaScript globals, not a typed ES module.
-  await import('../character/motion.js');
-  const { default: master } = await import('../character/master.svg?raw');
-  return master;
+/** Load the original browser scripts as classic scripts, not ES modules.
+ * The original PixiLive IIFEs publish CharacterGeometry / Engine / Flight / Motion on window.
+ * ?url copies source bytes into versioned same-origin assets without bundler rewriting.
+ */
+let loader: Promise<string> | null = null;
+function script(url: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const element = document.createElement('script');
+    element.src = url;
+    element.async = false;
+    element.onload = () => resolve();
+    element.onerror = () => {
+      element.remove();
+      reject(new Error('Could not load local PixiLive character script.'));
+    };
+    document.head.append(element);
+  });
+}
+function loadPixiLive(): Promise<string> {
+  loader ??= (async () => {
+    for (const url of [geometryUrl, engineUrl, flightUrl, motionUrl]) await script(url);
+    if (!window.CharacterEngine || !window.CharacterMotion)
+      throw new Error('Original PixiLive character globals did not initialize.');
+    const { default: master } = await import('../character/master.svg?raw');
+    return master;
+  })().catch((error) => {
+    loader = null;
+    throw error;
+  });
+  return loader;
 }
 
 /**
