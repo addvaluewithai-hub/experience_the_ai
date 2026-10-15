@@ -100,6 +100,13 @@ export function ImmersiveRoom(props: {
           );
         return;
       }
+      if (kind === 'pause') {
+        reactToGameInCall(
+          room.key,
+          `GAME_THINKING_PAUSE: The child has placed ${detail.digits} for ${detail.a}×${detail.b} but hasn't submitted. Ask ONE warm, very brief question about her thinking. Don't judge the partial digits, don't reveal the result and don't interrupt if she resumes typing.`,
+        );
+        return;
+      }
       if (kind === 'question') {
         noteGameToCall(
           room.key,
