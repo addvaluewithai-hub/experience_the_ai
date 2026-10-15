@@ -1,0 +1,27 @@
+name: Cube Flight cleanup formatter
+on:
+  push:
+    branches: [feat/cube-flight-memory]
+    paths: [.github/workflows/cube-flight-cleanup-format.yml]
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npx prettier --write "rooms/cube-flight/**/*.{ts,tsx,json,md}" apps/platform/src/features/room/ImmersiveRoom.tsx tests/cube-flight-flow.mjs
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add rooms/cube-flight apps/platform/src/features/room/ImmersiveRoom.tsx tests/cube-flight-flow.mjs
+          if ! git diff --cached --quiet; then
+            git commit -m "style(cube-flight): format learning mission and stable subscriptions"
+            git push origin HEAD:feat/cube-flight-memory
+          fi
