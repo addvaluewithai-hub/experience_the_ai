@@ -187,7 +187,9 @@ export function ImmersiveRoom(props: {
         )}
       </div>
       {cubeFlight ? (
-        gameStarted ? <CubeVoiceControls room={room} ai={props.ai} started /> : null
+        gameStarted ? (
+          <CubeVoiceControls room={room} ai={props.ai} started />
+        ) : null
       ) : docked ? (
         <PresenceDock room={room} ai={props.ai} leave={leave} />
       ) : (

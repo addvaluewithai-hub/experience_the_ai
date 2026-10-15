@@ -67,7 +67,9 @@ export function LumiAvatar({ model }: { model: CubeModel }) {
   const [profile, setProfile] = useState<PlayerProfile>(() => model.getProfile());
   useEffect(() => {
     const unsubscribe = model.subscribeProfile(() => setProfile(model.getProfile()));
-    return () => { unsubscribe(); };
+    return () => {
+      unsubscribe();
+    };
   }, [model]);
   const attach = useCallback(
     (el: HTMLDivElement | null) => {
