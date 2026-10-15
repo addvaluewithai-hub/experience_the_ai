@@ -1,10 +1,7 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 
 /** Keep one malfunctioning room from blanking the whole app; details go to the browser console. */
-export class CubeErrorBoundary extends Component<
-  { children: ReactNode },
-  { failed: boolean }
-> {
+export class CubeErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   state = { failed: false };
   static getDerivedStateFromError() {
     return { failed: true };
@@ -14,7 +11,11 @@ export class CubeErrorBoundary extends Component<
   }
   render() {
     if (this.state.failed)
-      return <div role="alert" dir="rtl">حصل عطل في تحميل اللعبة. ارجعي وجربي مرة تانية.</div>;
+      return (
+        <div role="alert" dir="rtl">
+          حصل عطل في تحميل اللعبة. ارجعي وجربي مرة تانية.
+        </div>
+      );
     return this.props.children;
   }
 }

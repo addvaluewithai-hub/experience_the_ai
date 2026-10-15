@@ -30,9 +30,7 @@ export function RoomPage(props: {
   useEffect(() => () => void endCall(), [room]);
   if (room.spec.layout === 'immersive') {
     const world = <ImmersiveRoom room={room} rooms={rooms} ai={props.ai} />;
-    return room.key === 'cube-flight' ? (
-      <CubeErrorBoundary>{world}</CubeErrorBoundary>
-    ) : world;
+    return room.key === 'cube-flight' ? <CubeErrorBoundary>{world}</CubeErrorBoundary> : world;
   }
   return (
     <div className="room-page">
