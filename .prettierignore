@@ -5,3 +5,5 @@ package-lock.json
 .functions-check/
 .wrangler/
 rooms/**/skills/
+# Original PixiLive SVG character sources copied unchanged for internal reuse.
+rooms/cube-flight/character/
