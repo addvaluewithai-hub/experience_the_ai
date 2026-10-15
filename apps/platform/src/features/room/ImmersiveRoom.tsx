@@ -81,15 +81,31 @@ export function ImmersiveRoom(props: {
         void startCall(room, companion, {
           greet: [
             'GAME_START: The child has started Cube Flight using the Start button.',
-            `First challenge: ${detail.a} × ${detail.b}. Ask for recall, do not give result.`,
+            `TODAY TABLE ${detail.table}. TEACH FIRST, do not quiz yet: the screen openly shows ${detail.a} × ${detail.b} = ${detail.answer}. Link it to ${detail.strategy}. Ask her to look at the cube groups, then press the next learning step. Only AFTER three learning examples will the answer disappear and recall begin.`,
             room.surface?.state() ?? '',
             'Speak in friendly, natural Egyptian Arabic, one or two lively sentences at a time.',
             'On the first visit ask the child for an OPTIONAL nickname and what she wants to name you.',
             'Only save a name she explicitly chose with remember_player/name_companion tools.',
             'If a nickname is already saved, welcome her by it, do not ask again.',
-            'Your role is to teach flexible strategies through the show_hint and reveal_array tools, never grade arithmetic.',
+            'Be a warm interactive coach, not a test reader. Use gestures and your visual hint and flight tools. Never grade arithmetic yourself.',
           ].join(' '),
         });
+        return;
+      }
+      if (kind === 'teach') {
+        // The first teaching example is in the start-call greeting; later steps are spoken.
+        if (detail.step !== 1)
+          reactToGameInCall(
+            room.key,
+            `GAME_TEACH: Table ${detail.table}; example ${detail.a} × ${detail.b} = ${detail.answer} is DISPLAYED with grouped cubes. Explain the link ${detail.strategy} in one brief Egyptian-Arabic sentence. Invite her to watch how groups connect, not to guess. Wait for her to move on.`,
+          );
+        return;
+      }
+      if (kind === 'lesson_complete') {
+        reactToGameInCall(
+          room.key,
+          `GAME_LESSON_DONE: The three teaching examples for table ${detail.table} are now hidden. Switch to independent recall. Cheer her on gently, and do NOT reveal the next result.`,
+        );
         return;
       }
       if (kind === 'selection') {
