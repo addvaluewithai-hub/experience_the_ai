@@ -119,8 +119,15 @@ export function GameBoard({ spec, data, edit, model }: Props) {
   const reveal = () => {
     if (!current || outcome) return;
     edit((d) =>
-      recordAttempt(spec, d, current.a, current.b, { correct: false, helped: true },
-        dateOf(new Date()), newRecordId),
+      recordAttempt(
+        spec,
+        d,
+        current.a,
+        current.b,
+        { correct: false, helped: true },
+        dateOf(new Date()),
+        newRecordId,
+      ),
     );
     setOutcome('shown');
     model.answer(false, true);
@@ -137,8 +144,15 @@ export function GameBoard({ spec, data, edit, model }: Props) {
     }
     const unassisted = !hinted && !wrong;
     edit((d) =>
-      recordAttempt(spec, d, current.a, current.b, { correct: true, helped: !unassisted },
-        dateOf(new Date()), newRecordId),
+      recordAttempt(
+        spec,
+        d,
+        current.a,
+        current.b,
+        { correct: true, helped: !unassisted },
+        dateOf(new Date()),
+        newRecordId,
+      ),
     );
     setOutcome(unassisted ? 'memory' : 'helped');
     setSolved((n) => n + 1);
@@ -147,32 +161,46 @@ export function GameBoard({ spec, data, edit, model }: Props) {
   };
 
   const result = current ? current.a * current.b : 0;
-  const words = outcome === 'memory'
-    ? 'دي طلعت من الذاكرة! ممتاز ✨'
-    : outcome === 'helped'
-      ? 'وصلتي لها! المرة الجاية نجرب من غير تلميح.'
-      : outcome === 'shown'
-        ? 'ده الناتج. خليه في بالك لما يرجع تاني.'
-        : wrong
-          ? 'قريبة! جربي الرابط ده وبعدين حاولي تاني.'
-          : 'ركّزي لحظة… فاكرة الناتج؟';
+  const words =
+    outcome === 'memory'
+      ? 'دي طلعت من الذاكرة! ممتاز ✨'
+      : outcome === 'helped'
+        ? 'وصلتي لها! المرة الجاية نجرب من غير تلميح.'
+        : outcome === 'shown'
+          ? 'ده الناتج. خليه في بالك لما يرجع تاني.'
+          : wrong
+            ? 'قريبة! جربي الرابط ده وبعدين حاولي تاني.'
+            : 'ركّزي لحظة… فاكرة الناتج؟';
 
   return (
     <main className="cf-arena" dir="rtl" aria-label="Cube Flight multiplication game">
       <header className="cf-hud">
-        <div className="cf-logo"><span className="cf-logo-icon">✦</span><b>CUBE FLIGHT</b></div>
+        <div className="cf-logo">
+          <span className="cf-logo-icon">✦</span>
+          <b>CUBE FLIGHT</b>
+        </div>
         <div className="cf-hud-right">
-          <span className="cf-stats">⚡ {independent} <small>من الذاكرة</small></span>
-          <span className="cf-round">{plan.length ? `${Math.min(index + 1, plan.length)} / ${plan.length}` : 'START'}</span>
+          <span className="cf-stats">
+            ⚡ {independent} <small>من الذاكرة</small>
+          </span>
+          <span className="cf-round">
+            {plan.length ? `${Math.min(index + 1, plan.length)} / ${plan.length}` : 'START'}
+          </span>
         </div>
       </header>
 
       {!plan.length ? (
         <section className="cf-intro">
           <div className="cf-supra">جاهزة للانطلاق؟</div>
-          <h2>الأرقام دي<br/><span>في دماغك!</span></h2>
+          <h2>
+            الأرقام دي
+            <br />
+            <span>في دماغك!</span>
+          </h2>
           <p>٤ تحديات. مكعبات. ولومي معاكي في كل حركة.</p>
-          <button className="cf-go" type="button" onClick={begin}>ابدئي اللعب <span>➜</span></button>
+          <button className="cf-go" type="button" onClick={begin}>
+            ابدئي اللعب <span>➜</span>
+          </button>
           <small>من غير عداد وقت. كل محاولة بتقوّي الذاكرة.</small>
         </section>
       ) : complete ? (
@@ -180,21 +208,32 @@ export function GameBoard({ spec, data, edit, model }: Props) {
           <div className="cf-medal">✦</div>
           <div className="cf-supra">RUN COMPLETE</div>
           <h2>مستوى جديد!</h2>
-          <strong>{independent} <small>/ {plan.length}</small></strong>
+          <strong>
+            {independent} <small>/ {plan.length}</small>
+          </strong>
           <p>إجابات من الذاكرة من غير مساعدة. الصح بمساعدة كمان تدريب ممتاز.</p>
-          <button className="cf-go" type="button" onClick={begin}>جولة جديدة ↗</button>
+          <button className="cf-go" type="button" onClick={begin}>
+            جولة جديدة ↗
+          </button>
         </section>
       ) : current ? (
         <section className="cf-play">
-          <div className="cf-status"><span>CHALLENGE {index + 1}</span><span>{current.revisit ? 'MEMORY RECALL' : 'NEW CUBE'}</span></div>
+          <div className="cf-status">
+            <span>CHALLENGE {index + 1}</span>
+            <span>{current.revisit ? 'MEMORY RECALL' : 'NEW CUBE'}</span>
+          </div>
           <div className="cf-equation" aria-label={`${current.a} في ${current.b}`}>
             <span className="cf-big-cube">{current.a}</span>
             <span className="cf-operator">×</span>
             <span className="cf-big-cube cf-second">{current.b}</span>
             <span className="cf-operator">=</span>
-            <span className={`cf-big-cube cf-answer-cube ${outcome ? 'cf-revealed' : ''}`}>{outcome ? result : '?'}</span>
+            <span className={`cf-big-cube cf-answer-cube ${outcome ? 'cf-revealed' : ''}`}>
+              {outcome ? result : '?'}
+            </span>
           </div>
-          <p className="cf-reaction" aria-live="polite">{words}</p>
+          <p className="cf-reaction" aria-live="polite">
+            {words}
+          </p>
           {hinted && (
             <aside className="cf-help-panel" aria-label="تلميح">
               <span className="cf-hint-title">✧ مفتاح الذاكرة</span>
@@ -203,10 +242,15 @@ export function GameBoard({ spec, data, edit, model }: Props) {
                 {array ? 'اخفي المكعبات' : 'شوفي المجموعات'}
               </button>
               {array && (
-                <div className="cf-array" role="img"
+                <div
+                  className="cf-array"
+                  role="img"
                   aria-label={`${current.a} مجموعات في كل واحدة ${current.b}`}
-                  style={{ gridTemplateColumns: `repeat(${current.b}, 1fr)` }}>
-                  {Array.from({ length: result }, (_, i) => <i key={i}/>)}
+                  style={{ gridTemplateColumns: `repeat(${current.b}, 1fr)` }}
+                >
+                  {Array.from({ length: result }, (_, i) => (
+                    <i key={i} />
+                  ))}
                 </div>
               )}
             </aside>
@@ -221,15 +265,25 @@ export function GameBoard({ spec, data, edit, model }: Props) {
             <>
               <NumberPad entry={entry} setEntry={setEntry} submit={submit} />
               <div className="cf-help-actions">
-                {!hinted && <button type="button" onClick={() => hint()}>✦ تلميح</button>}
-                <button type="button" onClick={reveal}>شوفي الإجابة</button>
+                {!hinted && (
+                  <button type="button" onClick={() => hint()}>
+                    ✦ تلميح
+                  </button>
+                )}
+                <button type="button" onClick={reveal}>
+                  شوفي الإجابة
+                </button>
               </div>
             </>
           )}
         </section>
       ) : null}
 
-      <div className="cf-floor" aria-hidden="true"><span/><span/><span/></div>
+      <div className="cf-floor" aria-hidden="true">
+        <span />
+        <span />
+        <span />
+      </div>
     </main>
   );
 }
