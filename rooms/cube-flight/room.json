@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "id": "cube-flight",
+  "title": "رحلة المكعبات",
+  "icon": "🧊",
+  "purpose": "لعبة قصيرة لطفلة عمرها 8 سنين فاهمة الضرب بالـ arrays، وتحتاج تسترجع نتائج 2 إلى 12 من الذاكرة. المكعبات والتلميحات جسر مؤقت للحفظ، وزوزو رفيقتها الطايرة؛ لا ضغط سرعة أو عقوبات.",
+  "language": "ar",
+  "theme": {
+    "preset": "kids",
+    "accent": "#7467d9"
+  },
+  "layout": "immersive",
+  "presence": "dock",
+  "characters": [
+    {
+      "id": "zuzu",
+      "name": "زوزو",
+      "role": "رفيقة المكعبات الطايرة",
+      "persona": "إنتِ زوزو، رفيقة طفلة عمرها 8 سنين بتفهم الضرب بالفعل. اتكلمي مصري قصير ومرح. دورك اللعب والتشجيع، مش امتحان أو شرح طويل. لما تحاول استرجاع ناتج من غير عد شجعيها، ولما تحتاج تلميح قولي إن ده طبيعي. اللعبة نفسها بتصحح الإجابات وتحسب التقدم؛ لا تقولي إن الإجابة صح أو غلط من نفسك، ولا تغيّري سجلها، ولا تدي ناتج العملية الظاهرة قبل ما تحاول أو تطلب مساعدة. لو سألت عن الحل ساعديها تربطه بعملية معروفة، وارجعيها للمكعبات. ما تطلبيش أي معلومات شخصية أو ترابطي حبك بالنجاح. تقدري تطيري وتحتفلي بأدوات العالم.",
+      "greeting": "يا أهلاً! أنا زوزو 🪽 هنلعب بالمكعبات ونخلي الأرقام تثبت في دماغنا. مستعدة؟",
+      "capabilities": [],
+      "voice": "Leda"
+    }
+  ],
+  "collections": [
+    {
+      "id": "facts",
+      "label": "ذاكرة عمليات الضرب",
+      "fields": [
+        { "id": "a", "label": "العامل الأول", "type": "number", "required": true },
+        { "id": "b", "label": "العامل الثاني", "type": "number", "required": true },
+        { "id": "attempts", "label": "المحاولات", "type": "number" },
+        { "id": "independent", "label": "الاسترجاعات المستقلة", "type": "number" },
+        { "id": "streak", "label": "أيام ناجحة متتالية", "type": "number" },
+        { "id": "last", "label": "آخر تدريب", "type": "date" },
+        { "id": "due", "label": "مراجعة يوم", "type": "date" },
+        {
+          "id": "stage",
+          "label": "مرحلة الذاكرة",
+          "type": "choice",
+          "options": ["learning", "review", "strong"]
+        }
+      ]
+    }
+  ],
+  "panels": [
+    { "id": "play", "kind": "world", "title": "رحلة المكعبات", "wide": true }
+  ],
+  "world": {
+    "surface": "cube-flight-phaser",
+    "describe": "Simple bright cube-play desk with Zuzu, a friendly winged creature hovering above it. The deterministic game shows the current multiplication question, accepts number cubes as answers, offers a scaffold hint or reveal, and records independent recalls. Zuzu should react to the game rather than determine correct answers.",
+    "actions": [
+      {
+        "name": "fly_to",
+        "description": "Fly playfully to the left, middle or right above the cubes.",
+        "params": {
+          "place": { "type": "choice", "options": ["left", "middle", "right"] }
+        },
+        "required": ["place"],
+        "characters": ["zuzu"]
+      },
+      {
+        "name": "cheer",
+        "description": "A small joyful spin and sparkle after a real achievement.",
+        "characters": ["zuzu"]
+      }
+    ]
+  }
+}
