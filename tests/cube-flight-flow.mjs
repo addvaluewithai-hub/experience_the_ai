@@ -56,7 +56,11 @@ export async function cubeFlightFlow(page, url) {
     await page.getByRole('textbox', { name: 'الناتج' }).fill(String(a * b));
     await page.getByRole('button', { name: /تأكيد/ }).click();
     await page.locator('.cf-lesson-success').waitFor();
-    assert.equal(await page.locator('.cf-lesson-success').count(), 1, 'success pauses for the child');
+    assert.equal(
+      await page.locator('.cf-lesson-success').count(),
+      1,
+      'success pauses for the child',
+    );
     await page.locator('.cf-lesson-next').click();
   }
   await page.locator('.cf-lesson').waitFor({ state: 'detached' });

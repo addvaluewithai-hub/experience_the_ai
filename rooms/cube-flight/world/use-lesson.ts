@@ -30,9 +30,13 @@ export function useLesson(
     model.emit({
       kind: 'teach',
       detail: {
-        table: mission.table, step: teaching + 1, phase: 'explain',
-        a: example.a, b: example.b,
-        answer: example.answer, strategy: example.anchor,
+        table: mission.table,
+        step: teaching + 1,
+        phase: 'explain',
+        a: example.a,
+        b: example.b,
+        answer: example.answer,
+        strategy: example.anchor,
       },
     });
   }, [mission, teaching, model]);
@@ -98,6 +102,16 @@ export function useLesson(
     } else setTeaching(step);
   };
 
-  return { mode, entry, setEntry, feedback, reset,
-    explainDone, chooseBridge, submitRecall, moreHelp, next };
+  return {
+    mode,
+    entry,
+    setEntry,
+    feedback,
+    reset,
+    explainDone,
+    chooseBridge,
+    submitRecall,
+    moreHelp,
+    next,
+  };
 }

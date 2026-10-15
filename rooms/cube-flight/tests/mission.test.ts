@@ -43,7 +43,6 @@ test('recommendation does NOT skip a table after three examples or assisted answ
   assert.equal(recommendTable(data), 3);
 });
 
-
 test('first teaches visible answers as cube group relationships, then recall prompts hide them', () => {
   const mission = dailyMission(emptyData(spec), 3, day);
   assert.deepEqual(

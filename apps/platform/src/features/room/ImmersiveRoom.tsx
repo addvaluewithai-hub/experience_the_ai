@@ -127,8 +127,10 @@ export function ImmersiveRoom(props: {
         return;
       }
       if (kind === 'lesson_help') {
-        reactToGameInCall(room.key,
-          `TEACHING_HELP: The child voluntarily asked to see the grouped cubes again. Re-explain gently, show her one pattern, and wait for her to try when ready.`);
+        reactToGameInCall(
+          room.key,
+          `TEACHING_HELP: The child voluntarily asked to see the grouped cubes again. Re-explain gently, show her one pattern, and wait for her to try when ready.`,
+        );
         return;
       }
       if (kind === 'lesson_complete') {

@@ -12,14 +12,16 @@ export type GroupBridge = {
 };
 
 export function groupBridge(table: number, other: number): GroupBridge {
-  if (!Number.isInteger(table) || table < 2 || table > 12 ||
-      !Number.isInteger(other) || other < 2 || other > 12)
+  if (
+    !Number.isInteger(table) ||
+    table < 2 ||
+    table > 12 ||
+    !Number.isInteger(other) ||
+    other < 2 ||
+    other > 12
+  )
     throw new Error('Invalid multiplication fact');
-  const base = other === 9 ? 10
-    : other === 10 ? 9
-    : other >= 11 ? 10
-    : other >= 6 ? 5
-    : other - 1;
+  const base = other === 9 ? 10 : other === 10 ? 9 : other >= 11 ? 10 : other >= 6 ? 5 : other - 1;
   const change = Math.abs(other - base);
   const subtract = other < base;
   const verb = subtract ? 'نشيل' : 'نزوّد';
@@ -31,7 +33,11 @@ export function groupBridge(table: number, other: number): GroupBridge {
 }
 
 /** A correct supported link unlocks the independent try; it does NOT award fluency. */
-export function afterBridgeChoice(mode: TeachingMode, bridge: GroupBridge, choice: number): TeachingMode {
+export function afterBridgeChoice(
+  mode: TeachingMode,
+  bridge: GroupBridge,
+  choice: number,
+): TeachingMode {
   return mode === 'connect' && choice === bridge.correct ? 'recall' : mode;
 }
 
