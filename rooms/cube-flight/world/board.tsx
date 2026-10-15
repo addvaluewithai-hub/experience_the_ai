@@ -1,4 +1,4 @@
-import { useEffect, useState, useSyncExternalStore, type FormEvent } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore, type FormEvent } from 'react';
 import type { SurfaceViewProps } from '@experience/room-runtime';
 import { newRecordId } from '@experience/room-runtime';
 import { dateOf, hintFor, recordAttempt, sessionPlan, type Question } from './memory';
@@ -11,6 +11,7 @@ type Props = SurfaceViewProps & { model: CubeModel };
 
 export function GameBoard({ spec, data, edit, model }: Props) {
   const [plan, setPlan] = useState<Question[]>([]);
+  const nudgedAt = useRef(-1);
   const [index, setIndex] = useState(0);
   const [entry, setEntry] = useState('');
   const [hinted, setHinted] = useState(false);
@@ -24,6 +25,7 @@ export function GameBoard({ spec, data, edit, model }: Props) {
 
   const begin = () => {
     const nextPlan = sessionPlan(data, dateOf(new Date()));
+    nudgedAt.current = -1;
     setPlan(nextPlan);
     setIndex(0);
     setEntry('');
@@ -84,11 +86,13 @@ export function GameBoard({ spec, data, edit, model }: Props) {
       600,
     );
     const pause = setTimeout(() => {
+      if (nudgedAt.current === index) return;
+      nudgedAt.current = index;
       model.peek();
       model.emit({ kind: 'pause', detail: { a: current.a, b: current.b, digits: entry } });
     }, 1900);
     return () => { clearTimeout(timer); clearTimeout(pause); };
-  }, [current, entry, model, outcome]);
+  }, [current, entry, index, model, outcome]);
 
   // AI actions request safe UI changes. They never submit an answer or forge a success.
   useEffect(() => {
