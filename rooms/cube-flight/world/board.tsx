@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState, useSyncExternalStore, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import type { SurfaceViewProps } from '@experience/room-runtime';
 import { newRecordId } from '@experience/room-runtime';
 import { dateOf, hintFor, recordAttempt, type Question } from './memory';
 import { dailyMission, recommendTable, type DailyMission } from './mission';
 import { LessonStage } from './lesson';
-import type { CubeModel } from './model';
+import type { CubeModel, GameCommand } from './model';
 import { PracticeStage, type Outcome } from './practice';
 import { GameIntro, GameFinish, ProgressPips } from './landing';
 
@@ -23,7 +23,11 @@ export function GameBoard({ spec, data, edit, model }: Props) {
   const [outcome, setOutcome] = useState<Outcome>(null);
   const [array, setArray] = useState(false);
   const [independent, setIndependent] = useState(0);
-  const command = useSyncExternalStore(model.subscribeCommand, model.getCommand, model.getCommand);
+  const [command, setCommand] = useState<GameCommand | null>(null);
+  useEffect(() => {
+    const unsubscribe = model.subscribeCommand(() => setCommand(model.getCommand()));
+    return () => { unsubscribe(); };
+  }, [model]);
   const current = plan[index];
   const complete = plan.length > 0 && index === plan.length;
 
