@@ -2,16 +2,21 @@ import assert from 'node:assert/strict';
 
 /** Browser regression for the new room: real SVG avatar, keypad and a scaffolded revisit. */
 export async function cubeFlightFlow(page, url) {
-  page.on('pageerror', (err) => console.error('Cube Flight page error:', err.stack || err.message));
+  page.on('pageerror', (err) =>
+    console.error('Cube Flight page error:', err.stack || err.message),
+  );
   page.on('console', (msg) => {
     if (msg.type() === 'error' || msg.type() === 'warning') console.log('Cube console:', msg.text());
   });
   await page.goto(`${url}/#/room/cube-flight`);
   await page.waitForTimeout(900);
-  console.log('Cube Flight root debug:', await page.evaluate(() => ({
-    rootText: document.querySelector('#root')?.textContent?.slice(0, 250),
-    hash: location.hash,
-  })));
+  console.log(
+    'Cube Flight root debug:',
+    await page.evaluate(() => ({
+      rootText: document.querySelector('#root')?.textContent?.slice(0, 250),
+      hash: location.hash,
+    })),
+  );
   await page.locator('[data-world="cube-flight"]').waitFor();
   await page.locator('.cf-avatar svg').waitFor();
   assert.equal(await page.locator('.dock').count(), 0, 'no side chat, only game and voice overlay');
