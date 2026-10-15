@@ -29,7 +29,7 @@ test('room is a docked screen with one original flying character and no agent sc
   assert.equal(spec.characters[0].id, 'lumi');
   assert.deepEqual(spec.characters[0].capabilities, []);
   assert.equal(spec.collections[0].fields.length, 8);
-  assert.equal(spec.world?.surface, 'cube-flight-phaser');
+  assert.equal(spec.world?.surface, 'cube-flight-svg');
 });
 
 test('commutative prompts share one memory, and all questions stay within 2–12', () => {
