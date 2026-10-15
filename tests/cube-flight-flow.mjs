@@ -18,13 +18,14 @@ export async function cubeFlightFlow(page, url) {
   assert.equal(factors.length, 3);
   const cubeSize = await cubes.first().boundingBox();
   assert.ok(cubeSize && cubeSize.width >= 70, 'large tactile cubes');
-  await page.getByRole('textbox', { name: 'الناتج' }).fill(
-    String(Number(factors[0]) * Number(factors[1])),
-  );
+  await page
+    .getByRole('textbox', { name: 'الناتج' })
+    .fill(String(Number(factors[0]) * Number(factors[1])));
   await page.getByRole('button', { name: /تأكيد/ }).click();
   await page.locator('.cf-result-flash.memory').waitFor();
   const saved = await page.evaluate(() =>
-    JSON.parse(localStorage.getItem('experience_the_ai:cube-flight:facts:v1') || 'null'));
+    JSON.parse(localStorage.getItem('experience_the_ai:cube-flight:facts:v1') || 'null'),
+  );
   assert.ok(saved?.facts?.length > 0, 'math memory persists to browser storage');
 
   await page.getByRole('button', { name: /التحدي اللي بعده/ }).click();

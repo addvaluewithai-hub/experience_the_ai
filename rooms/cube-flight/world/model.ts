@@ -76,7 +76,9 @@ export class CubeModel extends Cast {
   getProfile = (): PlayerProfile => (this.profile ??= readProfile());
   subscribeProfile = (listener: () => void) => {
     this.profileListeners.add(listener);
-    return () => { this.profileListeners.delete(listener); };
+    return () => {
+      this.profileListeners.delete(listener);
+    };
   };
   remember(which: 'player' | 'companion', name: unknown): boolean {
     const value = cleanName(name);
