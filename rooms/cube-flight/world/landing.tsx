@@ -40,3 +40,14 @@ export function GameFinish({
     </section>
   );
 }
+
+/** Nonverbal progress indicator — the child sees play, not a quiz dashboard. */
+export function ProgressPips({ index, total }: { index: number; total: number }) {
+  return (
+    <div className="cf-progress-pips" role="progressbar" aria-label="تقدم اللعب"
+      aria-valuenow={index} aria-valuemin={0} aria-valuemax={total}>
+      {Array.from({ length: total }, (_, i) =>
+        <i key={i} className={i < index ? 'lit' : ''} />)}
+    </div>
+  );
+}
