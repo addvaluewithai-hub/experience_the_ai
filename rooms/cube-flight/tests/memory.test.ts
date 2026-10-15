@@ -57,26 +57,10 @@ test('a quick success on one day cannot pretend to be multi-day mastery', () => 
   assert.equal(findFact(data, 9, 8)?.values.independent, 2);
   assert.equal(findFact(data, 8, 9)?.values.streak, 1);
   assert.equal(findFact(data, 8, 9)?.values.due, '2026-10-16');
-  data = recordAttempt(
-    spec,
-    data,
-    8,
-    9,
-    { correct: true, helped: false },
-    '2026-10-16',
-    id,
-  );
+  data = recordAttempt(spec, data, 8, 9, { correct: true, helped: false }, '2026-10-16', id);
   assert.equal(findFact(data, 8, 9)?.values.streak, 2);
   assert.equal(findFact(data, 8, 9)?.values.due, '2026-10-19');
-  data = recordAttempt(
-    spec,
-    data,
-    9,
-    8,
-    { correct: true, helped: false },
-    '2026-10-19',
-    id,
-  );
+  data = recordAttempt(spec, data, 9, 8, { correct: true, helped: false }, '2026-10-19', id);
   assert.equal(findFact(data, 8, 9)?.values.stage, 'strong');
 });
 

@@ -10,8 +10,7 @@ export type Fact = { a: number; b: number };
 export type Question = Fact & { revisit: number };
 
 /** Commutative multiplication is one memory, although prompts may swap the order. */
-export const canonical = (a: number, b: number): Fact =>
-  a <= b ? { a, b } : { a: b, b: a };
+export const canonical = (a: number, b: number): Fact => (a <= b ? { a, b } : { a: b, b: a });
 export const factKey = (a: number, b: number) => {
   const f = canonical(a, b);
   return `${f.a}x${f.b}`;
@@ -77,9 +76,7 @@ export function pickTargets(data: RoomData, today: string, count = 4): Fact[] {
             !chosen.some((c) => c.a === other.a || c.b === other.b) &&
             !chosen.some((c) => c.a === other.b || c.b === other.a),
         ) &&
-        chosen.some(
-          (c) => c.a === fact.a || c.a === fact.b || c.b === fact.a || c.b === fact.b,
-        )
+        chosen.some((c) => c.a === fact.a || c.a === fact.b || c.b === fact.a || c.b === fact.b)
       )
         continue;
       chosen.push(fact);
@@ -108,11 +105,7 @@ export function sessionPlan(data: RoomData, day: string): Question[] {
     const key = factKey(fact.a, fact.b);
     const revisit = visits.get(key) ?? 0;
     visits.set(key, revisit + 1);
-    return [
-      revisit % 2 === 0
-        ? { ...fact, revisit }
-        : { a: fact.b, b: fact.a, revisit },
-    ];
+    return [revisit % 2 === 0 ? { ...fact, revisit } : { a: fact.b, b: fact.a, revisit }];
   });
 }
 

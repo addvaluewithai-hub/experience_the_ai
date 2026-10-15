@@ -47,10 +47,18 @@ export function GameBoard({ spec, data, edit, model }: Props) {
   const reveal = () => {
     if (!current || result) return;
     edit((d) =>
-      recordAttempt(spec, d, current.a, current.b, {
-        correct: false,
-        helped: true,
-      }, dateOf(new Date()), newRecordId),
+      recordAttempt(
+        spec,
+        d,
+        current.a,
+        current.b,
+        {
+          correct: false,
+          helped: true,
+        },
+        dateOf(new Date()),
+        newRecordId,
+      ),
     );
     setResult('shown');
     model.answer(false, true);
@@ -68,10 +76,18 @@ export function GameBoard({ spec, data, edit, model }: Props) {
     }
     const unassisted = !hinted && !wrong;
     edit((d) =>
-      recordAttempt(spec, d, current.a, current.b, {
-        correct: true,
-        helped: !unassisted,
-      }, dateOf(new Date()), newRecordId),
+      recordAttempt(
+        spec,
+        d,
+        current.a,
+        current.b,
+        {
+          correct: true,
+          helped: !unassisted,
+        },
+        dateOf(new Date()),
+        newRecordId,
+      ),
     );
     setResult(unassisted ? 'independent' : 'helped');
     setSolved((n) => n + 1);
@@ -94,8 +110,8 @@ export function GameBoard({ spec, data, edit, model }: Props) {
         <p className="cf-eyebrow">🧊 CUBE FLIGHT</p>
         <h2>رحلة المكعبات مع لومي</h2>
         <p>
-          ٤ عمليات ضرب هنلعب بيهم كذا مرة وسط أسئلة مختلفة. لو محتاجة تحسبي، عادي!
-          هدفنا نخلي الناتج ييجي من الذاكرة مع التدريب.
+          ٤ عمليات ضرب هنلعب بيهم كذا مرة وسط أسئلة مختلفة. لو محتاجة تحسبي، عادي! هدفنا نخلي الناتج
+          ييجي من الذاكرة مع التدريب.
         </p>
         <button className="cf-primary" onClick={begin} type="button">
           يلا نطير ونلعب! 🪽
@@ -113,8 +129,8 @@ export function GameBoard({ spec, data, edit, model }: Props) {
           {solved} من {plan.length} إجابات صح، منهم {independent} من غير تلميح.
         </p>
         <p>
-          مش بنعتبر العملية اتحفظت من يوم واحد. في الجولة الجاية هنراجع اللي محتاج
-          تثبيت ونضيف عمليات جديدة.
+          مش بنعتبر العملية اتحفظت من يوم واحد. في الجولة الجاية هنراجع اللي محتاج تثبيت ونضيف
+          عمليات جديدة.
         </p>
         <button className="cf-primary" onClick={begin} type="button">
           جولة مكعبات جديدة
@@ -139,7 +155,9 @@ export function GameBoard({ spec, data, edit, model }: Props) {
     <section className="cf-card" dir="rtl" aria-label="لعبة جدول الضرب">
       <header className="cf-head">
         <strong>🧊 مكعبات الذاكرة</strong>
-        <span>سؤال {index + 1} / {plan.length}</span>
+        <span>
+          سؤال {index + 1} / {plan.length}
+        </span>
       </header>
       <div
         className="cf-progress"
@@ -160,17 +178,15 @@ export function GameBoard({ spec, data, edit, model }: Props) {
         <span className="cf-cube cf-mystery">{result ? correct : '؟'}</span>
       </div>
 
-      <p className="cf-feedback" aria-live="polite">{feedback}</p>
+      <p className="cf-feedback" aria-live="polite">
+        {feedback}
+      </p>
 
       {(hinted || result === 'shown') && (
         <aside className="cf-hint">
           <b>💡 رابط للذاكرة</b>
           <p>{hintFor(current.a, current.b)}</p>
-          <button
-            type="button"
-            className="cf-link"
-            onClick={() => setShowArray((v) => !v)}
-          >
+          <button type="button" className="cf-link" onClick={() => setShowArray((v) => !v)}>
             {showArray ? 'خبّي الـ Array' : 'ورّيني الـ Array'}
           </button>
           {showArray && (
@@ -180,7 +196,9 @@ export function GameBoard({ spec, data, edit, model }: Props) {
               aria-label={`${current.a} مجموعات، كل واحدة فيها ${current.b} مكعبات`}
               style={{ gridTemplateColumns: `repeat(${current.b}, 1fr)` }}
             >
-              {Array.from({ length: correct }, (_, i) => <i key={i} />)}
+              {Array.from({ length: correct }, (_, i) => (
+                <i key={i} />
+              ))}
             </div>
           )}
         </aside>
@@ -229,8 +247,14 @@ export function GameBoard({ spec, data, edit, model }: Props) {
             </button>
           </div>
           <div className="cf-help">
-            {!hinted && <button type="button" onClick={showHint}>💡 تلميح</button>}
-            <button type="button" onClick={reveal}>ورّيني الحل</button>
+            {!hinted && (
+              <button type="button" onClick={showHint}>
+                💡 تلميح
+              </button>
+            )}
+            <button type="button" onClick={reveal}>
+              ورّيني الحل
+            </button>
           </div>
         </form>
       )}

@@ -11,7 +11,10 @@ export class CubeSurface implements RoomSurface {
   readonly model = new CubeModel();
   readonly View: ComponentType<SurfaceViewProps>;
 
-  constructor(readonly spec: RoomSpec, _store: RoomStore) {
+  constructor(
+    readonly spec: RoomSpec,
+    _store: RoomStore,
+  ) {
     const model = this.model;
     this.View = function CubeView(props: SurfaceViewProps) {
       return (
@@ -49,5 +52,4 @@ export class CubeSurface implements RoomSurface {
   }
 }
 
-export const cubeFlightSurface = (spec: RoomSpec, store: RoomStore) =>
-  new CubeSurface(spec, store);
+export const cubeFlightSurface = (spec: RoomSpec, store: RoomStore) => new CubeSurface(spec, store);

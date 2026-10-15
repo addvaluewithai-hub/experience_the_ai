@@ -43,9 +43,7 @@
       ]
     }
   ],
-  "panels": [
-    { "id": "play", "kind": "world", "title": "رحلة المكعبات", "wide": true }
-  ],
+  "panels": [{ "id": "play", "kind": "world", "title": "رحلة المكعبات", "wide": true }],
   "world": {
     "surface": "cube-flight-svg",
     "describe": "Simple bright cube-play desk with Zuzu, a friendly winged creature hovering above it. The deterministic game shows the current multiplication question, accepts number cubes as answers, offers a scaffold hint or reveal, and records independent recalls. Zuzu should react to the game rather than determine correct answers.",
