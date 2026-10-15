@@ -10,6 +10,7 @@ import { LumiAvatar } from './avatar';
 import { GameBoard } from './board';
 import { CubeModel } from './model';
 import { cubeStyle } from './style';
+import { missionStyle } from './mission-style';
 
 /** Reuses PixiLive's own SVG art and motion rig; no duplicate Phaser mascot. */
 export class CubeSurface implements RoomSurface {
@@ -54,7 +55,7 @@ export class CubeSurface implements RoomSurface {
           role="group"
           aria-label="لعبة مكعبات الضرب مع لومي الرفيقة الطايرة"
         >
-          <style>{cubeStyle}</style>
+          <style>{cubeStyle + missionStyle}</style>
           {avatarReady && <LumiAvatar model={model} />}
           <GameBoard {...props} model={model} />
         </div>
