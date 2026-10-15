@@ -17,6 +17,10 @@ export class CubeSurface implements RoomSurface {
   ) {
     const model = this.model;
     this.View = function CubeView(props: SurfaceViewProps) {
+      const omitAvatar =
+        typeof location !== 'undefined' && location.search.includes('cube_debug_no_avatar');
+      const omitBoard =
+        typeof location !== 'undefined' && location.search.includes('cube_debug_no_board');
       return (
         <div
           className="cf-stage"
@@ -25,8 +29,8 @@ export class CubeSurface implements RoomSurface {
           aria-label="لعبة مكعبات الضرب مع لومي الرفيقة الطايرة"
         >
           <style>{cubeStyle}</style>
-          <LumiAvatar model={model} />
-          <GameBoard {...props} model={model} />
+          {!omitAvatar && <LumiAvatar model={model} />}
+          {!omitBoard && <GameBoard {...props} model={model} />}
         </div>
       );
     };
