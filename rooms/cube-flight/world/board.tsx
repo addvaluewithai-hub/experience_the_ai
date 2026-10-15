@@ -200,9 +200,7 @@ export function GameBoard({ spec, data, edit, model }: Props) {
 
   return (
     <main className="cf-arena" dir="rtl" aria-label="Cube Flight multiplication game">
-      {plan.length > 0 && !complete && (
-        <ProgressPips index={index} total={plan.length} />
-      )}
+      {plan.length > 0 && !complete && <ProgressPips index={index} total={plan.length} />}
 
       {!plan.length ? (
         <GameIntro begin={begin} />
