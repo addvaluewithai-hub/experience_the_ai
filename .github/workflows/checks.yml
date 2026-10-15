@@ -29,6 +29,7 @@ jobs:
       - run: npm run test:browser:kitchen
       - uses: actions/upload-artifact@v4
         if: always()
+        continue-on-error: true # Screenshots are optional; storage quotas must not mask test results
         with:
           name: browser-screenshots
           path: test-results/
