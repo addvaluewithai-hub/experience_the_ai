@@ -25,7 +25,17 @@ export const cubeStyle = String.raw`
   height:clamp(240px,56vh,570px); z-index:1; pointer-events:none;
   filter:drop-shadow(0 30px 38px #897acb33);
 }
+.cf-sprite-host { width:100%; height:100%; }
 .cf-avatar svg { width:100%; height:100%; display:block; }
+.cf-name-tag {
+  position:absolute; left:50%; bottom:1%;
+  transform:translateX(-50%); min-width:54px; max-width:120px;
+  padding:4px 12px; border:2px solid #fff;
+  border-radius:999px; background:#ffffffca;
+  color:#6751b4; font-weight:900; font-size:14px;
+  text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  box-shadow:0 5px 16px #6654a43b; pointer-events:none;
+}
 .cf-arena {
   position:absolute; inset:0; z-index:2; overflow-y:auto; overflow-x:hidden;
   display:flex; flex-direction:column; align-items:center;
@@ -218,6 +228,7 @@ export const cubeStyle = String.raw`
 .cf-voice-state { background:#ffffffe8; border-radius:12px; padding:10px; font-size:13px; }
 @media(max-width:540px) {
   .cf-avatar { top:25px; right:-38px; width:220px; height:188px; }
+  .cf-name-tag { font-size:12px; bottom:0; padding:3px 9px; }
   .cf-play { padding-top:clamp(158px,22vh,184px); }
   .cf-intro,.cf-finish { padding-top:clamp(170px,25vh,220px); }
   .cf-progress-pips { top:max(65px,env(safe-area-inset-top)); gap:4px; max-width:85%; }
