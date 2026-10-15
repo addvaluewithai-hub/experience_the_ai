@@ -1,10 +1,4 @@
 import { useEffect, useRef } from 'react';
-import type { ComponentType } from 'react';
-import master from '../character/master.svg?raw';
-import '../character/geometry.js';
-import '../character/engine.js';
-import '../character/flight.js';
-import '../character/motion.js';
 import type { CubeModel, SpriteRig } from './model';
 
 interface CharacterRecipe {
@@ -26,9 +20,23 @@ declare global {
   }
 }
 
+/** PixiLive source modules are browser-only IIFEs; load them after mount, in dependency order. */
+async function loadPixiLive() {
+  // @ts-ignore PixiLive ships original JavaScript globals, not a typed ES module.
+  await import('../character/geometry.js');
+  // @ts-ignore PixiLive ships original JavaScript globals, not a typed ES module.
+  await import('../character/engine.js');
+  // @ts-ignore PixiLive ships original JavaScript globals, not a typed ES module.
+  await import('../character/flight.js');
+  // @ts-ignore PixiLive ships original JavaScript globals, not a typed ES module.
+  await import('../character/motion.js');
+  const { default: master } = await import('../character/master.svg?raw');
+  return master;
+}
+
 /**
- * PixiLive's original Lumi sprite art, flight, facial poses and visemes.
- * Scripts and master SVG are copied from feat/character-engine, not recreated in the game.
+ * Lumi is rendered and animated by the original PixiLive SVG recipe + rig.
+ * No new mascot art or motion loop is introduced for the maths room.
  */
 export function LumiAvatar({ model }: { model: CubeModel }) {
   const host = useRef<HTMLDivElement>(null);
@@ -36,31 +44,41 @@ export function LumiAvatar({ model }: { model: CubeModel }) {
   useEffect(() => {
     const el = host.current;
     if (!el) return;
-    const engine = window.CharacterEngine.createEngine(master);
-    const recipe = engine.normalize({
-      species: 'sprite',
-      name: 'لومي',
-      accent: '#A080E8',
-    });
-    // This markup comes from a committed, reviewed SVG master and a fixed local recipe.
-    el.innerHTML = engine.render(recipe);
-    const svg = el.querySelector('svg');
-    if (svg) {
-      svg.setAttribute('aria-label', 'لومي، الرفيقة الطايرة');
-      svg.style.width = '100%';
-      svg.style.height = '100%';
-      svg.style.display = 'block';
-    }
-    const rig = window.CharacterMotion.createRig(el, {
-      keyboard: false,
-      externalControl: true,
-      speechMotionScale: 0.4,
-      appearance: () => engine.metrics(recipe),
-    });
-    model.bindAvatar(rig);
+    let gone = false;
+    let rig: SpriteRig | null = null;
+    void loadPixiLive()
+      .then((master) => {
+        if (gone) return;
+        const engine = window.CharacterEngine.createEngine(master);
+        const recipe = engine.normalize({
+          species: 'sprite',
+          name: 'لومي',
+          accent: '#A080E8',
+        });
+        // Markup comes only from the committed SVG master and a fixed local recipe.
+        el.innerHTML = engine.render(recipe);
+        const svg = el.querySelector('svg');
+        if (svg) {
+          svg.setAttribute('aria-label', 'لومي، الرفيقة الطايرة');
+          svg.style.width = '100%';
+          svg.style.height = '100%';
+          svg.style.display = 'block';
+        }
+        rig = window.CharacterMotion.createRig(el, {
+          keyboard: false,
+          externalControl: true,
+          speechMotionScale: 0.4,
+          appearance: () => engine.metrics(recipe),
+        });
+        model.bindAvatar(rig);
+      })
+      .catch((error) => {
+        if (!gone) console.error('Could not mount the PixiLive avatar:', error);
+      });
     return () => {
+      gone = true;
       model.bindAvatar(null);
-      rig.destroy();
+      rig?.destroy();
       el.replaceChildren();
     };
   }, [model]);
