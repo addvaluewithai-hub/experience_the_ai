@@ -5,7 +5,7 @@ import {
   type RoomSpec,
 } from '@experience/room-spec';
 import type { RoomStore, RoomSurface, SurfaceViewProps } from '@experience/room-runtime';
-import type { ComponentType } from 'react';
+import { useEffect, useState, type ComponentType } from 'react';
 import { LumiAvatar } from './avatar';
 import { GameBoard } from './board';
 import { CubeModel } from './model';
@@ -40,6 +40,13 @@ export class CubeSurface implements RoomSurface {
     }
     const model = this.model;
     this.View = function CubeView(props: SurfaceViewProps) {
+      const [avatarReady, setAvatarReady] = useState(false);
+      // The original PixiLive rig attaches after the game board's initial React commit.
+      // This avoids competing with the board on the first StrictMode mount.
+      useEffect(() => {
+        const frame = requestAnimationFrame(() => setAvatarReady(true));
+        return () => cancelAnimationFrame(frame);
+      }, []);
       return (
         <div
           className="cf-stage"
@@ -48,7 +55,7 @@ export class CubeSurface implements RoomSurface {
           aria-label="لعبة مكعبات الضرب مع لومي الرفيقة الطايرة"
         >
           <style>{cubeStyle}</style>
-          <LumiAvatar model={model} />
+          {avatarReady && <LumiAvatar model={model} />}
           <GameBoard {...props} model={model} />
         </div>
       );
