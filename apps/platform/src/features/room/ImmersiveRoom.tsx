@@ -107,7 +107,9 @@ export function ImmersiveRoom(props: {
       }
       if (kind === 'answer') {
         const correct = detail.correct === true;
-        reactToGameInCall(room.key, correct
+        reactToGameInCall(room.key, detail.revealed === true
+          ? `GAME_SOLUTION: The child asked to see ${detail.a} × ${detail.b} = ${detail.expected}. She saw the result. Give one brief memory connection and invite a later recall, without judging her.`
+          : correct
           ? `GAME_ANSWER: ${detail.a}×${detail.b} = ${detail.answer}, verified CORRECT by the game. Independent recall=${detail.independent}. Respond with one playful spoken reaction. If assisted, mention the strategy helped and we'll try again later. No long lecture.`
           : `GAME_ANSWER: Child chose ${detail.answer} for ${detail.a}×${detail.b}; verified INCORRECT by game (correct result is ${detail.expected}, never give it immediately). Offer one short way to THINK using ${detail.strategy}; use show_hint/reveal_array only if needed. Let her retry without judgment.`);
         return;
