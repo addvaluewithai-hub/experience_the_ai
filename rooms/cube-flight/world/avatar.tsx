@@ -64,46 +64,49 @@ function loadPixiLive(): Promise<string> {
  * No new mascot art or motion loop is introduced for the maths room.
  */
 export function LumiAvatar({ model }: { model: CubeModel }) {
-  const attach = useCallback((el: HTMLDivElement | null) => {
-    if (!el) return;
-    let gone = false;
-    let rig: SpriteRig | null = null;
-    void loadPixiLive()
-      .then((master) => {
-        if (gone) return;
-        const engine = window.CharacterEngine.createEngine(master);
-        const recipe = engine.normalize({
-          species: 'sprite',
-          name: 'لومي',
-          accent: '#A080E8',
+  const attach = useCallback(
+    (el: HTMLDivElement | null) => {
+      if (!el) return;
+      let gone = false;
+      let rig: SpriteRig | null = null;
+      void loadPixiLive()
+        .then((master) => {
+          if (gone) return;
+          const engine = window.CharacterEngine.createEngine(master);
+          const recipe = engine.normalize({
+            species: 'sprite',
+            name: 'لومي',
+            accent: '#A080E8',
+          });
+          // Markup comes only from the committed SVG master and a fixed local recipe.
+          el.innerHTML = engine.render(recipe);
+          const svg = el.querySelector('svg');
+          if (svg) {
+            svg.setAttribute('aria-label', 'لومي، الرفيقة الطايرة');
+            svg.style.width = '100%';
+            svg.style.height = '100%';
+            svg.style.display = 'block';
+          }
+          rig = window.CharacterMotion.createRig(el, {
+            keyboard: false,
+            externalControl: true,
+            speechMotionScale: 0.4,
+            appearance: () => engine.metrics(recipe),
+          });
+          model.bindAvatar(rig);
+        })
+        .catch((error) => {
+          if (!gone) console.error('Could not mount the PixiLive avatar:', error);
         });
-        // Markup comes only from the committed SVG master and a fixed local recipe.
-        el.innerHTML = engine.render(recipe);
-        const svg = el.querySelector('svg');
-        if (svg) {
-          svg.setAttribute('aria-label', 'لومي، الرفيقة الطايرة');
-          svg.style.width = '100%';
-          svg.style.height = '100%';
-          svg.style.display = 'block';
-        }
-        rig = window.CharacterMotion.createRig(el, {
-          keyboard: false,
-          externalControl: true,
-          speechMotionScale: 0.4,
-          appearance: () => engine.metrics(recipe),
-        });
-        model.bindAvatar(rig);
-      })
-      .catch((error) => {
-        if (!gone) console.error('Could not mount the PixiLive avatar:', error);
-      });
-    return () => {
-      gone = true;
-      model.bindAvatar(null);
-      rig?.destroy();
-      el.replaceChildren();
-    };
-  }, [model]);
+      return () => {
+        gone = true;
+        model.bindAvatar(null);
+        rig?.destroy();
+        el.replaceChildren();
+      };
+    },
+    [model],
+  );
 
   return <div className="cf-avatar" aria-label="لومي الرفيقة الطايرة" ref={attach} />;
 }
