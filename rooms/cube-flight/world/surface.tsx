@@ -1,4 +1,4 @@
-import type { MouthFrame, PresenceMode, RoomSpec } from '@experience/room-spec';
+import { parseData, type MouthFrame, type PresenceMode, type RoomSpec } from '@experience/room-spec';
 import type { RoomStore, RoomSurface, SurfaceViewProps } from '@experience/room-runtime';
 import type { ComponentType } from 'react';
 import { LumiAvatar } from './avatar';
@@ -13,8 +13,26 @@ export class CubeSurface implements RoomSurface {
 
   constructor(
     readonly spec: RoomSpec,
-    _store: RoomStore,
+    store: RoomStore,
   ) {
+    // Preview-only browser persistence for this room, validated before it enters the store.
+    // Names and progress stay on this device; no third-party analytics or server profiles.
+    if (typeof localStorage !== 'undefined') {
+      const key = 'experience_the_ai:cube-flight:facts:v1';
+      try {
+        const cached = localStorage.getItem(key);
+        if (cached) store.set(parseData(spec, JSON.parse(cached)));
+      } catch {
+        // Private browsing / corrupted cache: safely start with an empty room store.
+      }
+      store.subscribe(() => {
+        try {
+          localStorage.setItem(key, JSON.stringify(store.get()));
+        } catch {
+          // The room still works when browser storage is blocked.
+        }
+      });
+    }
     const model = this.model;
     this.View = function CubeView(props: SurfaceViewProps) {
       return (
@@ -32,6 +50,9 @@ export class CubeSurface implements RoomSurface {
     };
   }
 
+  onGameEvent(listener: (event: import('@experience/room-runtime').RoomInteractionEvent) => void) {
+    return this.model.subscribeGame(listener);
+  }
   act(character: string, action: string, args: Record<string, unknown>) {
     this.model.act(character, action, args);
   }
