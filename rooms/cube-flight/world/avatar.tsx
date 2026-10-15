@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useCallback } from 'react';
 import type { CubeModel, SpriteRig } from './model';
 
 interface CharacterRecipe {
@@ -64,10 +64,7 @@ function loadPixiLive(): Promise<string> {
  * No new mascot art or motion loop is introduced for the maths room.
  */
 export function LumiAvatar({ model }: { model: CubeModel }) {
-  const host = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const el = host.current;
+  const attach = useCallback((el: HTMLDivElement | null) => {
     if (!el) return;
     let gone = false;
     let rig: SpriteRig | null = null;
@@ -108,5 +105,5 @@ export function LumiAvatar({ model }: { model: CubeModel }) {
     };
   }, [model]);
 
-  return <div className="cf-avatar" aria-label="لومي الرفيقة الطايرة" ref={host} />;
+  return <div className="cf-avatar" aria-label="لومي الرفيقة الطايرة" ref={attach} />;
 }
