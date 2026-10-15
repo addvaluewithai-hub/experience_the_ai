@@ -81,13 +81,13 @@ export function ImmersiveRoom(props: {
         void startCall(room, companion, {
           greet: [
             'GAME_START: The child has started Cube Flight using the Start button.',
-            `TODAY TABLE ${detail.table}. TEACH FIRST, do not quiz yet: the screen openly shows ${detail.a} × ${detail.b} = ${detail.answer}. Link it to ${detail.strategy}. Ask her to look at the cube groups, then press the next learning step. Only AFTER three learning examples will the answer disappear and recall begin.`,
+            `TODAY TABLE ${detail.table}. TEACH STEP ONE: ${detail.a} × ${detail.b} = ${detail.answer} is DISPLAYED with groups. Explain the concrete relationship ${detail.strategy} slowly, in two short turns. Invite the child to look and press "I see the groups"; DO NOT quiz until she chooses to try.`,
             room.surface?.state() ?? '',
             'Speak in friendly, natural Egyptian Arabic, one or two lively sentences at a time.',
             'On the first visit ask the child for an OPTIONAL nickname and what she wants to name you.',
             'Only save a name she explicitly chose with remember_player/name_companion tools.',
             'If a nickname is already saved, welcome her by it, do not ask again.',
-            'Be a warm interactive coach, not a test reader. Use gestures and your visual hint and flight tools. Never grade arithmetic yourself.',
+            'IMPORTANT: do not skip or race through examples. Each fact must pass three interactive stages: EXPLAIN with answer/blocks, CONNECT (she chooses the number of groups to add/subtract), then RECALL with answer and blocks hidden. Celebrate her recall and let her decide when to continue. If she gets stuck, calmly reteach. Do not grade yourself; only trust game events.',
           ].join(' '),
         });
         return;
@@ -97,8 +97,38 @@ export function ImmersiveRoom(props: {
         if (detail.step !== 1)
           reactToGameInCall(
             room.key,
-            `GAME_TEACH: Table ${detail.table}; example ${detail.a} × ${detail.b} = ${detail.answer} is DISPLAYED with grouped cubes. Explain the link ${detail.strategy} in one brief Egyptian-Arabic sentence. Invite her to watch how groups connect, not to guess. Wait for her to move on.`,
+            `GAME_TEACH: Table ${detail.table}; example ${detail.a} × ${detail.b} = ${detail.answer} is DISPLAYED with grouped cubes. Clearly explain WHY the group connection ${detail.strategy} works in conversational Egyptian Arabic. Ask her to observe one specific thing, then WAIT for her tap. Do not say next number until she understands and acts.`,
           );
+        return;
+      }
+      if (kind === 'bridge_question') {
+        reactToGameInCall(
+          room.key,
+          `GROUP_CONNECTION: The child is now choosing a small missing group COUNT for ${detail.a} × ${detail.b}. Ask ${detail.question} gently, and wait for her choice. Do not tell her which button is correct.`,
+        );
+        return;
+      }
+      if (kind === 'bridge_result') {
+        reactToGameInCall(
+          room.key,
+          detail.correct === true
+            ? `GROUP_CONNECTION_OK: The child's choice correctly completed the number-group link for ${detail.a} × ${detail.b}. Praise her thinking briefly. The blocks and answer are now hidden; invite her to retrieve the product independently.`
+            : `GROUP_CONNECTION_RETRY: Her chosen group count was not right. Don't say the right option! Point her to the color-coded groups, give one small counting clue and let her choose again.`,
+        );
+        return;
+      }
+      if (kind === 'lesson_recall') {
+        reactToGameInCall(
+          room.key,
+          detail.correct === true
+            ? `TEACHING_RECALL_OK: The child independently reconstructed ${detail.a} × ${detail.b} after understanding its group link. Congratulate warmly, then pause: she chooses when to learn the next fact. This is teaching progress, not multi-day memory mastery.`
+            : `TEACHING_RECALL_RETRY: The child tried ${detail.attempt} for ${detail.a} × ${detail.b} and could not recall yet. The game has RETURNED to a visual worked example. Re-explain the relationship in a NEW short way, then let her reconnect the groups and try independently again. NO shame, pressure, or rushing.`,
+        );
+        return;
+      }
+      if (kind === 'lesson_help') {
+        reactToGameInCall(room.key,
+          `TEACHING_HELP: The child voluntarily asked to see the grouped cubes again. Re-explain gently, show her one pattern, and wait for her to try when ready.`);
         return;
       }
       if (kind === 'lesson_complete') {
