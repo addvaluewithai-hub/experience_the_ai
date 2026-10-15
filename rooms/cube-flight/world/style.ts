@@ -178,6 +178,53 @@ export const cubeStyle = String.raw`
 .immersive:has([data-world="cube-flight"]) .immersive-captions {
   position:absolute; left:0; top:52px; width:min(330px,75vw); max-height:110px; overflow:auto;
 }
+
+/* This game has no chat dock, transcription bubbles, home button or quiz labels. */
+.immersive:has([data-world="cube-flight"]) .immersive-exit,
+.immersive:has([data-world="cube-flight"]) .immersive-bottom { display:none; }
+.cf-progress-pips {
+  position:absolute; top:max(20px,env(safe-area-inset-top)); left:50%;
+  transform:translateX(-50%); display:flex; direction:ltr; gap:7px;
+  pointer-events:none; z-index:8; max-width:45%;
+}
+.cf-progress-pips i {
+  width:clamp(7px,1vw,12px); height:clamp(7px,1vw,12px); border-radius:50%;
+  background:#fff9; border:2px solid #8f81d775; box-shadow:0 2px 5px #56459433;
+}
+.cf-progress-pips i.lit { background:#8c6bef; border-color:#fff; }
+.cf-result-flash {
+  position:absolute; top:clamp(80px,15vh,160px); right:0;
+  display:grid; place-items:center; width:58px; height:58px;
+  border-radius:50%; color:#fff; font-size:30px; font-weight:900;
+  background:#48bba6; border:4px solid #fff;
+  box-shadow:0 8px 18px #368f8880; animation:cf-pop .3s ease;
+}
+.cf-result-flash.shown { background:#8a7acb; }
+.cf-voice-tools,.cf-voice-retry,.cf-voice-state {
+  position:absolute; top:max(12px,env(safe-area-inset-top)); left:max(12px,env(safe-area-inset-left));
+  z-index:30; color:#594398; font-weight:850;
+}
+.cf-voice-tools { display:flex; gap:8px; }
+.cf-voice-tools button {
+  width:45px; height:45px; border:2px solid #fff; border-bottom:5px solid #a093cf;
+  border-radius:15px; background:#ffffffdb; box-shadow:0 5px 14px #6651ad3b;
+  color:#5441a5; font-size:19px; cursor:pointer;
+}
+.cf-voice-retry {
+  border:2px solid #fff; background:#ffffffe8; border-radius:16px;
+  box-shadow:0 6px 18px #7663aa35; padding:9px 12px;
+  display:flex; align-items:center; gap:8px; cursor:pointer;
+}
+.cf-voice-state { background:#ffffffe8; border-radius:12px; padding:10px; font-size:13px; }
+@media(max-width:540px) {
+  .cf-avatar { top:25px; right:-38px; width:220px; height:188px; }
+  .cf-play { padding-top:clamp(158px,22vh,184px); }
+  .cf-intro,.cf-finish { padding-top:clamp(170px,25vh,220px); }
+  .cf-progress-pips { top:max(65px,env(safe-area-inset-top)); gap:4px; max-width:85%; }
+  .cf-progress-pips i { width:6px; height:6px; border-width:1px; }
+  .cf-result-flash { top:clamp(120px,19vh,175px); right:6px; width:37px;height:37px;font-size:23px; }
+  .cf-voice-tools button { width:40px; height:40px; font-size:17px; }
+}
 @keyframes cf-pop { from{opacity:.4;transform:scale(.88)} to{opacity:1;transform:scale(1)} }
 @media(max-width:850px) {
   .cf-avatar { top:6%; right:-15%; width:clamp(220px,54vw,460px); height:38vh; }
