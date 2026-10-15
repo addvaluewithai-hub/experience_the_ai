@@ -4,6 +4,7 @@ import { newRecordId } from '@experience/room-runtime';
 import { dateOf, hintFor, recordAttempt, type Question } from './memory';
 import { dailyMission, recommendTable, type DailyMission } from './mission';
 import { LessonStage } from './lesson';
+import { useLesson } from './use-lesson';
 import type { CubeModel } from './model';
 import { useCubeCommand } from './use-command';
 import { PracticeStage, type Outcome } from './practice';
@@ -23,6 +24,7 @@ export function GameBoard({ spec, data, edit, model }: Props) {
   const [array, setArray] = useState(false);
   const [independent, setIndependent] = useState(0);
   const command = useCubeCommand(model);
+  const lesson = useLesson(model, mission, teaching, setTeaching);
   const current = plan[index];
   const complete = plan.length > 0 && index === plan.length;
   const begin = (table = selectedTable) => {
@@ -30,6 +32,7 @@ export function GameBoard({ spec, data, edit, model }: Props) {
     const nextPlan = chosen.questions;
     setSelectedTable(table);
     setMission(chosen);
+    lesson.reset();
     setTeaching(0);
     nudgedAt.current = -1;
     setPlan(nextPlan);
@@ -54,31 +57,6 @@ export function GameBoard({ spec, data, edit, model }: Props) {
         },
       });
   };
-  const nextLesson = () => {
-    if (!mission || teaching === null) return;
-    const next = teaching + 1;
-    if (next >= mission.lessons.length) {
-      setTeaching(null);
-      model.emit({ kind: 'lesson_complete', detail: { table: mission.table } });
-    } else setTeaching(next);
-  };
-  useEffect(() => {
-    if (!mission || teaching === null) return;
-    const lesson = mission.lessons[teaching];
-    if (!lesson) return;
-    model.go('right');
-    model.emit({
-      kind: 'teach',
-      detail: {
-        table: mission.table,
-        step: teaching + 1,
-        a: lesson.a,
-        b: lesson.b,
-        answer: lesson.answer,
-        strategy: lesson.anchor,
-      },
-    });
-  }, [mission, teaching, model]);
   const next = () => {
     if (!outcome) return;
     setIndex((i) => i + 1);
@@ -145,7 +123,8 @@ export function GameBoard({ spec, data, edit, model }: Props) {
       model.hint();
     } else if (command.action === 'advance') {
       if (!plan.length || complete) begin();
-      else if (teaching !== null) nextLesson();
+      // Never let a character tool skip an explanation or advance an unverified recall.
+      else if (teaching !== null) return;
       else if (outcome) next();
     }
     // A new command id, not a game rerender, is what dispatches it.
@@ -247,7 +226,15 @@ export function GameBoard({ spec, data, edit, model }: Props) {
           table={mission.table}
           lessons={mission.lessons}
           step={teaching}
-          next={nextLesson}
+          mode={lesson.mode}
+          entry={lesson.entry}
+          setEntry={lesson.setEntry}
+          feedback={lesson.feedback}
+          explainDone={lesson.explainDone}
+          chooseBridge={lesson.chooseBridge}
+          submitRecall={lesson.submitRecall}
+          moreHelp={lesson.moreHelp}
+          next={lesson.next}
         />
       ) : complete ? (
         <GameFinish
