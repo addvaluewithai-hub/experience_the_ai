@@ -1,5 +1,5 @@
 /** The teaching bridge has a verifiable action, not just a Next button. */
-export type TeachingMode = 'explain' | 'connect' | 'recall';
+export type TeachingMode = 'explain' | 'connect' | 'recall' | 'success';
 
 export type GroupBridge = {
   base: number;
