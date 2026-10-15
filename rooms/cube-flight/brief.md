@@ -76,7 +76,7 @@ interleaving guided and independent work, retrieval practice, and spaced reviews
 
 - **Model / See:** Lumi shows a true multiplication fact and physically grouped cubes.
   Where helpful, link it to x5, x10, or one extra/subtracted group.
-- **Connect / Think:** the child answers an independent *group-count* question (for
+- **Connect / Think:** the child answers an independent _group-count_ question (for
   example, from 3×5 to 3×7, how many groups do we add?). The app, not Gemini,
   verifies the choice. Wrong answer => show which groups matter, retry; no Next.
 - **Cover / Recall:** both array and result are hidden; the child uses the big
