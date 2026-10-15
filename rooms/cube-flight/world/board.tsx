@@ -2,6 +2,8 @@ import { useEffect, useRef, useState, useSyncExternalStore, type FormEvent } fro
 import type { SurfaceViewProps } from '@experience/room-runtime';
 import { newRecordId } from '@experience/room-runtime';
 import { dateOf, hintFor, recordAttempt, type Question } from './memory';
+import { dailyMission, recommendTable, type DailyMission } from './mission';
+import { LessonStage } from './lesson';
 import type { CubeModel } from './model';
 import { PracticeStage, type Outcome } from './practice';
 import { GameIntro, GameFinish, ProgressPips } from './landing';
@@ -10,6 +12,9 @@ type Props = SurfaceViewProps & { model: CubeModel };
 
 export function GameBoard({ spec, data, edit, model }: Props) {
   const [plan, setPlan] = useState<Question[]>([]);
+  const [mission, setMission] = useState<DailyMission | null>(null);
+  const [selectedTable, setSelectedTable] = useState(() => recommendTable(data));
+  const [teaching, setTeaching] = useState<number | null>(null);
   const nudgedAt = useRef(-1);
   const [index, setIndex] = useState(0);
   const [entry, setEntry] = useState('');
@@ -22,8 +27,12 @@ export function GameBoard({ spec, data, edit, model }: Props) {
   const current = plan[index];
   const complete = plan.length > 0 && index === plan.length;
 
-  const begin = () => {
-    const nextPlan = sessionPlan(data, dateOf(new Date()));
+  const begin = (table = selectedTable) => {
+    const chosen = dailyMission(data, table, dateOf(new Date()));
+    const nextPlan = chosen.questions;
+    setSelectedTable(table);
+    setMission(chosen);
+    setTeaching(0);
     nudgedAt.current = -1;
     setPlan(nextPlan);
     setIndex(0);
@@ -34,8 +43,41 @@ export function GameBoard({ spec, data, edit, model }: Props) {
     setArray(false);
     setIndependent(0);
     const first = nextPlan[0];
-    if (first) model.emit({ kind: 'start', detail: { a: first.a, b: first.b } });
+    if (first)
+      model.emit({
+        kind: 'start',
+        detail: {
+          table,
+          a: chosen.lessons[0].a, b: chosen.lessons[0].b,
+          answer: chosen.lessons[0].answer, strategy: chosen.lessons[0].anchor,
+          phase: 'teach',
+        },
+      });
   };
+
+  const nextLesson = () => {
+    if (!mission || teaching === null) return;
+    const next = teaching + 1;
+    if (next >= mission.lessons.length) {
+      setTeaching(null);
+      model.emit({ kind: 'lesson_complete', detail: { table: mission.table } });
+    } else setTeaching(next);
+  };
+
+  useEffect(() => {
+    if (!mission || teaching === null) return;
+    const lesson = mission.lessons[teaching];
+    if (!lesson) return;
+    model.go('right');
+    model.emit({
+      kind: 'teach',
+      detail: {
+        table: mission.table, step: teaching + 1,
+        a: lesson.a, b: lesson.b,
+        answer: lesson.answer, strategy: lesson.anchor,
+      },
+    });
+  }, [mission, teaching, model]);
 
   const next = () => {
     if (!outcome) return;
@@ -59,13 +101,13 @@ export function GameBoard({ spec, data, edit, model }: Props) {
   };
 
   useEffect(() => {
-    if (!current) return;
+    if (!current || teaching !== null) return;
     model.prompt(current.a, current.b);
     model.emit({
       kind: 'question',
       detail: { a: current.a, b: current.b, revisit: current.revisit },
     });
-  }, [current, model]);
+  }, [current, teaching, model]);
 
   useEffect(() => {
     if (!complete) return;
@@ -75,7 +117,7 @@ export function GameBoard({ spec, data, edit, model }: Props) {
   }, [complete, model]);
 
   useEffect(() => {
-    if (!current || outcome || !entry) return;
+    if (!current || teaching !== null || outcome || !entry) return;
     const timer = setTimeout(
       () =>
         model.emit({
@@ -94,20 +136,21 @@ export function GameBoard({ spec, data, edit, model }: Props) {
       clearTimeout(timer);
       clearTimeout(pause);
     };
-  }, [current, entry, index, model, outcome]);
+  }, [current, entry, index, model, outcome, teaching]);
 
   // AI actions request safe UI changes. They never submit an answer or forge a success.
   useEffect(() => {
     if (!command) return;
-    if (command.action === 'hint' && current && !outcome) {
+    if (command.action === 'hint' && teaching === null && current && !outcome) {
       setHinted(true);
       model.hint();
-    } else if (command.action === 'array' && current && !outcome) {
+    } else if (command.action === 'array' && teaching === null && current && !outcome) {
       setHinted(true);
       setArray(true);
       model.hint();
     } else if (command.action === 'advance') {
       if (!plan.length || complete) begin();
+      else if (teaching !== null) nextLesson();
       else if (outcome) next();
     }
     // A new command id, not a game rerender, is what dispatches it.
@@ -115,7 +158,7 @@ export function GameBoard({ spec, data, edit, model }: Props) {
   }, [command]);
 
   const reveal = () => {
-    if (!current || outcome) return;
+    if (!current || teaching !== null || outcome) return;
     edit((d) =>
       recordAttempt(
         spec,
@@ -146,7 +189,7 @@ export function GameBoard({ spec, data, edit, model }: Props) {
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
-    if (!current || outcome || !entry) return;
+    if (!current || teaching !== null || outcome || !entry) return;
     if (Number(entry) !== current.a * current.b) {
       setEntry('');
       setWrong(true);
@@ -197,12 +240,17 @@ export function GameBoard({ spec, data, edit, model }: Props) {
 
   return (
     <main className="cf-arena" dir="rtl" aria-label="Cube Flight multiplication game">
-      {plan.length > 0 && !complete && <ProgressPips index={index} total={plan.length} />}
+      {plan.length > 0 && teaching === null && !complete && <ProgressPips index={index} total={plan.length} />}
 
       {!plan.length ? (
-        <GameIntro begin={begin} />
+        <GameIntro begin={begin} selectedTable={selectedTable}
+          selectTable={setSelectedTable} recommended={recommendTable(data)} />
+      ) : teaching !== null && mission ? (
+        <LessonStage table={mission.table} lessons={mission.lessons}
+          step={teaching} next={nextLesson} />
       ) : complete ? (
-        <GameFinish begin={begin} independent={independent} total={plan.length} />
+        <GameFinish begin={() => begin()} independent={independent}
+          total={plan.length} table={mission?.table ?? selectedTable} />
       ) : current ? (
         <PracticeStage
           current={current} index={index} total={plan.length}
