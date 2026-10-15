@@ -68,3 +68,32 @@
 - الإجابة المستقلة الموثوقة من كود اللعبة فقط هي التي تزود progress؛ التعلم/التلميح لا يحتسبا إتقانًا.
 - العالم يرسل أحداث `teach` و`lesson_complete` و`question` للشخصية؛ لومي تحكي الرابط قبل السؤال، ثم تتوقف عن كشف النتيجة وقت اللعب.
 - موبايل: جدول اليوم في شريط مكعبات أفقي قابل للتمرير، ومجموعات الدرس داخل صندوق صغير قابل للتمرير، مع لوحة الأرقام الكبيرة المعتادة.
+
+## Learning upgrade: no more skipping after viewing worked examples
+
+Based on the IES What Works Clearinghouse practice guides on explicit representations,
+interleaving guided and independent work, retrieval practice, and spaced reviews:
+
+- **Model / See:** Lumi shows a true multiplication fact and physically grouped cubes.
+  Where helpful, link it to x5, x10, or one extra/subtracted group.
+- **Connect / Think:** the child answers an independent *group-count* question (for
+  example, from 3×5 to 3×7, how many groups do we add?). The app, not Gemini,
+  verifies the choice. Wrong answer => show which groups matter, retry; no Next.
+- **Cover / Recall:** both array and result are hidden; the child uses the big
+  number pad to recall the product. A wrong answer or optional help returns
+  safely to the model explanation, rather than rushing into the next fact.
+- **Celebrate / Pause:** after a verified right answer in the teaching phase,
+  Lumi celebrates, then the child presses Next herself. Gemini tools cannot
+  skip the teaching stages or submit the answer.
+- **Practice / Mix / Revisit:** only later unassisted verified recall updates
+  the saved memory record. Facts recur between others in the session and
+  are scheduled across days.
+- The **suggested** next multiplication table now waits until all 11
+  associated products (2..12) have demonstrated independent recall on
+  two distinct calendar dates. The child can still manually choose any table.
+- Short, meaningful natural Egyptian-Arabic AI coaching is triggered by
+  each trusted learning-stage outcome. The core learning process still works
+  without the live voice connection.
+- Avoid timers and punishment. Mistakes trigger instruction, not shame.
+- This remains a design for practicing fluency, not an empirically validated
+  claim that the child has mastered every multiplication fact.
