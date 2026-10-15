@@ -4,6 +4,7 @@ import { newRecordId } from '@experience/room-runtime';
 import { dateOf, hintFor, recordAttempt, sessionPlan, type Question } from './memory';
 import type { CubeModel } from './model';
 import { NumberPad } from './pad';
+import { GameIntro, GameFinish } from './landing';
 
 type Outcome = 'memory' | 'helped' | 'shown' | null;
 type Props = SurfaceViewProps & { model: CubeModel };
@@ -208,32 +209,9 @@ export function GameBoard({ spec, data, edit, model }: Props) {
       )}
 
       {!plan.length ? (
-        <section className="cf-intro">
-          <div className="cf-supra">CUBE FLIGHT</div>
-          <h2>
-            الأرقام دي
-            <br />
-            <span>في دماغك!</span>
-          </h2>
-          <p>لومي بتطير معاكي، وتفكري سوا في أصعب الأرقام.</p>
-          <button className="cf-go" type="button" onClick={begin}>
-            ابدئي مع لومي <span>➜</span>
-          </button>
-          <small>اسمعي لومي، اختاري اسمك واسمها، وابدئي التحدي.</small>
-        </section>
+        <GameIntro begin={begin} />
       ) : complete ? (
-        <section className="cf-finish" aria-live="polite">
-          <div className="cf-medal">✦</div>
-          <div className="cf-supra">CUBE FLIGHT</div>
-          <h2>مستوى جديد!</h2>
-          <strong>
-            {independent} <small>/ {plan.length}</small>
-          </strong>
-          <p>إجابات من الذاكرة من غير مساعدة. الصح بمساعدة كمان تدريب ممتاز.</p>
-          <button className="cf-go" type="button" onClick={begin}>
-            جولة جديدة ↗
-          </button>
-        </section>
+        <GameFinish begin={begin} independent={independent} total={plan.length} />
       ) : current ? (
         <section className="cf-play">
           <div className="cf-equation" aria-label={`${current.a} في ${current.b}`}>
