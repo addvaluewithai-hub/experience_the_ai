@@ -71,7 +71,8 @@ export function GameBoard({ spec, data, edit, model }: Props) {
   const complete = plan.length > 0 && index === plan.length;
 
   const begin = () => {
-    setPlan(sessionPlan(data, dateOf(new Date())));
+    const nextPlan = sessionPlan(data, dateOf(new Date()));
+    setPlan(nextPlan);
     setIndex(0);
     setEntry('');
     setOutcome(null);
@@ -80,6 +81,8 @@ export function GameBoard({ spec, data, edit, model }: Props) {
     setArray(false);
     setIndependent(0);
     setSolved(0);
+    const first = nextPlan[0];
+    if (first) model.emit({ kind: 'start', detail: { a: first.a, b: first.b } });
   };
 
   const next = () => {
@@ -97,17 +100,48 @@ export function GameBoard({ spec, data, edit, model }: Props) {
     setHinted(true);
     if (showArray) setArray(true);
     model.hint();
+    model.emit({
+      kind: 'hint',
+      detail: { a: current.a, b: current.b, strategy: hintFor(current.a, current.b) },
+    });
   };
 
   useEffect(() => {
-    if (current) model.prompt(current.a, current.b);
+    if (!current) return;
+    model.prompt(current.a, current.b);
+    model.emit({
+      kind: 'question',
+      detail: { a: current.a, b: current.b, revisit: current.revisit },
+    });
   }, [current, model]);
+
+  useEffect(() => {
+    if (!complete) return;
+    model.emit({ kind: 'round_complete', detail: { independent, total: plan.length } });
+    // React to finishing the round, not to every counter update.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [complete, model]);
+
+  useEffect(() => {
+    if (!current || outcome || !entry) return;
+    const timer = setTimeout(() => model.emit({
+      kind: 'selection',
+      detail: { digits: entry },
+    }), 600);
+    return () => clearTimeout(timer);
+  }, [current, entry, model, outcome]);
 
   // AI actions request safe UI changes. They never submit an answer or forge a success.
   useEffect(() => {
     if (!command) return;
-    if (command.action === 'hint') hint();
-    else if (command.action === 'array') hint(true);
+    if (command.action === 'hint' && current && !outcome) {
+      setHinted(true);
+      model.hint();
+    } else if (command.action === 'array' && current && !outcome) {
+      setHinted(true);
+      setArray(true);
+      model.hint();
+    }
     else if (command.action === 'advance') {
       if (!plan.length || complete) begin();
       else if (outcome) next();
@@ -131,6 +165,14 @@ export function GameBoard({ spec, data, edit, model }: Props) {
     );
     setOutcome('shown');
     model.answer(false, true);
+    model.emit({
+      kind: 'answer',
+      detail: {
+        a: current.a, b: current.b, revealed: true, answer: current.a * current.b,
+        expected: current.a * current.b, correct: false, independent: false,
+        strategy: hintFor(current.a, current.b),
+      },
+    });
   };
 
   const submit = (event: FormEvent) => {
@@ -139,7 +181,16 @@ export function GameBoard({ spec, data, edit, model }: Props) {
     if (Number(entry) !== current.a * current.b) {
       setEntry('');
       setWrong(true);
-      hint();
+      setHinted(true);
+      model.hint();
+      model.emit({
+        kind: 'answer',
+        detail: {
+          a: current.a, b: current.b, answer: Number(entry),
+          expected: current.a * current.b, correct: false, independent: false,
+          strategy: hintFor(current.a, current.b),
+        },
+      });
       return;
     }
     const unassisted = !hinted && !wrong;
@@ -158,55 +209,46 @@ export function GameBoard({ spec, data, edit, model }: Props) {
     setSolved((n) => n + 1);
     if (unassisted) setIndependent((n) => n + 1);
     model.answer(true, !unassisted);
+    model.emit({
+      kind: 'answer',
+      detail: {
+        a: current.a, b: current.b, answer: Number(entry),
+        expected: current.a * current.b, correct: true, independent: unassisted,
+        strategy: hintFor(current.a, current.b),
+      },
+    });
   };
 
   const result = current ? current.a * current.b : 0;
-  const words =
-    outcome === 'memory'
-      ? 'دي طلعت من الذاكرة! ممتاز ✨'
-      : outcome === 'helped'
-        ? 'وصلتي لها! المرة الجاية نجرب من غير تلميح.'
-        : outcome === 'shown'
-          ? 'ده الناتج. خليه في بالك لما يرجع تاني.'
-          : wrong
-            ? 'قريبة! جربي الرابط ده وبعدين حاولي تاني.'
-            : 'ركّزي لحظة… فاكرة الناتج؟';
 
   return (
     <main className="cf-arena" dir="rtl" aria-label="Cube Flight multiplication game">
-      <header className="cf-hud">
-        <div className="cf-logo">
-          <span className="cf-logo-icon">✦</span>
-          <b>CUBE FLIGHT</b>
+      {plan.length > 0 && !complete && (
+        <div className="cf-progress-pips" role="progressbar"
+          aria-label="تقدم اللعب" aria-valuenow={index}
+          aria-valuemin={0} aria-valuemax={plan.length}>
+          {plan.map((_, i) => <i key={i} className={i < index ? 'lit' : ''} />)}
         </div>
-        <div className="cf-hud-right">
-          <span className="cf-stats">
-            ⚡ {independent} <small>من الذاكرة</small>
-          </span>
-          <span className="cf-round">
-            {plan.length ? `${Math.min(index + 1, plan.length)} / ${plan.length}` : 'START'}
-          </span>
-        </div>
-      </header>
+      )}
 
       {!plan.length ? (
         <section className="cf-intro">
-          <div className="cf-supra">جاهزة للانطلاق؟</div>
+          <div className="cf-supra">CUBE FLIGHT</div>
           <h2>
             الأرقام دي
             <br />
             <span>في دماغك!</span>
           </h2>
-          <p>٤ تحديات. مكعبات. ولومي معاكي في كل حركة.</p>
+          <p>لومي بتطير معاكي، وتفكري سوا في أصعب الأرقام.</p>
           <button className="cf-go" type="button" onClick={begin}>
-            ابدئي اللعب <span>➜</span>
+            ابدئي مع لومي <span>➜</span>
           </button>
-          <small>من غير عداد وقت. كل محاولة بتقوّي الذاكرة.</small>
+          <small>اسمعي لومي، اختاري اسمك واسمها، وابدئي التحدي.</small>
         </section>
       ) : complete ? (
         <section className="cf-finish" aria-live="polite">
           <div className="cf-medal">✦</div>
-          <div className="cf-supra">RUN COMPLETE</div>
+          <div className="cf-supra">CUBE FLIGHT</div>
           <h2>مستوى جديد!</h2>
           <strong>
             {independent} <small>/ {plan.length}</small>
@@ -218,10 +260,7 @@ export function GameBoard({ spec, data, edit, model }: Props) {
         </section>
       ) : current ? (
         <section className="cf-play">
-          <div className="cf-status">
-            <span>CHALLENGE {index + 1}</span>
-            <span>{current.revisit ? 'MEMORY RECALL' : 'NEW CUBE'}</span>
-          </div>
+
           <div className="cf-equation" aria-label={`${current.a} في ${current.b}`}>
             <span className="cf-big-cube">{current.a}</span>
             <span className="cf-operator">×</span>
@@ -231,9 +270,15 @@ export function GameBoard({ spec, data, edit, model }: Props) {
               {outcome ? result : '?'}
             </span>
           </div>
-          <p className="cf-reaction" aria-live="polite">
-            {words}
-          </p>
+          <span className="sr-only" aria-live="polite">
+            {outcome === 'memory' ? 'إجابة صح من الذاكرة'
+              : outcome === 'helped' ? 'إجابة صح بمساعدة'
+              : outcome === 'shown' ? 'تم عرض الحل'
+              : wrong ? 'جرّبي تاني مع التلميح' : ''}
+          </span>
+          {outcome && <div className={`cf-result-flash ${outcome}`} aria-hidden="true">
+            {outcome === 'shown' ? '✦' : '✓'}
+          </div>}
           {hinted && (
             <aside className="cf-help-panel" aria-label="تلميح">
               <span className="cf-hint-title">✧ مفتاح الذاكرة</span>
