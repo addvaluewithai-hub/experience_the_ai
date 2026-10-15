@@ -18,6 +18,8 @@ export interface SpriteRig {
   destroy(): void;
 }
 type Spot = 'left' | 'middle' | 'right';
+export type GameAction = 'hint' | 'array' | 'advance';
+export type GameCommand = { id: number; action: GameAction };
 
 /** Scoring stays in memory.ts; Lumi only moves and reacts. */
 export class CubeModel extends Cast {
@@ -26,6 +28,21 @@ export class CubeModel extends Cast {
   private avatar: SpriteRig | null = null;
   private place: Spot = 'middle';
   private successes = 0;
+  private listeners = new Set<() => void>();
+  private command: GameCommand | null = null;
+  private commandId = 0;
+  subscribeCommand = (listener: () => void) => {
+    this.listeners.add(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
+  };
+  getCommand = () => this.command;
+
+  private request(action: GameAction) {
+    this.command = { id: ++this.commandId, action };
+    for (const listener of this.listeners) listener();
+  }
 
   bindAvatar(avatar: SpriteRig | null) {
     this.avatar = avatar;
@@ -80,6 +97,9 @@ export class CubeModel extends Cast {
       (args.place === 'left' || args.place === 'middle' || args.place === 'right')
     )
       this.go(args.place);
+    else if (action === 'show_hint') this.request('hint');
+    else if (action === 'reveal_array') this.request('array');
+    else if (action === 'advance') this.request('advance');
     else if (action === 'cheer') {
       this.avatar?.setEmotion('excited');
       this.avatar?.setGesture('celebrate', 1.5);
