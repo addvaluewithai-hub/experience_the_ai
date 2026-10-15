@@ -20,7 +20,16 @@ type Spot = 'left' | 'middle' | 'right';
 export type GameAction = 'hint' | 'array' | 'advance';
 export type GameCommand = { id: number; action: GameAction };
 export type GameEvent = {
-  kind: 'start' | 'teach' | 'lesson_complete' | 'question' | 'selection' | 'pause' | 'answer' | 'hint' | 'round_complete';
+  kind:
+    | 'start'
+    | 'teach'
+    | 'lesson_complete'
+    | 'question'
+    | 'selection'
+    | 'pause'
+    | 'answer'
+    | 'hint'
+    | 'round_complete';
   detail: Record<string, string | number | boolean>;
 };
 export type PlayerProfile = { player: string; companion: string };

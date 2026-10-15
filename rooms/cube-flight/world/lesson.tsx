@@ -2,7 +2,10 @@ import type { Lesson } from './mission';
 
 /** An actual teach step: the answer is shown WITH a physical group relationship. */
 export function LessonStage({
-  table, lessons, step, next,
+  table,
+  lessons,
+  step,
+  next,
 }: {
   table: number;
   lessons: Lesson[];
@@ -25,9 +28,14 @@ export function LessonStage({
       <div className="cf-lesson-demo" aria-label={`${b} مجموعات من ${a} مكعبات`}>
         <div className="cf-lesson-grid">
           {Array.from({ length: b }, (_, row) => (
-            <div className={`cf-lesson-row ${row >= 5 ? 'extra' : ''}`} key={row}
-              style={{ gridTemplateColumns: `repeat(${a}, minmax(0, 1fr))` }}>
-              {Array.from({ length: a }, (_, col) => <i key={col} />)}
+            <div
+              className={`cf-lesson-row ${row >= 5 ? 'extra' : ''}`}
+              key={row}
+              style={{ gridTemplateColumns: `repeat(${a}, minmax(0, 1fr))` }}
+            >
+              {Array.from({ length: a }, (_, col) => (
+                <i key={col} />
+              ))}
             </div>
           ))}
         </div>

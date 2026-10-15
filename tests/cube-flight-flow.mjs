@@ -3,7 +3,9 @@ import assert from 'node:assert/strict';
 /** Browser: one start control, spoken companion rig, game events and local progress on desktop/mobile. */
 export async function cubeFlightFlow(page, url) {
   const originalSize = page.viewportSize();
-  page.on('pageerror', (error) => console.error('Cube cold pageerror:', error.stack || error.message));
+  page.on('pageerror', (error) =>
+    console.error('Cube cold pageerror:', error.stack || error.message),
+  );
   page.on('console', (message) => {
     if (message.type() === 'error') console.error('Cube console error:', message.text());
   });
@@ -28,8 +30,15 @@ export async function cubeFlightFlow(page, url) {
   assert.equal(await page.getByText(/جدول 3 · اكتشفي الرابط/).count(), 1);
   for (let i = 0; i < 3; i++) {
     const fact = await page.locator('.cf-teach-equation .cf-big-cube').allTextContents();
-    assert.equal(Number(fact[0]) * Number(fact[1]), Number(fact[2]), 'teach result is visible and correct');
-    assert.ok((await page.locator('.cf-lesson-row i').count()) > 0, 'teaching shows real cube groups');
+    assert.equal(
+      Number(fact[0]) * Number(fact[1]),
+      Number(fact[2]),
+      'teach result is visible and correct',
+    );
+    assert.ok(
+      (await page.locator('.cf-lesson-row i').count()) > 0,
+      'teaching shows real cube groups',
+    );
     await page.locator('.cf-lesson-next').click();
   }
   await page.locator('.cf-lesson').waitFor({ state: 'detached' });

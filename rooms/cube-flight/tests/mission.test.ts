@@ -41,7 +41,10 @@ test('recommended table moves forward but old weak facts remain available to rev
 
 test('first teaches visible answers as cube group relationships, then recall prompts hide them', () => {
   const mission = dailyMission(emptyData(spec), 3, day);
-  assert.deepEqual(mission.lessons.map((fact) => fact.b), [6, 7, 8]);
+  assert.deepEqual(
+    mission.lessons.map((fact) => fact.b),
+    [6, 7, 8],
+  );
   assert.match(mission.lessons[0].anchor, /3 × 5 = 15/);
   assert.equal(mission.lessons[0].answer, 18);
   assert.match(learningAnchor(8, 9), /10/);

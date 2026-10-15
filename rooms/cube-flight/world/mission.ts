@@ -8,9 +8,9 @@ import { canonical, factKey, findFact, type Fact, type Question } from './memory
 export function recommendTable(data: RoomData): number {
   for (let table = 2; table <= 12; table++) {
     const seen = new Set(
-      (data.facts ?? []).filter((row) =>
-        Number(row.values.a) === table || Number(row.values.b) === table,
-      ).map((row) => factKey(Number(row.values.a), Number(row.values.b))),
+      (data.facts ?? [])
+        .filter((row) => Number(row.values.a) === table || Number(row.values.b) === table)
+        .map((row) => factKey(Number(row.values.a), Number(row.values.b))),
     );
     if (seen.size < 3) return table;
   }
@@ -45,7 +45,10 @@ export function dailyMission(data: RoomData, table: number, today: string): Dail
     .sort((a, b) => a.score - b.score || a.index - b.index);
   const selected = weighted.slice(0, 3).map(({ other }) => other);
   const lessons = selected.map((other) => ({
-    a: table, b: other, answer: table * other, anchor: learningAnchor(table, other),
+    a: table,
+    b: other,
+    answer: table * other,
+    anchor: learningAnchor(table, other),
   }));
 
   // Only include a fact outside today's table if it is already known and due.
@@ -55,15 +58,17 @@ export function dailyMission(data: RoomData, table: number, today: string): Dail
     .filter((values) => Number.isInteger(values.a) && Number.isInteger(values.b))
     .filter((values) => values.due && String(values.due) <= today)
     .map((values) => canonical(Number(values.a), Number(values.b)))
-    .find((fact) =>
-      fact.a >= 2 && fact.b <= 12 &&
-      fact.a !== table && fact.b !== table && !lessonKeys.has(factKey(fact.a, fact.b)),
+    .find(
+      (fact) =>
+        fact.a >= 2 &&
+        fact.b <= 12 &&
+        fact.a !== table &&
+        fact.b !== table &&
+        !lessonKeys.has(factKey(fact.a, fact.b)),
     );
   const prompts: Fact[] = lessons.map(({ a, b }) => ({ a, b }));
   if (oldDue) prompts.push(oldDue);
-  const order = oldDue
-    ? [0, 1, 2, 3, 0, 1, 2, 3, 1, 0, 2]
-    : [0, 1, 2, 0, 1, 2, 0, 2, 1];
+  const order = oldDue ? [0, 1, 2, 3, 0, 1, 2, 3, 1, 0, 2] : [0, 1, 2, 0, 1, 2, 0, 2, 1];
   const visits = new Map<string, number>();
   const questions = order.map((slot) => {
     const fact = prompts[slot];

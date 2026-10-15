@@ -1,5 +1,8 @@
 export function GameIntro({
-  begin, selectedTable, selectTable, recommended,
+  begin,
+  selectedTable,
+  selectTable,
+  recommended,
 }: {
   begin: (table: number) => void;
   selectedTable: number;
@@ -16,12 +19,18 @@ export function GameIntro({
       </h2>
       <p>النهارده هنكتشف روابط صغيرة في جدول واحد، وبعدين نلعب من الذاكرة.</p>
       <div className="cf-tables" role="group" aria-label="اختاري جدول النهارده">
-        <div className="cf-table-heading">جدول النهارده <small>لومي بترشّح {recommended}</small></div>
+        <div className="cf-table-heading">
+          جدول النهارده <small>لومي بترشّح {recommended}</small>
+        </div>
         <div className="cf-table-picker">
           {Array.from({ length: 11 }, (_, i) => i + 2).map((table) => (
-            <button key={table} type="button" aria-pressed={table === selectedTable}
+            <button
+              key={table}
+              type="button"
+              aria-pressed={table === selectedTable}
               className={table === selectedTable ? 'cf-table-tile selected' : 'cf-table-tile'}
-              onClick={() => selectTable(table)}>
+              onClick={() => selectTable(table)}
+            >
               {table}
             </button>
           ))}
@@ -38,7 +47,8 @@ export function GameIntro({
 export function GameFinish({
   begin,
   independent,
-  total, table,
+  total,
+  table,
 }: {
   begin: () => void;
   independent: number;

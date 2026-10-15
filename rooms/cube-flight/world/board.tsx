@@ -48,8 +48,10 @@ export function GameBoard({ spec, data, edit, model }: Props) {
         kind: 'start',
         detail: {
           table,
-          a: chosen.lessons[0].a, b: chosen.lessons[0].b,
-          answer: chosen.lessons[0].answer, strategy: chosen.lessons[0].anchor,
+          a: chosen.lessons[0].a,
+          b: chosen.lessons[0].b,
+          answer: chosen.lessons[0].answer,
+          strategy: chosen.lessons[0].anchor,
           phase: 'teach',
         },
       });
@@ -72,9 +74,12 @@ export function GameBoard({ spec, data, edit, model }: Props) {
     model.emit({
       kind: 'teach',
       detail: {
-        table: mission.table, step: teaching + 1,
-        a: lesson.a, b: lesson.b,
-        answer: lesson.answer, strategy: lesson.anchor,
+        table: mission.table,
+        step: teaching + 1,
+        a: lesson.a,
+        b: lesson.b,
+        answer: lesson.answer,
+        strategy: lesson.anchor,
       },
     });
   }, [mission, teaching, model]);
@@ -240,23 +245,47 @@ export function GameBoard({ spec, data, edit, model }: Props) {
 
   return (
     <main className="cf-arena" dir="rtl" aria-label="Cube Flight multiplication game">
-      {plan.length > 0 && teaching === null && !complete && <ProgressPips index={index} total={plan.length} />}
+      {plan.length > 0 && teaching === null && !complete && (
+        <ProgressPips index={index} total={plan.length} />
+      )}
 
       {!plan.length ? (
-        <GameIntro begin={begin} selectedTable={selectedTable}
-          selectTable={setSelectedTable} recommended={recommendTable(data)} />
+        <GameIntro
+          begin={begin}
+          selectedTable={selectedTable}
+          selectTable={setSelectedTable}
+          recommended={recommendTable(data)}
+        />
       ) : teaching !== null && mission ? (
-        <LessonStage table={mission.table} lessons={mission.lessons}
-          step={teaching} next={nextLesson} />
+        <LessonStage
+          table={mission.table}
+          lessons={mission.lessons}
+          step={teaching}
+          next={nextLesson}
+        />
       ) : complete ? (
-        <GameFinish begin={() => begin()} independent={independent}
-          total={plan.length} table={mission?.table ?? selectedTable} />
+        <GameFinish
+          begin={() => begin()}
+          independent={independent}
+          total={plan.length}
+          table={mission?.table ?? selectedTable}
+        />
       ) : current ? (
         <PracticeStage
-          current={current} index={index} total={plan.length}
-          outcome={outcome} hinted={hinted} wrong={wrong}
-          array={array} setArray={setArray} entry={entry} setEntry={setEntry}
-          submit={submit} next={next} hint={() => hint()} reveal={reveal}
+          current={current}
+          index={index}
+          total={plan.length}
+          outcome={outcome}
+          hinted={hinted}
+          wrong={wrong}
+          array={array}
+          setArray={setArray}
+          entry={entry}
+          setEntry={setEntry}
+          submit={submit}
+          next={next}
+          hint={() => hint()}
+          reveal={reveal}
         />
       ) : null}
 
