@@ -31,7 +31,8 @@ export async function startCall(
   /** `true`: the character greets the person who just arrived; text: speaks first from it. */
   options: { greet?: boolean | string } = {},
 ) {
-  await endCall();
+  // Keep audio unlock within the original tap when no earlier call needs closing.
+  if (session) await endCall();
   const conversation = conversationFor(room, character);
   set({
     status: 'connecting',
@@ -80,6 +81,16 @@ export function sayInCall(room: OpenRoom, character: Character, text: string) {
   conversationFor(room, character).hear('person', text, true);
   session.say(text);
   return true;
+}
+
+/** Game state is context, never a fabricated utterance from the child. */
+export function noteGameToCall(roomKey: string, text: string) {
+  if (session && state.roomKey === roomKey && state.status === 'live') session.note(text);
+}
+
+/** An explicit completed game action may invite a brief spoken reaction. */
+export function reactToGameInCall(roomKey: string, text: string) {
+  if (session && state.roomKey === roomKey && state.status === 'live') session.say(text);
 }
 
 export function toggleMute() {

@@ -4,8 +4,9 @@ import { useRoomData } from '@experience/room-runtime';
 import { roomHref, type OpenRoom } from '../../app/rooms';
 import { arrivalCue, conversationFor, takeHandoff } from './conversation';
 import { PresenceDock } from './PresenceDock';
+import { CubeVoiceControls } from './CubeVoiceControls';
 import { PresenceLayer } from './PresenceLayer';
-import { startCall } from './voiceCall';
+import { noteGameToCall, reactToGameInCall, startCall } from './voiceCall';
 import './immersive.css';
 
 const briefed = new Set<string>();
@@ -21,6 +22,8 @@ export function ImmersiveRoom(props: {
 }) {
   const { room, rooms } = props;
   const data = useRoomData(room.store);
+  const cubeFlight = room.key === 'cube-flight';
+  const [gameStarted, setGameStarted] = useState(false);
   const edit = useCallback(
     (change: (current: RoomData) => RoomData) => room.store.set(change(room.store.get())),
     [room],
@@ -65,6 +68,126 @@ export function ImmersiveRoom(props: {
     const first = room.spec.characters[0];
     void conversationFor(room, first).send(arrivalCue(room, first), null);
   }, [docked, props.ai, arriving, room]);
+  // The only game-to-voice bridge. Room events carry facts graded by code, never the
+  // model's guesses. Text is hidden: the flying character responds with real audio.
+  useEffect(() => {
+    if (!cubeFlight || !room.surface?.onGameEvent) return;
+    const companion = room.spec.characters[0];
+    return room.surface.onGameEvent(({ kind, detail }) => {
+      if (kind === 'start') {
+        setGameStarted(true);
+        if (props.ai === false) return;
+        // Triggered directly by the big Start button's click, so audio unlock is allowed.
+        void startCall(room, companion, {
+          greet: [
+            'GAME_START: The child has started Cube Flight using the Start button.',
+            `TODAY TABLE ${detail.table}. TEACH STEP ONE: ${detail.a} × ${detail.b} = ${detail.answer} is DISPLAYED with groups. Explain the concrete relationship ${detail.strategy} slowly, in two short turns. Invite the child to look and press "I see the groups"; DO NOT quiz until she chooses to try.`,
+            room.surface?.state() ?? '',
+            'Speak in friendly, natural Egyptian Arabic, one or two lively sentences at a time.',
+            'On the first visit ask the child for an OPTIONAL nickname and what she wants to name you.',
+            'Only save a name she explicitly chose with remember_player/name_companion tools.',
+            'If a nickname is already saved, welcome her by it, do not ask again.',
+            'IMPORTANT: do not skip or race through examples. Each fact must pass three interactive stages: EXPLAIN with answer/blocks, CONNECT (she chooses the number of groups to add/subtract), then RECALL with answer and blocks hidden. Celebrate her recall and let her decide when to continue. If she gets stuck, calmly reteach. Do not grade yourself; only trust game events.',
+          ].join(' '),
+        });
+        return;
+      }
+      if (kind === 'teach') {
+        // The first teaching example is in the start-call greeting; later steps are spoken.
+        if (detail.step !== 1)
+          reactToGameInCall(
+            room.key,
+            `GAME_TEACH: Table ${detail.table}; example ${detail.a} × ${detail.b} = ${detail.answer} is DISPLAYED with grouped cubes. Clearly explain WHY the group connection ${detail.strategy} works in conversational Egyptian Arabic. Ask her to observe one specific thing, then WAIT for her tap. Do not say next number until she understands and acts.`,
+          );
+        return;
+      }
+      if (kind === 'bridge_question') {
+        reactToGameInCall(
+          room.key,
+          `GROUP_CONNECTION: The child is now choosing a small missing group COUNT for ${detail.a} × ${detail.b}. Ask ${detail.question} gently, and wait for her choice. Do not tell her which button is correct.`,
+        );
+        return;
+      }
+      if (kind === 'bridge_result') {
+        reactToGameInCall(
+          room.key,
+          detail.correct === true
+            ? `GROUP_CONNECTION_OK: The child's choice correctly completed the number-group link for ${detail.a} × ${detail.b}. Praise her thinking briefly. The blocks and answer are now hidden; invite her to retrieve the product independently.`
+            : `GROUP_CONNECTION_RETRY: Her chosen group count was not right. Don't say the right option! Point her to the color-coded groups, give one small counting clue and let her choose again.`,
+        );
+        return;
+      }
+      if (kind === 'lesson_recall') {
+        reactToGameInCall(
+          room.key,
+          detail.correct === true
+            ? `TEACHING_RECALL_OK: The child independently reconstructed ${detail.a} × ${detail.b} after understanding its group link. Congratulate warmly, then pause: she chooses when to learn the next fact. This is teaching progress, not multi-day memory mastery.`
+            : `TEACHING_RECALL_RETRY: The child tried ${detail.attempt} for ${detail.a} × ${detail.b} and could not recall yet. The game has RETURNED to a visual worked example. Re-explain the relationship in a NEW short way, then let her reconnect the groups and try independently again. NO shame, pressure, or rushing.`,
+        );
+        return;
+      }
+      if (kind === 'lesson_help') {
+        reactToGameInCall(
+          room.key,
+          `TEACHING_HELP: The child voluntarily asked to see the grouped cubes again. Re-explain gently, show her one pattern, and wait for her to try when ready.`,
+        );
+        return;
+      }
+      if (kind === 'lesson_complete') {
+        reactToGameInCall(
+          room.key,
+          `GAME_LESSON_DONE: The three teaching examples for table ${detail.table} are now hidden. Switch to independent recall. Cheer her on gently, and do NOT reveal the next result.`,
+        );
+        return;
+      }
+      if (kind === 'selection') {
+        if (typeof detail.digits === 'string')
+          noteGameToCall(
+            room.key,
+            `GAME_SELECTION: The player is currently composing digits ${detail.digits}; do not react until she submits.`,
+          );
+        return;
+      }
+      if (kind === 'pause') {
+        reactToGameInCall(
+          room.key,
+          `GAME_THINKING_PAUSE: The child has placed ${detail.digits} for ${detail.a}×${detail.b} but hasn't submitted. Ask ONE warm, very brief question about her thinking. Don't judge the partial digits, don't reveal the result and don't interrupt if she resumes typing.`,
+        );
+        return;
+      }
+      if (kind === 'question') {
+        noteGameToCall(
+          room.key,
+          `GAME_QUESTION: ${detail.a} times ${detail.b} is visible; revisiting=${detail.revisit}. Wait for her attempt.`,
+        );
+        return;
+      }
+      if (kind === 'hint') {
+        reactToGameInCall(
+          room.key,
+          `GAME_HINT_REQUEST: Child requested help with ${detail.a} × ${detail.b}. On screen the strategy says: ${detail.strategy}. Explain this connection briefly aloud, ask her to try recalling. No spoilers unless she asks.`,
+        );
+        return;
+      }
+      if (kind === 'answer') {
+        const correct = detail.correct === true;
+        reactToGameInCall(
+          room.key,
+          detail.revealed === true
+            ? `GAME_SOLUTION: The child asked to see ${detail.a} × ${detail.b} = ${detail.expected}. She saw the result. Give one brief memory connection and invite a later recall, without judging her.`
+            : correct
+              ? `GAME_ANSWER: ${detail.a}×${detail.b} = ${detail.answer}, verified CORRECT by the game. Independent recall=${detail.independent}. Respond with one playful spoken reaction. If assisted, mention the strategy helped and we'll try again later. No long lecture.`
+              : `GAME_ANSWER: Child chose ${detail.answer} for ${detail.a}×${detail.b}; verified INCORRECT by game (correct result is ${detail.expected}, never give it immediately). Offer one short way to THINK using ${detail.strategy}; use show_hint/reveal_array only if needed. Let her retry without judgment.`,
+        );
+        return;
+      }
+      if (kind === 'round_complete')
+        reactToGameInCall(
+          room.key,
+          `GAME_COMPLETE: ${detail.independent} independent recalls out of ${detail.total} challenges. Congratulate effort briefly in Egyptian Arabic. Invite another round when she wants, no pressure.`,
+        );
+    });
+  }, [cubeFlight, room, props.ai]);
   const View = room.surface?.View;
   const leave = room.parent ? roomHref(room.parent.key) : '#/';
   const ar = room.spec.language === 'ar';
@@ -95,7 +218,11 @@ export function ImmersiveRoom(props: {
           />
         )}
       </div>
-      {docked ? (
+      {cubeFlight ? (
+        gameStarted ? (
+          <CubeVoiceControls room={room} ai={props.ai} started />
+        ) : null
+      ) : docked ? (
         <PresenceDock room={room} ai={props.ai} leave={leave} />
       ) : (
         <>

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { mkdir } from 'node:fs/promises';
 import { chromium } from 'playwright';
+import { cubeFlightFlow } from './cube-flight-flow.mjs';
 
 // Built app + mocked API: this checks rooms, panels and the agent tool loop in a real browser.
 // It does not prove a real model's behaviour; that needs a live check on a preview deployment.
@@ -87,9 +88,11 @@ try {
 
   await page.goto(url);
   await assert.doesNotReject(page.getByRole('link', { name: /كوكب العادات/ }).waitFor());
-  assert.equal(await page.locator('.card').count(), 9);
+  assert.equal(await page.locator('.card').count(), 10);
   await page.getByRole('link', { name: /وادي قوس قزح/ }).waitFor();
   await page.screenshot({ path: 'test-results/home.png', fullPage: true });
+
+  await cubeFlightFlow(page, url);
 
   // A person's own edits go through the room rules and every panel agrees.
   await page.getByRole('link', { name: /كوكب العادات/ }).click();
@@ -269,6 +272,7 @@ try {
       'study-room',
       'rainbow-valley',
       'rainbow-valley/crystal-river',
+      'cube-flight',
     ]) {
       await page.goto(`${url}/#/room/${room}`);
       await page.locator('.room, .immersive').first().waitFor();

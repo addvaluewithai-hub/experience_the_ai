@@ -9,4 +9,5 @@ export type {
   RoomSurface,
   RoomWorld,
   SurfaceViewProps,
+  RoomInteractionEvent,
 } from './panels/types';
