@@ -23,6 +23,10 @@ export type GameEvent = {
   kind:
     | 'start'
     | 'teach'
+    | 'bridge_question'
+    | 'bridge_result'
+    | 'lesson_recall'
+    | 'lesson_help'
     | 'lesson_complete'
     | 'question'
     | 'selection'
