@@ -1,0 +1,32 @@
+name: One-time Cube Flight formatting
+on:
+  push:
+    branches:
+      - feat/cube-flight-memory
+    paths:
+      - .github/workflows/cube-flight-formatter.yml
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Format authored room code (not original PixiLive sources)
+        run: npx prettier --write "rooms/cube-flight/**/*.{ts,tsx,json,md}" rooms/index.ts
+      - name: Commit formatting changes to this feature branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add rooms/cube-flight rooms/index.ts
+          if ! git diff --cached --quiet; then
+            git commit -m "style(cube-flight): apply Prettier to authored room files"
+            git push origin HEAD:feat/cube-flight-memory
+          fi
