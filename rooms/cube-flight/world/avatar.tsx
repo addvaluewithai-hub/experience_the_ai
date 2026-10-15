@@ -1,5 +1,5 @@
-import { useCallback, useSyncExternalStore } from 'react';
-import type { CubeModel, SpriteRig } from './model';
+import { useCallback, useEffect, useState } from 'react';
+import type { CubeModel, PlayerProfile, SpriteRig } from './model';
 
 interface CharacterRecipe {
   species: string;
@@ -64,7 +64,11 @@ function loadPixiLive(): Promise<string> {
  * No new mascot art or motion loop is introduced for the maths room.
  */
 export function LumiAvatar({ model }: { model: CubeModel }) {
-  const profile = useSyncExternalStore(model.subscribeProfile, model.getProfile, model.getProfile);
+  const [profile, setProfile] = useState<PlayerProfile>(() => model.getProfile());
+  useEffect(() => {
+    const unsubscribe = model.subscribeProfile(() => setProfile(model.getProfile()));
+    return () => { unsubscribe(); };
+  }, [model]);
   const attach = useCallback(
     (el: HTMLDivElement | null) => {
       if (!el) return;
