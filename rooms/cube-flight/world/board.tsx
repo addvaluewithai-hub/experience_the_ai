@@ -8,7 +8,6 @@ import { GameIntro, GameFinish } from './landing';
 
 type Outcome = 'memory' | 'helped' | 'shown' | null;
 type Props = SurfaceViewProps & { model: CubeModel };
-const keys = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
 
 export function GameBoard({ spec, data, edit, model }: Props) {
   const [plan, setPlan] = useState<Question[]>([]);
@@ -19,7 +18,6 @@ export function GameBoard({ spec, data, edit, model }: Props) {
   const [outcome, setOutcome] = useState<Outcome>(null);
   const [array, setArray] = useState(false);
   const [independent, setIndependent] = useState(0);
-  const [solved, setSolved] = useState(0);
   const command = useSyncExternalStore(model.subscribeCommand, model.getCommand, model.getCommand);
   const current = plan[index];
   const complete = plan.length > 0 && index === plan.length;
@@ -34,7 +32,6 @@ export function GameBoard({ spec, data, edit, model }: Props) {
     setHinted(false);
     setArray(false);
     setIndependent(0);
-    setSolved(0);
     const first = nextPlan[0];
     if (first) model.emit({ kind: 'start', detail: { a: first.a, b: first.b } });
   };
@@ -172,7 +169,6 @@ export function GameBoard({ spec, data, edit, model }: Props) {
       ),
     );
     setOutcome(unassisted ? 'memory' : 'helped');
-    setSolved((n) => n + 1);
     if (unassisted) setIndependent((n) => n + 1);
     model.answer(true, !unassisted);
     model.emit({
