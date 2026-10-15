@@ -1,13 +1,18 @@
 import type { RoomData } from '@experience/room-spec';
 import { canonical, factKey, findFact, type Fact, type Question } from './memory';
 
-/** Prefer the next table with facts that have not yet been recalled on three separate days. */
+/** Move the suggested spotlight forward after three facts were tried, while
+ * unfinished/weak previous facts stay eligible for spaced mixed review.
+ * A parent/child may always choose another table on the start screen.
+ */
 export function recommendTable(data: RoomData): number {
   for (let table = 2; table <= 12; table++) {
-    const secure = Array.from({ length: 11 }, (_, i) => i + 2).filter(
-      (other) => Number(findFact(data, table, other)?.values.streak ?? 0) >= 3,
+    const seen = new Set(
+      (data.facts ?? []).filter((row) =>
+        Number(row.values.a) === table || Number(row.values.b) === table,
+      ).map((row) => factKey(Number(row.values.a), Number(row.values.b))),
     );
-    if (secure.length < 8) return table;
+    if (seen.size < 3) return table;
   }
   return 12;
 }
