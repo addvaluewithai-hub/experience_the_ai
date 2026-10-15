@@ -4,7 +4,8 @@ import { newRecordId } from '@experience/room-runtime';
 import { dateOf, hintFor, recordAttempt, type Question } from './memory';
 import { dailyMission, recommendTable, type DailyMission } from './mission';
 import { LessonStage } from './lesson';
-import type { CubeModel, GameCommand } from './model';
+import type { CubeModel } from './model';
+import { useCubeCommand } from './use-command';
 import { PracticeStage, type Outcome } from './practice';
 import { GameIntro, GameFinish, ProgressPips } from './landing';
 
@@ -23,11 +24,7 @@ export function GameBoard({ spec, data, edit, model }: Props) {
   const [outcome, setOutcome] = useState<Outcome>(null);
   const [array, setArray] = useState(false);
   const [independent, setIndependent] = useState(0);
-  const [command, setCommand] = useState<GameCommand | null>(null);
-  useEffect(() => {
-    const unsubscribe = model.subscribeCommand(() => setCommand(model.getCommand()));
-    return () => { unsubscribe(); };
-  }, [model]);
+  const command = useCubeCommand(model);
   const current = plan[index];
   const complete = plan.length > 0 && index === plan.length;
 
