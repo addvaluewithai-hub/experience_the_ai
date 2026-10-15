@@ -11,5 +11,5 @@ export default defineConfig({
     strictPort: true,
     proxy: { '/api': 'http://127.0.0.1:8787' },
   },
-  build: { outDir: '../../dist', emptyOutDir: true, target: 'es2023', minify: false },
+  build: { outDir: '../../dist', emptyOutDir: true, target: 'es2023' },
 });
