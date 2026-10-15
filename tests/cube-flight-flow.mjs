@@ -3,6 +3,14 @@ import assert from 'node:assert/strict';
 /** Browser regression for the new room: real SVG avatar, keypad and a scaffolded revisit. */
 export async function cubeFlightFlow(page, url) {
   await page.goto(`${url}/#/room/cube-flight`);
+  await page.waitForTimeout(1000);
+  console.log('Cube Flight page debug:', JSON.stringify(await page.evaluate(() => ({
+    route: location.hash,
+    title: document.title,
+    text: document.body.innerText.slice(0, 900),
+    stage: document.querySelector('.immersive-world')?.outerHTML.slice(0, 1200),
+    react: document.querySelector('#root')?.outerHTML.slice(0, 1200),
+  }))));
   await page.locator('[data-world="cube-flight"]').waitFor();
   await page.locator('.cf-avatar svg').waitFor();
   await page.getByRole('button', { name: /يلا نطير ونلعب/ }).click();
