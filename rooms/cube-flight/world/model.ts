@@ -1,40 +1,58 @@
-import { Flight, Wings, type FlightState, type WingFrame } from '@experience/kit-flight';
 import { Cast } from '@experience/kit-phaser';
+import type { MouthFrame, PresenceMode } from '@experience/room-spec';
 
+/** The original PixiLive sprite rig, mounted by the room's SVG avatar. */
+export interface SpriteRig {
+  setFlight(command: {
+    action: 'move' | 'hover';
+    x?: number;
+    y?: number;
+    speed?: number;
+    path?: 'arc' | 'direct' | 'swoop';
+  }): boolean;
+  setGesture(name: string, duration?: number): void;
+  setEmotion(name: string): void;
+  setMouthPose(frame: MouthFrame | null): void;
+  setMode?(mode: PresenceMode): void;
+  setEnergy(value: number): void;
+  destroy(): void;
+}
 type Spot = 'left' | 'middle' | 'right';
-type Moment = 'cheer' | 'think';
 
-/** Presence + playful motion. Scores never enter this class: the game logic owns them. */
+/** Scoring stays in memory.ts; Zuzu only moves and reacts. */
 export class CubeModel extends Cast {
-  readonly flight: Flight;
-  private wings: Wings;
-  wing: WingFrame = { phase: 0, beat: 0, open: 0 };
   question = '';
   phase = 'مستنيين أول سؤال';
-  private momentQueue: Moment[] = [];
+  private avatar: SpriteRig | null = null;
+  private place: Spot = 'middle';
   private successes = 0;
 
-  constructor(readonly reduced = false) {
-    super();
-    this.flight = new Flight({ x: 0.5, y: 0.24 }, { reducedMotion: reduced });
-    this.wings = new Wings({ reducedMotion: reduced });
+  bindAvatar(avatar: SpriteRig | null) {
+    this.avatar = avatar;
+    if (!avatar) return;
+    this.go(this.place);
+    avatar.setMode?.(this.modeOf('zuzu'));
+    avatar.setEnergy(0.25);
+    avatar.setMouthPose(this.mouthOf('zuzu'));
   }
 
-  step(dt: number): FlightState {
-    const next = this.flight.step(dt);
-    this.wing = this.wings.step(dt, next);
-    return next;
+  go(spot: Spot) {
+    this.place = spot;
+    const x = spot === 'left' ? 0.16 : spot === 'right' ? 0.84 : 0.5;
+    this.avatar?.setFlight({ action: 'move', x, y: 0.16, speed: 0.65, path: 'arc' });
   }
 
   prompt(a: number, b: number) {
     this.question = `${a} × ${b}`;
     this.phase = 'بتحاول تسترجع من الذاكرة';
+    this.avatar?.setEmotion('happy');
     this.go('middle');
   }
 
   hint() {
     this.phase = 'بتستخدم تلميح';
-    this.momentQueue.push('think');
+    this.avatar?.setEmotion('thinking');
+    this.avatar?.setGesture('think', 1.5);
     this.go('left');
   }
 
@@ -45,22 +63,14 @@ export class CubeModel extends Cast {
         : 'إجابة صح مستقلة'
       : 'شافت الحل وهترجع للعملية بعد فاصل';
     if (correct) {
-      this.successes += 1;
-      this.momentQueue.push('cheer');
+      this.successes++;
+      this.avatar?.setEmotion('excited');
+      this.avatar?.setGesture('celebrate', 1.5);
       this.go(this.successes % 2 ? 'right' : 'left');
     } else {
-      this.momentQueue.push('think');
+      this.avatar?.setEmotion('thinking');
       this.go('left');
     }
-  }
-
-  go(spot: Spot) {
-    const x = spot === 'left' ? 0.21 : spot === 'right' ? 0.79 : 0.5;
-    this.flight.command({ action: 'move', x, y: 0.24, speed: 0.7, path: 'arc' });
-  }
-
-  takeMoments() {
-    return this.momentQueue.splice(0);
   }
 
   act(character: string, action: string, args: Record<string, unknown>) {
@@ -68,15 +78,34 @@ export class CubeModel extends Cast {
     if (
       action === 'fly_to' &&
       (args.place === 'left' || args.place === 'middle' || args.place === 'right')
-    ) {
+    )
       this.go(args.place);
-    } else if (action === 'cheer') {
-      this.momentQueue.push('cheer');
+    else if (action === 'cheer') {
+      this.avatar?.setEmotion('excited');
+      this.avatar?.setGesture('celebrate', 1.5);
       this.go('right');
     }
   }
 
+  setMode(character: string, mode: PresenceMode) {
+    super.setMode(character, mode);
+    if (character === 'zuzu') {
+      this.avatar?.setMode?.(mode);
+      this.avatar?.setEnergy(mode === 'speaking' ? 0.45 : 0.2);
+    }
+  }
+
+  speak(character: string | null) {
+    super.speak(character);
+    this.avatar?.setMode?.(character === 'zuzu' ? 'speaking' : 'idle');
+  }
+
+  mouth(character: string, frame: MouthFrame | null) {
+    super.mouth(character, frame);
+    if (character === 'zuzu') this.avatar?.setMouthPose(frame);
+  }
+
   state() {
-    return `Zuzu is flying above number cubes. Current game: ${this.question || 'not started'}; ${this.phase}. The keypad checks multiplication exactly; do not guess whether an answer was correct and do not reveal the result unless asked. Voice is optional.`;
+    return `Zuzu is flying above number cubes. Game: ${this.question || 'not started'}; ${this.phase}. The keypad checks results exactly; do not guess correctness or say a hidden answer first.`;
   }
 }
