@@ -22,14 +22,16 @@ let n = 0;
 const id = () => `fact-${++n}`;
 const day = '2026-10-15';
 
-test('room is a docked screen with one original flying character and no agent scoring', () => {
+test('room is an immersive arcade with an original flying character and no agent scoring', () => {
   const spec = setup();
   assert.equal(spec.layout, 'immersive');
-  assert.equal(spec.presence, 'dock');
+  assert.equal(spec.presence, undefined);
   assert.equal(spec.characters[0].id, 'lumi');
   assert.deepEqual(spec.characters[0].capabilities, []);
   assert.equal(spec.collections[0].fields.length, 8);
   assert.equal(spec.world?.surface, 'cube-flight-svg');
+  const actions = spec.world?.actions?.map((action) => action.name) ?? [];
+  assert.deepEqual(actions, ['fly_to', 'cheer', 'show_hint', 'reveal_array', 'advance']);
 });
 
 test('commutative prompts share one memory, and all questions stay within 2–12', () => {
