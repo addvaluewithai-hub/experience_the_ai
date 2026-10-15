@@ -1,8 +1,4 @@
 import { useEffect, useRef } from 'react';
-import geometryUrl from '../character/geometry.js?url';
-import engineUrl from '../character/engine.js?url';
-import flightUrl from '../character/flight.js?url';
-import motionUrl from '../character/motion.js?url';
 import type { CubeModel, SpriteRig } from './model';
 
 interface CharacterRecipe {
@@ -44,7 +40,14 @@ function script(url: string): Promise<void> {
 }
 function loadPixiLive(): Promise<string> {
   loader ??= (async () => {
-    for (const url of [geometryUrl, engineUrl, flightUrl, motionUrl]) await script(url);
+    const [geometry, engine, flight, motion] = await Promise.all([
+      import('../character/geometry.js?url'),
+      import('../character/engine.js?url'),
+      import('../character/flight.js?url'),
+      import('../character/motion.js?url'),
+    ]);
+    for (const url of [geometry.default, engine.default, flight.default, motion.default])
+      await script(url);
     if (!window.CharacterEngine || !window.CharacterMotion)
       throw new Error('Original PixiLive character globals did not initialize.');
     const { default: master } = await import('../character/master.svg?raw');
