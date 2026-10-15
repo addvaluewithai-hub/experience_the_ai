@@ -28,17 +28,35 @@ export async function cubeFlightFlow(page, url) {
   await page.getByRole('button', { name: '3', exact: true }).click();
   await page.getByRole('button', { name: /ابدئي مع لومي/ }).click();
   assert.equal(await page.getByText(/جدول 3 · اكتشفي الرابط/).count(), 1);
+  // A lesson cannot be skipped: explain → choose a group link → hidden recall → success.
   for (let i = 0; i < 3; i++) {
     const fact = await page.locator('.cf-teach-equation .cf-big-cube').allTextContents();
-    assert.equal(
-      Number(fact[0]) * Number(fact[1]),
-      Number(fact[2]),
-      'teach result is visible and correct',
-    );
-    assert.ok(
-      (await page.locator('.cf-lesson-row i').count()) > 0,
-      'teaching shows real cube groups',
-    );
+    const a = Number(fact[0]);
+    const b = Number(fact[1]);
+    assert.equal(a * b, Number(fact[2]), 'worked example has the correct product');
+    assert.ok((await page.locator('.cf-lesson-row i').count()) > 0);
+    await page.getByRole('button', { name: /فهمت المجموعات/ }).click();
+    assert.equal(await page.locator('.cf-bridge').count(), 1);
+    if (i === 0) {
+      const invalid = b === 7 ? 1 : 3;
+      await page.getByRole('button', { name: `${invalid} مجموعة` }).click();
+      assert.equal(await page.locator('.cf-bridge').count(), 1, 'wrong bridge cannot skip fact');
+    }
+    const extra = b === 9 || b === 10 ? 1 : b >= 11 ? b - 10 : b >= 6 ? b - 5 : 1;
+    await page.getByRole('button', { name: `${extra} مجموعة` }).click();
+    await page.locator('.cf-lesson-recall').waitFor();
+    assert.equal(await page.locator('.cf-lesson-grid').count(), 0, 'groups are hidden in recall');
+    if (i === 0) {
+      await page.getByRole('textbox', { name: 'الناتج' }).fill('999');
+      await page.getByRole('button', { name: /تأكيد/ }).click();
+      await page.locator('.cf-lesson-demo').waitFor();
+      await page.getByRole('button', { name: /فهمت المجموعات/ }).click();
+      await page.getByRole('button', { name: `${extra} مجموعة` }).click();
+    }
+    await page.getByRole('textbox', { name: 'الناتج' }).fill(String(a * b));
+    await page.getByRole('button', { name: /تأكيد/ }).click();
+    await page.locator('.cf-lesson-success').waitFor();
+    assert.equal(await page.locator('.cf-lesson-success').count(), 1, 'success pauses for the child');
     await page.locator('.cf-lesson-next').click();
   }
   await page.locator('.cf-lesson').waitFor({ state: 'detached' });
@@ -68,7 +86,17 @@ export async function cubeFlightFlow(page, url) {
   await page.reload();
   await page.locator('.cf-avatar svg').waitFor();
   await page.getByRole('button', { name: /ابدئي مع لومي/ }).click();
-  for (let i = 0; i < 3; i++) await page.locator('.cf-lesson-next').click();
+  for (let i = 0; i < 3; i++) {
+    const fact = await page.locator('.cf-teach-equation .cf-big-cube').allTextContents();
+    const a = Number(fact[0]);
+    const b = Number(fact[1]);
+    const extra = b === 9 || b === 10 ? 1 : b >= 11 ? b - 10 : b >= 6 ? b - 5 : 1;
+    await page.getByRole('button', { name: /فهمت المجموعات/ }).click();
+    await page.getByRole('button', { name: `${extra} مجموعة` }).click();
+    await page.getByRole('textbox', { name: 'الناتج' }).fill(String(a * b));
+    await page.getByRole('button', { name: /تأكيد/ }).click();
+    await page.locator('.cf-lesson-next').click();
+  }
   const phone = await page.evaluate(() => ({
     viewport: window.innerWidth,
     document: document.documentElement.scrollWidth,
