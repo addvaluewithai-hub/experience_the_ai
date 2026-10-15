@@ -28,6 +28,17 @@ test('first visit gently recommends table two, but every table from 2 to 12 can 
   }
 });
 
+test('recommended table moves forward but old weak facts remain available to revisit', () => {
+  let data = emptyData(spec);
+  for (const other of [6, 7, 8]) {
+    data = recordAttempt(spec, data, 2, other, { correct: true, helped: true }, day, id);
+  }
+  assert.equal(recommendTable(data), 3);
+  const mission = dailyMission(data, 3, day);
+  assert.ok(mission.questions.some((q) => q.a === 2 || q.b === 2));
+  assert.ok(mission.lessons.every((f) => f.a === 3));
+});
+
 test('first teaches visible answers as cube group relationships, then recall prompts hide them', () => {
   const mission = dailyMission(emptyData(spec), 3, day);
   assert.deepEqual(mission.lessons.map((fact) => fact.b), [6, 7, 8]);
