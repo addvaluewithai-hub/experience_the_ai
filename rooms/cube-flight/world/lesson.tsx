@@ -49,10 +49,10 @@ export function LessonStage({
       {visibleGroups && (
         <div className="cf-lesson-demo">
           <div className="cf-lesson-grid" role="img"
-            aria-label={`${b} مجموعات، في كل مجموعة ${a} مكعبات`}>
-            {Array.from({ length: b }, (_, row) => (
+            aria-label={`${b} مجموعات من ${a} مكعبات، مع توضيح ${bridge.subtract ? 'المجموعة اللي هنشيلها' : 'المجموعات الإضافية'}`}>
+            {Array.from({ length: bridge.subtract ? bridge.base : b }, (_, row) => (
               <div key={row}
-                className={`cf-lesson-row ${row >= bridge.base ? 'extra' : ''}`}
+                className={`cf-lesson-row ${row >= b ? 'removed' : row >= bridge.base ? 'extra' : ''}`}
                 style={{ gridTemplateColumns: `repeat(${a}, minmax(0, 1fr))` }}>
                 {Array.from({ length: a }, (_, col) => <i key={col} />)}
               </div>
