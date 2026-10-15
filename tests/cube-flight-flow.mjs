@@ -7,6 +7,14 @@ export async function cubeFlightFlow(page, url) {
     if (msg.type() === 'error' || msg.type() === 'warning')
       console.log('Cube console:', msg.text());
   });
+  for (const mode of ['cube_debug_no_avatar', 'cube_debug_no_board']) {
+    await page.goto(`${url}/?${mode}#/room/cube-flight`);
+    await page.waitForTimeout(700);
+    console.log('Cube isolate', mode, await page.evaluate(() => ({
+      active: Boolean(document.querySelector('[data-world="cube-flight"]')),
+      root: document.querySelector('#root')?.textContent?.slice(0, 100),
+    })));
+  }
   await page.goto(`${url}/#/room/cube-flight`);
   await page.waitForTimeout(900);
   console.log(
