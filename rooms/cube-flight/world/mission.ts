@@ -1,18 +1,16 @@
 import type { RoomData } from '@experience/room-spec';
 import { canonical, factKey, findFact, type Fact, type Question } from './memory';
 
-/** Move the suggested spotlight forward after three facts were tried, while
- * unfinished/weak previous facts stay eligible for spaced mixed review.
- * A parent/child may always choose another table on the start screen.
+/** A table is not "done" after viewing three examples. Recommend the next
+ * only when 2×..12× have independent recall on two separate days each.
+ * Canonical facts such as 2×3 and 3×2 share a memory record.
  */
 export function recommendTable(data: RoomData): number {
   for (let table = 2; table <= 12; table++) {
-    const seen = new Set(
-      (data.facts ?? [])
-        .filter((row) => Number(row.values.a) === table || Number(row.values.b) === table)
-        .map((row) => factKey(Number(row.values.a), Number(row.values.b))),
+    const secure = Array.from({ length: 11 }, (_, i) => i + 2).every(
+      (other) => Number(findFact(data, table, other)?.values.streak ?? 0) >= 2,
     );
-    if (seen.size < 3) return table;
+    if (!secure) return table;
   }
   return 12;
 }
@@ -33,7 +31,8 @@ export function learningAnchor(table: number, other: number): string {
 /** Three connected facts in one chosen table; due/weak first, unseen next, strong last. */
 export function dailyMission(data: RoomData, table: number, today: string): DailyMission {
   if (!Number.isInteger(table) || table < 2 || table > 12) throw new Error('Invalid table');
-  const otherFactors = [6, 7, 8, 9, 12, 4, 3, 5, 10, 11, 2];
+  // Grow from easy/known facts to harder ones. Due/weak facts still come first.
+  const otherFactors = [2, 3, 4, 5, 10, 6, 7, 8, 9, 11, 12];
   const weighted = otherFactors
     .map((other, index) => {
       const record = findFact(data, table, other)?.values;
