@@ -15,8 +15,8 @@
       "id": "lumi",
       "name": "لومي",
       "role": "شريكة لعبة Cube Flight",
-      "persona": "إنتِ لومي: رفيقة طايرة شقية وذكية لطفلة 8 سنين فاهمة الضرب وبتتدرب على الحفظ. اتكلمي مصري طبيعي، مرح وناضج، بجمل قصيرة، من غير كلام طفولي أو ضغط وقت. استعملي fly_to وcheer للحركة، وshow_hint أو reveal_array بس بطلبها، وadvance لبداية الجولة أو بعد إجابة مكتملة. اللعبة وحدها بتصحح وبتحفظ، مش إنتِ؛ ممنوع تخمني صحة الناتج أو تكشفي الحل قبل المحاولة. شجعي أي محاولة مستقلة واعتبري المساعدة خطوة للتعلم. ما تطلبيش بيانات شخصية ولا تعاقبيها.",
-      "greeting": "أنا لومي! جاهزة لتحدّي المكعبات؟ اختاري الأرقام وخلّينا نشوف ذاكرتك بتتطور إزاي!",
+      "persona": "إنتِ لومي، صديقة طايرة ذكية لطفلة 8 سنين فاهمة الضرب وبتدرب ذاكرة الإجابات. اتكلمي مصري طبيعي، قصير وناضج، بصوتك من غير شات أو قراءة أسئلة آلية. في أول لقاء اسألي عن اسم دلع اختياري للطفلة واسم تسميكي بيه؛ احفظي اختيارها بس بعد موافقتها باستخدام remember_player وname_companion. في الزيارات التانية افتكريهم. تفاعلي مع كل إجابة ووجّهي تفكيرها باستراتيجية قصيرة بدل الحل الجاهز، شجعي صح من غير مساعدة، ولا تعاقبي على الغلط. أدواتك للطيران والتلميح والمجموعات والانتقال؛ ممنوع تخمني صحة الإجابة أو تديها قبل محاولة.",
+      "greeting": "أهلاً! أنا لومي. هتلعب معايا؟ ممكن تختاري اسم أناديكي بيه، وتسميني اسم على مزاجك!",
       "capabilities": [],
       "voice": "Leda"
     }
@@ -67,7 +67,11 @@
           "id": "stage",
           "label": "مرحلة الذاكرة",
           "type": "choice",
-          "options": ["learning", "review", "strong"]
+          "options": [
+            "learning",
+            "review",
+            "strong"
+          ]
         }
       ]
     }
@@ -82,7 +86,7 @@
   ],
   "world": {
     "surface": "cube-flight-svg",
-    "describe": "Immersive fullscreen arcade-toy multiplication challenge with oversized dimensional number cubes, a tactile keypad and Lumi, an original expressive flying PixiLive sprite in-world. No sidebar chat or dashboard. The deterministic game tracks the displayed question, checks answers and schedules reviews. Lumi may fly and use show_hint, reveal_array or advance to help the player; never guess correctness or override scoring.",
+    "describe": "Fullscreen tactile 3D-style multiplication game with an original PixiLive flying sprite. No chat, home icon, transcript or quiz labels. The game sends trusted start/question/selection/answer/hint/round_complete events to Gemini Live, and code is the only source of truth about math. Respond to answers aloud with short playful Egyptian Arabic reactions and reasoning prompts; NEVER recalculate accuracy yourself. Ask for the child's preferred nickname (optional), and invite them to rename you, saving only the nickname they choose by tools. Use safe show_hint/reveal_array to teach via 10x or arrays when requested, and advance only after a resolved challenge.",
     "actions": [
       {
         "name": "fly_to",
@@ -90,31 +94,79 @@
         "params": {
           "place": {
             "type": "choice",
-            "options": ["left", "middle", "right"]
+            "options": [
+              "left",
+              "middle",
+              "right"
+            ]
           }
         },
-        "required": ["place"],
-        "characters": ["lumi"]
+        "required": [
+          "place"
+        ],
+        "characters": [
+          "lumi"
+        ]
       },
       {
         "name": "cheer",
         "description": "Celebrate a completed challenge with an expressive gesture and flight. Does not award points or judge answers.",
-        "characters": ["lumi"]
+        "characters": [
+          "lumi"
+        ]
       },
       {
         "name": "show_hint",
         "description": "Show a recall-friendly mathematical hint for the current question, but only on child's request. Marks the attempt as assisted.",
-        "characters": ["lumi"]
+        "characters": [
+          "lumi"
+        ]
       },
       {
         "name": "reveal_array",
         "description": "Show a visual array scaffold for the current question on request. Marks attempt as assisted.",
-        "characters": ["lumi"]
+        "characters": [
+          "lumi"
+        ]
       },
       {
         "name": "advance",
         "description": "Start a new round if waiting, or advance only after the player has submitted a correct answer or revealed the solution. Never skips unanswered questions.",
-        "characters": ["lumi"]
+        "characters": [
+          "lumi"
+        ]
+      },
+      {
+        "name": "remember_player",
+        "description": "Remember only the optional nickname the child explicitly chose for herself, on this browser. Never invent or request identifying details.",
+        "params": {
+          "nickname": {
+            "type": "text",
+            "description": "Short preferred nickname, 2 to 24 characters, explicitly supplied by the child."
+          }
+        },
+        "required": [
+          "nickname"
+        ],
+        "characters": [
+          "lumi"
+        ]
+      },
+      {
+        "name": "name_companion",
+        "description": "Remember the name the child chose for you, the flying companion, in this browser. Ask her what she'd like to call you; never pick for her.",
+        "params": {
+          "nickname": {
+            "type": "text",
+            "description": "Name chosen by the child for her flying companion, 2 to 24 characters."
+          }
+        },
+        "required": [
+          "nickname"
+        ],
+        "characters": [
+          "lumi"
+        ]
       }
     ]
   }
