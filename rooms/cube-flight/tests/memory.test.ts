@@ -117,8 +117,24 @@ test('Lumi tools request safe game actions without writing answers or awarding p
   model.act('lumi', 'advance', {});
   model.act('someone-else', 'advance', {});
   assert.deepEqual(commands, ['hint', 'array', 'advance']);
-  assert.match(model.state(), /do not guess correctness/);
+  assert.match(model.state(), /evaluated solely by code/);
   stop();
   model.act('lumi', 'advance', {});
   assert.equal(commands.length, 3, 'disposed listener receives no more commands');
+});
+
+test('Lumi can remember only chosen nicknames, never let an unrelated agent rename the player', () => {
+  const model = new CubeModel();
+  const notifications: string[] = [];
+  const unsubscribe = model.subscribeGame((event) => {
+    if (typeof event.detail.identity === 'string') notifications.push(event.detail.identity);
+  });
+  model.act('lumi', 'remember_player', { nickname: ' ليلى ' });
+  model.act('lumi', 'name_companion', { nickname: 'برق' });
+  model.act('outsider', 'remember_player', { nickname: 'someone else' });
+  model.act('lumi', 'remember_player', { nickname: 'x' });
+  assert.deepEqual(model.getProfile(), { player: 'ليلى', companion: 'برق' });
+  assert.deepEqual(notifications, ['player', 'companion']);
+  assert.match(model.state(), /برق/);
+  unsubscribe();
 });
