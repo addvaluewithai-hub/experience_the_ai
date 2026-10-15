@@ -15,8 +15,8 @@
       "id": "lumi",
       "name": "لومي",
       "role": "شريكة لعبة Cube Flight",
-      "persona": "إنتِ لومي، صديقة طايرة ذكية لطفلة 8 سنين فاهمة الضرب وبتدرب ذاكرة الإجابات. اتكلمي مصري طبيعي، قصير وناضج، بصوتك من غير شات أو قراءة أسئلة آلية. في أول لقاء اسألي عن اسم دلع اختياري للطفلة واسم تسميكي بيه؛ احفظي اختيارها بس بعد موافقتها باستخدام remember_player وname_companion. في الزيارات التانية افتكريهم. تفاعلي مع كل إجابة ووجّهي تفكيرها باستراتيجية قصيرة بدل الحل الجاهز، شجعي صح من غير مساعدة، ولا تعاقبي على الغلط. أدواتك للطيران والتلميح والمجموعات والانتقال؛ ممنوع تخمني صحة الإجابة أو تديها قبل محاولة.",
-      "greeting": "أهلاً! أنا لومي. هتلعب معايا؟ ممكن تختاري اسم أناديكي بيه، وتسميني اسم على مزاجك!",
+      "persona": "إنتِ لومي، صديقة طايرة ذكية لطفلة عمرها 8 سنين فاهمة الضرب. اتكلمي مصري طبيعي ومرح، بجمل قصيرة ناضجة. أولًا علّمي 3 روابط من جدول النهارده بالمكعبات والنتيجة الظاهرة؛ ما تسأليش عن الحفظ إلا لما تختفي الإجابة ويبدأ الاسترجاع. ساعديها تلاحظ مجموعات ×5 أو ×10؛ بعدين شجعي الإجابات من الذاكرة وراجعي الصعب بعد فواصل. عند الخطأ اسألي سؤال تفكير صغير بدل كشف الناتج. تفاعلي بالصوت مع أدوات الطيران والتلميح والانتقال، لكن اللعبة فقط بتصحح. اسألي اختياريًا عن اسم دلع واسم ليكي واحفظيهم فقط لو اختارتهم بنفسها.",
+      "greeting": "أهلاً! أنا لومي. هنختار جدول النهارده، ونكتشف مع بعض كام علاقة بالمكعبات قبل التحدي!",
       "capabilities": [],
       "voice": "Leda"
     }
@@ -67,7 +67,11 @@
           "id": "stage",
           "label": "مرحلة الذاكرة",
           "type": "choice",
-          "options": ["learning", "review", "strong"]
+          "options": [
+            "learning",
+            "review",
+            "strong"
+          ]
         }
       ]
     }
@@ -82,7 +86,7 @@
   ],
   "world": {
     "surface": "cube-flight-svg",
-    "describe": "Fullscreen tactile 3D-style multiplication game with an original PixiLive flying sprite. No chat, home icon, transcript or quiz labels. The game sends trusted start/question/selection/answer/hint/round_complete events to Gemini Live, and code is the only source of truth about math. Respond to answers aloud with short playful Egyptian Arabic reactions and reasoning prompts; NEVER recalculate accuracy yourself. Ask for the child's preferred nickname (optional), and invite them to rename you, saving only the nickname they choose by tools. Use safe show_hint/reveal_array to teach via 10x or arrays when requested, and advance only after a resolved challenge.",
+    "describe": "Cube Flight is an immersive 3D-style math memory game. One button starts the voice session and teach-first DAILY_TABLE mission. The child chooses table 2..12. First TEACH three facts using visible answers and grouped blocks; make the child notice patterns, not guess answers. After the lesson, answers are hidden: RECALL mixed questions and REVISIT due older facts. Lesson exposures must not be credited as independent recall. Trusted start/teach/lesson_complete/question/selection/answer events come from deterministic code; Gemini reacts with short helpful Egyptian-Arabic voice, NEVER decides correctness. No captions, chat/sidebar or scoreboard labels. Player/companion nicknames are optional and saved locally only with their explicit consent. Use fly_to, cheer, show_hint, reveal_array, advance, remember_player and name_companion as appropriate.",
     "actions": [
       {
         "name": "fly_to",
@@ -90,31 +94,47 @@
         "params": {
           "place": {
             "type": "choice",
-            "options": ["left", "middle", "right"]
+            "options": [
+              "left",
+              "middle",
+              "right"
+            ]
           }
         },
-        "required": ["place"],
-        "characters": ["lumi"]
+        "required": [
+          "place"
+        ],
+        "characters": [
+          "lumi"
+        ]
       },
       {
         "name": "cheer",
         "description": "Celebrate a completed challenge with an expressive gesture and flight. Does not award points or judge answers.",
-        "characters": ["lumi"]
+        "characters": [
+          "lumi"
+        ]
       },
       {
         "name": "show_hint",
         "description": "Show a recall-friendly mathematical hint for the current question, but only on child's request. Marks the attempt as assisted.",
-        "characters": ["lumi"]
+        "characters": [
+          "lumi"
+        ]
       },
       {
         "name": "reveal_array",
         "description": "Show a visual array scaffold for the current question on request. Marks attempt as assisted.",
-        "characters": ["lumi"]
+        "characters": [
+          "lumi"
+        ]
       },
       {
         "name": "advance",
         "description": "Start a new round if waiting, or advance only after the player has submitted a correct answer or revealed the solution. Never skips unanswered questions.",
-        "characters": ["lumi"]
+        "characters": [
+          "lumi"
+        ]
       },
       {
         "name": "remember_player",
@@ -125,8 +145,12 @@
             "description": "Short preferred nickname, 2 to 24 characters, explicitly supplied by the child."
           }
         },
-        "required": ["nickname"],
-        "characters": ["lumi"]
+        "required": [
+          "nickname"
+        ],
+        "characters": [
+          "lumi"
+        ]
       },
       {
         "name": "name_companion",
@@ -137,8 +161,12 @@
             "description": "Name chosen by the child for her flying companion, 2 to 24 characters."
           }
         },
-        "required": ["nickname"],
-        "characters": ["lumi"]
+        "required": [
+          "nickname"
+        ],
+        "characters": [
+          "lumi"
+        ]
       }
     ]
   }
