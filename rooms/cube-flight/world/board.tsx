@@ -83,7 +83,11 @@ export function GameBoard({ spec, data, edit, model }: Props) {
         }),
       600,
     );
-    return () => clearTimeout(timer);
+    const pause = setTimeout(() => {
+      model.peek();
+      model.emit({ kind: 'pause', detail: { a: current.a, b: current.b, digits: entry } });
+    }, 1900);
+    return () => { clearTimeout(timer); clearTimeout(pause); };
   }, [current, entry, model, outcome]);
 
   // AI actions request safe UI changes. They never submit an answer or forge a success.
