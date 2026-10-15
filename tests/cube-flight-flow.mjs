@@ -36,7 +36,7 @@ export async function cubeFlightFlow(page, url) {
   assert.equal(factors.length, 3);
   const product = Number(factors[0]) * Number(factors[1]);
   await page.getByRole('textbox', { name: 'الناتج' }).fill(String(product));
-  await page.getByRole('button', { name: /اتأكدّي/ }).click();
+  await page.getByRole('button', { name: /تأكيد/ }).click();
   await page.getByText(/دي طلعت من الذاكرة/).waitFor();
   await page.getByRole('button', { name: /التحدي اللي بعده/ }).click();
   await page.getByRole('button', { name: /تلميح/ }).click();
