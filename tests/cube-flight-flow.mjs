@@ -2,6 +2,10 @@ import assert from 'node:assert/strict';
 
 /** Browser regression for the new room: real SVG avatar, keypad and a scaffolded revisit. */
 export async function cubeFlightFlow(page, url) {
+  page.on('pageerror', (e) => console.error('Cube page error:', e.stack ?? e.message));
+  page.on('console', (message) => {
+    if (message.type() === 'error') console.error('Cube console:', message.text());
+  });
   await page.goto(`${url}/#/room/cube-flight`);
   await page.waitForTimeout(1000);
   console.log(
