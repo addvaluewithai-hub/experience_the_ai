@@ -52,6 +52,7 @@ export class CubeModel extends Cast {
   private successes = 0;
   private listeners = new Set<() => void>();
   private gameListeners = new Set<(event: GameEvent) => void>();
+  private profileListeners = new Set<() => void>();
   private command: GameCommand | null = null;
   private commandId = 0;
   private profile: PlayerProfile | null = null;
@@ -73,11 +74,16 @@ export class CubeModel extends Cast {
     for (const listener of this.gameListeners) listener(event);
   }
   getProfile = (): PlayerProfile => (this.profile ??= readProfile());
+  subscribeProfile = (listener: () => void) => {
+    this.profileListeners.add(listener);
+    return () => { this.profileListeners.delete(listener); };
+  };
   remember(which: 'player' | 'companion', name: unknown): boolean {
     const value = cleanName(name);
     if (value.length < 2) return false;
     const next = { ...this.getProfile(), [which]: value };
     this.profile = next;
+    for (const listener of this.profileListeners) listener();
     try {
       if (typeof localStorage !== 'undefined')
         localStorage.setItem(PROFILE_KEY, JSON.stringify(next));
