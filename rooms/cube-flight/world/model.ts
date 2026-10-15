@@ -19,7 +19,7 @@ export interface SpriteRig {
 }
 type Spot = 'left' | 'middle' | 'right';
 
-/** Scoring stays in memory.ts; Zuzu only moves and reacts. */
+/** Scoring stays in memory.ts; Lumi only moves and reacts. */
 export class CubeModel extends Cast {
   question = '';
   phase = 'مستنيين أول سؤال';
@@ -31,9 +31,9 @@ export class CubeModel extends Cast {
     this.avatar = avatar;
     if (!avatar) return;
     this.go(this.place);
-    avatar.setMode?.(this.modeOf('zuzu'));
+    avatar.setMode?.(this.modeOf('lumi'));
     avatar.setEnergy(0.25);
-    avatar.setMouthPose(this.mouthOf('zuzu'));
+    avatar.setMouthPose(this.mouthOf('lumi'));
   }
 
   go(spot: Spot) {
@@ -74,7 +74,7 @@ export class CubeModel extends Cast {
   }
 
   act(character: string, action: string, args: Record<string, unknown>) {
-    if (character !== 'zuzu') return;
+    if (character !== 'lumi') return;
     if (
       action === 'fly_to' &&
       (args.place === 'left' || args.place === 'middle' || args.place === 'right')
@@ -89,7 +89,7 @@ export class CubeModel extends Cast {
 
   setMode(character: string, mode: PresenceMode) {
     super.setMode(character, mode);
-    if (character === 'zuzu') {
+    if (character === 'lumi') {
       this.avatar?.setMode?.(mode);
       this.avatar?.setEnergy(mode === 'speaking' ? 0.45 : 0.2);
     }
@@ -97,15 +97,15 @@ export class CubeModel extends Cast {
 
   speak(character: string | null) {
     super.speak(character);
-    this.avatar?.setMode?.(character === 'zuzu' ? 'speaking' : 'idle');
+    this.avatar?.setMode?.(character === 'lumi' ? 'speaking' : 'idle');
   }
 
   mouth(character: string, frame: MouthFrame | null) {
     super.mouth(character, frame);
-    if (character === 'zuzu') this.avatar?.setMouthPose(frame);
+    if (character === 'lumi') this.avatar?.setMouthPose(frame);
   }
 
   state() {
-    return `Zuzu is flying above number cubes. Game: ${this.question || 'not started'}; ${this.phase}. The keypad checks results exactly; do not guess correctness or say a hidden answer first.`;
+    return `Lumi is flying above number cubes. Game: ${this.question || 'not started'}; ${this.phase}. The keypad checks results exactly; do not guess correctness or say a hidden answer first.`;
   }
 }
