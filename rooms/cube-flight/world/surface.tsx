@@ -1,40 +1,30 @@
-import { PhaserFrame } from '@experience/kit-phaser';
 import type { MouthFrame, PresenceMode, RoomSpec } from '@experience/room-spec';
 import type { RoomStore, RoomSurface, SurfaceViewProps } from '@experience/room-runtime';
 import type { ComponentType } from 'react';
+import { LumiAvatar } from './avatar';
 import { GameBoard } from './board';
 import { CubeModel } from './model';
 import { cubeStyle } from './style';
 
-const reducedMotion = () =>
-  typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
-
+/** Reuses PixiLive's own SVG art and motion rig; no duplicate Phaser mascot. */
 export class CubeSurface implements RoomSurface {
-  readonly model = new CubeModel(reducedMotion());
+  readonly model = new CubeModel();
   readonly View: ComponentType<SurfaceViewProps>;
 
   constructor(readonly spec: RoomSpec, _store: RoomStore) {
     const model = this.model;
-    const load = () =>
-      import('./scene').then(
-        ({ startCubeFlight }) =>
-          (el: HTMLElement) =>
-            startCubeFlight(el, model).stop,
-      );
     this.View = function CubeView(props: SurfaceViewProps) {
       return (
-        <PhaserFrame
-          world="cube-flight"
-          label="زوزو بتطير فوق مكعبات جدول الضرب"
-          background="#eaf1ff"
-          frame={props.frame}
-          load={load}
-          waking="زوزو جاية تطير…"
-          failed="الرسم مش متاح دلوقتي."
+        <div
+          className="cf-stage"
+          data-world="cube-flight"
+          role="group"
+          aria-label="لعبة مكعبات الضرب مع لومي الرفيقة الطايرة"
         >
           <style>{cubeStyle}</style>
+          <LumiAvatar model={model} />
           <GameBoard {...props} model={model} />
-        </PhaserFrame>
+        </div>
       );
     };
   }
