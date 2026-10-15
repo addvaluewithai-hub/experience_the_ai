@@ -28,27 +28,32 @@ test('first visit gently recommends table two, but every table from 2 to 12 can 
   }
 });
 
-test('recommended table moves forward but old weak facts remain available to revisit', () => {
+test('recommendation does NOT skip a table after three examples or assisted answers', () => {
   let data = emptyData(spec);
-  for (const other of [6, 7, 8]) {
+  for (const other of [2, 3, 4]) {
     data = recordAttempt(spec, data, 2, other, { correct: true, helped: true }, day, id);
   }
+  assert.equal(recommendTable(data), 2);
+  assert.equal(dailyMission(data, 2, day).lessons[0].b, 2);
+  // All eleven facts must survive independent recall on two separate calendar days.
+  for (let other = 2; other <= 12; other++) {
+    data = recordAttempt(spec, data, 2, other, { correct: true, helped: false }, day, id);
+    data = recordAttempt(spec, data, 2, other, { correct: true, helped: false }, '2026-10-16', id);
+  }
   assert.equal(recommendTable(data), 3);
-  const mission = dailyMission(data, 3, day);
-  assert.ok(mission.questions.some((q) => q.a === 2 || q.b === 2));
-  assert.ok(mission.lessons.every((f) => f.a === 3));
 });
+
 
 test('first teaches visible answers as cube group relationships, then recall prompts hide them', () => {
   const mission = dailyMission(emptyData(spec), 3, day);
   assert.deepEqual(
     mission.lessons.map((fact) => fact.b),
-    [6, 7, 8],
+    [2, 3, 4],
   );
-  assert.match(mission.lessons[0].anchor, /3 × 5 = 15/);
-  assert.equal(mission.lessons[0].answer, 18);
+  assert.match(mission.lessons[0].anchor, /3 \+ 3 = 6/);
+  assert.equal(mission.lessons[0].answer, 6);
   assert.match(learningAnchor(8, 9), /10/);
-  assert.equal(mission.questions[0].a * mission.questions[0].b, 18);
+  assert.equal(mission.questions[0].a * mission.questions[0].b, 6);
 });
 
 test('due facts from another table join the mixed quiz; learning itself never writes mastery', () => {
