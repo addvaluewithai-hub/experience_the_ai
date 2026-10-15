@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState, useSyncExternalStore, type FormEvent } from 'react';
 import type { SurfaceViewProps } from '@experience/room-runtime';
 import { newRecordId } from '@experience/room-runtime';
-import { dateOf, hintFor, recordAttempt, sessionPlan, type Question } from './memory';
+import { dateOf, hintFor, recordAttempt, type Question } from './memory';
 import type { CubeModel } from './model';
-import { NumberPad } from './pad';
+import { PracticeStage, type Outcome } from './practice';
 import { GameIntro, GameFinish, ProgressPips } from './landing';
 
-type Outcome = 'memory' | 'helped' | 'shown' | null;
 type Props = SurfaceViewProps & { model: CubeModel };
 
 export function GameBoard({ spec, data, edit, model }: Props) {
@@ -196,8 +195,6 @@ export function GameBoard({ spec, data, edit, model }: Props) {
     });
   };
 
-  const result = current ? current.a * current.b : 0;
-
   return (
     <main className="cf-arena" dir="rtl" aria-label="Cube Flight multiplication game">
       {plan.length > 0 && !complete && <ProgressPips index={index} total={plan.length} />}
@@ -207,75 +204,12 @@ export function GameBoard({ spec, data, edit, model }: Props) {
       ) : complete ? (
         <GameFinish begin={begin} independent={independent} total={plan.length} />
       ) : current ? (
-        <section className="cf-play">
-          <div className="cf-equation" aria-label={`${current.a} في ${current.b}`}>
-            <span className="cf-big-cube">{current.a}</span>
-            <span className="cf-operator">×</span>
-            <span className="cf-big-cube cf-second">{current.b}</span>
-            <span className="cf-operator">=</span>
-            <span className={`cf-big-cube cf-answer-cube ${outcome ? 'cf-revealed' : ''}`}>
-              {outcome ? result : '?'}
-            </span>
-          </div>
-          <span className="sr-only" aria-live="polite">
-            {outcome === 'memory'
-              ? 'إجابة صح من الذاكرة'
-              : outcome === 'helped'
-                ? 'إجابة صح بمساعدة'
-                : outcome === 'shown'
-                  ? 'تم عرض الحل'
-                  : wrong
-                    ? 'جرّبي تاني مع التلميح'
-                    : ''}
-          </span>
-          {outcome && (
-            <div className={`cf-result-flash ${outcome}`} aria-hidden="true">
-              {outcome === 'shown' ? '✦' : '✓'}
-            </div>
-          )}
-          {hinted && (
-            <aside className="cf-help-panel" aria-label="تلميح">
-              <span className="cf-hint-title">✧ مفتاح الذاكرة</span>
-              <p>{hintFor(current.a, current.b)}</p>
-              <button className="cf-show-array" type="button" onClick={() => setArray(!array)}>
-                {array ? 'اخفي المكعبات' : 'شوفي المجموعات'}
-              </button>
-              {array && (
-                <div
-                  className="cf-array"
-                  role="img"
-                  aria-label={`${current.a} مجموعات في كل واحدة ${current.b}`}
-                  style={{ gridTemplateColumns: `repeat(${current.b}, 1fr)` }}
-                >
-                  {Array.from({ length: result }, (_, i) => (
-                    <i key={i} />
-                  ))}
-                </div>
-              )}
-            </aside>
-          )}
-          {outcome ? (
-            <div className="cf-done-actions">
-              <button className="cf-go" type="button" onClick={next}>
-                {index === plan.length - 1 ? 'شوفي النتيجة' : 'التحدي اللي بعده'} <span>➜</span>
-              </button>
-            </div>
-          ) : (
-            <>
-              <NumberPad entry={entry} setEntry={setEntry} submit={submit} />
-              <div className="cf-help-actions">
-                {!hinted && (
-                  <button type="button" onClick={() => hint()}>
-                    ✦ تلميح
-                  </button>
-                )}
-                <button type="button" onClick={reveal}>
-                  شوفي الإجابة
-                </button>
-              </div>
-            </>
-          )}
-        </section>
+        <PracticeStage
+          current={current} index={index} total={plan.length}
+          outcome={outcome} hinted={hinted} wrong={wrong}
+          array={array} setArray={setArray} entry={entry} setEntry={setEntry}
+          submit={submit} next={next} hint={() => hint()} reveal={reveal}
+        />
       ) : null}
 
       <div className="cf-floor" aria-hidden="true">
