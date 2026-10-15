@@ -20,7 +20,7 @@ type Spot = 'left' | 'middle' | 'right';
 export type GameAction = 'hint' | 'array' | 'advance';
 export type GameCommand = { id: number; action: GameAction };
 export type GameEvent = {
-  kind: 'start' | 'question' | 'selection' | 'answer' | 'hint' | 'round_complete';
+  kind: 'start' | 'question' | 'selection' | 'pause' | 'answer' | 'hint' | 'round_complete';
   detail: Record<string, string | number | boolean>;
 };
 export type PlayerProfile = { player: string; companion: string };
@@ -117,6 +117,10 @@ export class CubeModel extends Cast {
     this.phase = 'بتحاول تسترجع من الذاكرة';
     this.avatar?.setEmotion('happy');
     this.go('middle');
+  }
+  peek() {
+    this.avatar?.setEmotion('curious');
+    this.avatar?.setGesture('think', 0.6);
   }
   hint() {
     this.phase = 'بتستخدم تلميح';
