@@ -32,7 +32,7 @@ test('room is an immersive arcade with an original flying character and no agent
   assert.equal(spec.collections[0].fields.length, 8);
   assert.equal(spec.world?.surface, 'cube-flight-svg');
   const actions = spec.world?.actions?.map((action) => action.name) ?? [];
-  assert.deepEqual(actions, ['fly_to', 'cheer', 'show_hint', 'reveal_array', 'advance']);
+  assert.deepEqual(actions, ['fly_to', 'cheer', 'show_hint', 'reveal_array', 'advance', 'remember_player', 'name_companion']);
 });
 
 test('commutative prompts share one memory, and all questions stay within 2–12', () => {
