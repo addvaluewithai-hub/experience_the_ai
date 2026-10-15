@@ -4,6 +4,11 @@ import assert from 'node:assert/strict';
 export async function cubeFlightFlow(page, url) {
   const originalSize = page.viewportSize();
   await page.goto(`${url}/#/room/cube-flight`);
+  await page.waitForTimeout(700);
+  console.log('Cube cold navigation:', await page.evaluate(() => ({
+    url: location.href,
+    text: document.body.innerText.slice(0, 450),
+  })));
   await page.locator('[data-world="cube-flight"]').waitFor();
   await page.locator('.cf-avatar svg').waitFor();
   assert.equal(await page.locator('.dock').count(), 0, 'there is no chat dock');
