@@ -16,7 +16,7 @@ export function CubeVoiceControls({ room, ai, started }: {
   if (ai === false)
     return <span className="cf-voice-state" role="status">اللعبة من غير صوت حاليًا</span>;
 
-  if (status === 'error')
+  if (status === 'error' || status === 'ended')
     return (
       <button className="cf-voice-retry" type="button"
         onClick={() => void startCall(room, character, {
