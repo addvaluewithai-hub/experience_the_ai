@@ -8,9 +8,7 @@ import type { CubeModel } from './model';
 import { useCubeCommand } from './use-command';
 import { PracticeStage, type Outcome } from './practice';
 import { GameIntro, GameFinish, ProgressPips } from './landing';
-
 type Props = SurfaceViewProps & { model: CubeModel };
-
 export function GameBoard({ spec, data, edit, model }: Props) {
   const [plan, setPlan] = useState<Question[]>([]);
   const [mission, setMission] = useState<DailyMission | null>(null);
@@ -27,7 +25,6 @@ export function GameBoard({ spec, data, edit, model }: Props) {
   const command = useCubeCommand(model);
   const current = plan[index];
   const complete = plan.length > 0 && index === plan.length;
-
   const begin = (table = selectedTable) => {
     const chosen = dailyMission(data, table, dateOf(new Date()));
     const nextPlan = chosen.questions;
@@ -57,7 +54,6 @@ export function GameBoard({ spec, data, edit, model }: Props) {
         },
       });
   };
-
   const nextLesson = () => {
     if (!mission || teaching === null) return;
     const next = teaching + 1;
@@ -66,7 +62,6 @@ export function GameBoard({ spec, data, edit, model }: Props) {
       model.emit({ kind: 'lesson_complete', detail: { table: mission.table } });
     } else setTeaching(next);
   };
-
   useEffect(() => {
     if (!mission || teaching === null) return;
     const lesson = mission.lessons[teaching];
@@ -84,7 +79,6 @@ export function GameBoard({ spec, data, edit, model }: Props) {
       },
     });
   }, [mission, teaching, model]);
-
   const next = () => {
     if (!outcome) return;
     setIndex((i) => i + 1);
@@ -94,7 +88,6 @@ export function GameBoard({ spec, data, edit, model }: Props) {
     setHinted(false);
     setArray(false);
   };
-
   const hint = (showArray = false) => {
     if (!current || outcome) return;
     setHinted(true);
@@ -105,7 +98,6 @@ export function GameBoard({ spec, data, edit, model }: Props) {
       detail: { a: current.a, b: current.b, strategy: hintFor(current.a, current.b) },
     });
   };
-
   useEffect(() => {
     if (!current || teaching !== null) return;
     model.prompt(current.a, current.b);
@@ -114,14 +106,12 @@ export function GameBoard({ spec, data, edit, model }: Props) {
       detail: { a: current.a, b: current.b, revisit: current.revisit },
     });
   }, [current, teaching, model]);
-
   useEffect(() => {
     if (!complete) return;
     model.emit({ kind: 'round_complete', detail: { independent, total: plan.length } });
     // React to finishing the round, not to every counter update.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [complete, model]);
-
   useEffect(() => {
     if (!current || teaching !== null || outcome || !entry) return;
     const timer = setTimeout(
@@ -143,7 +133,6 @@ export function GameBoard({ spec, data, edit, model }: Props) {
       clearTimeout(pause);
     };
   }, [current, entry, index, model, outcome, teaching]);
-
   // AI actions request safe UI changes. They never submit an answer or forge a success.
   useEffect(() => {
     if (!command) return;
@@ -162,7 +151,6 @@ export function GameBoard({ spec, data, edit, model }: Props) {
     // A new command id, not a game rerender, is what dispatches it.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [command]);
-
   const reveal = () => {
     if (!current || teaching !== null || outcome) return;
     edit((d) =>
@@ -192,7 +180,6 @@ export function GameBoard({ spec, data, edit, model }: Props) {
       },
     });
   };
-
   const submit = (event: FormEvent) => {
     event.preventDefault();
     if (!current || teaching !== null || outcome || !entry) return;
@@ -243,13 +230,11 @@ export function GameBoard({ spec, data, edit, model }: Props) {
       },
     });
   };
-
   return (
     <main className="cf-arena" dir="rtl" aria-label="Cube Flight multiplication game">
       {plan.length > 0 && teaching === null && !complete && (
         <ProgressPips index={index} total={plan.length} />
       )}
-
       {!plan.length ? (
         <GameIntro
           begin={begin}
@@ -289,7 +274,6 @@ export function GameBoard({ spec, data, edit, model }: Props) {
           reveal={reveal}
         />
       ) : null}
-
       <div className="cf-floor" aria-hidden="true">
         <span />
         <span />
