@@ -4,7 +4,7 @@ import { newRecordId } from '@experience/room-runtime';
 import { dateOf, hintFor, recordAttempt, sessionPlan, type Question } from './memory';
 import type { CubeModel } from './model';
 import { NumberPad } from './pad';
-import { GameIntro, GameFinish } from './landing';
+import { GameIntro, GameFinish, ProgressPips } from './landing';
 
 type Outcome = 'memory' | 'helped' | 'shown' | null;
 type Props = SurfaceViewProps & { model: CubeModel };
@@ -201,18 +201,7 @@ export function GameBoard({ spec, data, edit, model }: Props) {
   return (
     <main className="cf-arena" dir="rtl" aria-label="Cube Flight multiplication game">
       {plan.length > 0 && !complete && (
-        <div
-          className="cf-progress-pips"
-          role="progressbar"
-          aria-label="تقدم اللعب"
-          aria-valuenow={index}
-          aria-valuemin={0}
-          aria-valuemax={plan.length}
-        >
-          {plan.map((_, i) => (
-            <i key={i} className={i < index ? 'lit' : ''} />
-          ))}
-        </div>
+        <ProgressPips index={index} total={plan.length} />
       )}
 
       {!plan.length ? (
