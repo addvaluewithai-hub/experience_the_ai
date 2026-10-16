@@ -1,0 +1,29 @@
+name: Format Life Atrium
+on:
+  push:
+    branches: [feat/life-atrium-three]
+permissions:
+  contents: write
+jobs:
+  formatting:
+    if: ${{ !contains(github.event.head_commit.message, '[format bot]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/life-atrium-three
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm ci
+      - run: npx prettier --write rooms/life-hub
+      - name: Commit formatting
+        run: |
+          git config user.name "Life Atrium Formatter"
+          git config user.email "actions@users.noreply.github.com"
+          git add rooms/life-hub
+          if ! git diff --cached --quiet; then
+            git commit -m "style: format Life Atrium [format bot]"
+            git push origin HEAD:feat/life-atrium-three
+          fi
