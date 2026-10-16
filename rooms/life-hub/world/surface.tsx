@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useSyncExternalStore, type ComponentType } from 'react';
+import { useEffect, useRef, useState, type ComponentType } from 'react';
 import type { MouthFrame, PresenceMode, RoomSpec } from '@experience/room-spec';
 import type { RoomSurface, SurfaceViewProps } from '@experience/room-runtime';
 
@@ -77,7 +77,8 @@ export class AtriumSurface implements RoomSurface {
     this.View = function AtriumView(props: SurfaceViewProps) {
       const mount = useRef<HTMLDivElement>(null);
       const [failed, setFailed] = useState(false);
-      useSyncExternalStore(model.subscribe, model.snapshot, model.snapshot);
+      const [, setRevision] = useState(0);
+      useEffect(() => model.subscribe(() => setRevision((value) => value + 1)), []);
       const children = props.spec.rooms ?? [];
       const choices = DOORS.map((id) => {
         const room = children.find((r) => r.id === id);
