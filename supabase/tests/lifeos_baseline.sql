@@ -22,9 +22,35 @@ create table public.lifeos_goals (
   id uuid primary key default gen_random_uuid(),
   profile_id uuid not null references public.lifeos_profiles (id),
   title text not null check (length(btrim(title)) > 0),
-  status text not null default 'backlog',
+  why text not null default '',
+  success_definition text not null default '',
+  target_date date,
+  completed_at timestamptz,
+  archived_at timestamptz,
+  status text not null default 'backlog' check (status = any (array['backlog', 'active',
+    'paused', 'completed', 'cancelled', 'archived'])),
+  check (status <> 'archived' or archived_at is not null),
+  check (status <> 'completed' or completed_at is not null),
   unique (id, profile_id)
 );
+-- What hangs off a goal, reduced to the keys (the real tables hold much more).
+do $$
+declare t text;
+begin
+  foreach t in array array['lifeos_goal_tasks', 'lifeos_goal_milestones', 'lifeos_goal_metrics',
+                           'lifeos_goal_media']
+  loop
+    execute format('create table public.%I (id uuid primary key default gen_random_uuid(),
+      profile_id uuid not null, goal_id uuid not null, foreign key (goal_id, profile_id)
+      references public.lifeos_goals (id, profile_id) on delete cascade)', t);
+  end loop;
+  foreach t in array array['lifeos_goal_evidence', 'lifeos_goal_reflections']
+  loop
+    execute format('create table public.%I (id uuid primary key default gen_random_uuid(),
+      profile_id uuid not null, goal_id uuid, foreign key (goal_id, profile_id)
+      references public.lifeos_goals (id, profile_id))', t);
+  end loop;
+end $$;
 create table public.lifeos_events (
   id bigint generated always as identity primary key,
   profile_id uuid not null references public.lifeos_profiles (id),
@@ -54,6 +80,22 @@ begin
   raise exception '% is append-only; insert a superseding record instead', tg_table_name;
 end;
 $$;
+-- As live: every goal insert and status change is an event (source dragonos).
+create function public.lifeos_record_goal_domain_event() returns trigger
+language plpgsql set search_path to 'public' as $$
+begin
+  if tg_op = 'UPDATE' and old.status is not distinct from new.status then
+    return new;
+  end if;
+  insert into public.lifeos_events (profile_id, event_type, source, payload)
+  values (new.profile_id,
+          case when tg_op = 'INSERT' then 'goal.created' else 'goal.status_changed' end,
+          'dragonos', jsonb_build_object('goal_id', new.id, 'new_status', new.status));
+  return new;
+end;
+$$;
+create trigger lifeos_goals_status_event after insert or update on public.lifeos_goals
+  for each row execute function public.lifeos_record_goal_domain_event();
 grant execute on function public.lifeos_is_profile_owner(uuid) to authenticated;
 grant select on public.lifeos_profiles, public.lifeos_goals, public.lifeos_events
   to authenticated;
