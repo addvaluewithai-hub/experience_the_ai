@@ -62,7 +62,7 @@
   position: absolute;
   z-index: 2;
   left: 50%;
-  bottom: clamp(177px, 25vh, 215px);
+  bottom: clamp(238px, 30vh, 285px);
   transform: translateX(-50%);
   display: flex;
   gap: 10px;
@@ -87,7 +87,7 @@
 .life-atrium-doors {
   position: absolute;
   z-index: 3;
-  bottom: max(42px, 6vh);
+  bottom: max(104px, 10vh);
   left: 50%;
   transform: translateX(-50%);
   display: grid;
@@ -146,7 +146,7 @@
 .life-atrium-help {
   z-index: 2;
   position: absolute;
-  bottom: 12px;
+  bottom: 79px;
   left: 0;
   right: 0;
   margin: 0 20px;
@@ -162,11 +162,11 @@
     right: 24px;
   }
   .life-atrium-guide {
-    bottom: 193px;
+    bottom: 235px;
     font-size: 11px;
   }
   .life-atrium-doors {
-    bottom: 48px;
+    bottom: 100px;
     gap: 6px;
     width: calc(100% - 20px);
   }
