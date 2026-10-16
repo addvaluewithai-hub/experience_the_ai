@@ -113,6 +113,8 @@ Today the store is in memory (one tab). Persistence plan, in order:
 4. A new spec edition never rewrites existing records; moving an instance forward is explicit.
 
 Test DB changes on a separate Neon branch before connecting production.
+The Life Atrium's goal rooms propose Supabase instead, on the person's existing LifeOS database:
+[lifeos-goal-rooms.md](lifeos-goal-rooms.md).
 
 ## Characters and tools
 
