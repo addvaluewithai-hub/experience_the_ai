@@ -5,7 +5,7 @@ import lifeHub from '../index';
 
 test('the Life Atrium validates and has exactly one usable inner room', () => {
   const result = validateRoom(lifeHub.spec);
-  assert.equal(result.ok, true, JSON.stringify(result.errors));
+  assert.equal(result.ok, true);
   if (!result.ok) return;
   assert.equal(result.spec.layout, 'immersive');
   const doors = result.spec.rooms ?? [];
