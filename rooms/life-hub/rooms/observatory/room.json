@@ -1,0 +1,159 @@
+{
+  "id": "observatory",
+  "title": "The Observatory",
+  "purpose": "Every goal at once, from above, with the Chairman: what moves, what waits, and what to add, pause, archive or let go. Changes go to the person's LifeOS.",
+  "icon": "✧",
+  "layout": "immersive",
+  "characters": [
+    {
+      "id": "chairman",
+      "name": "Orion",
+      "role": "Chairman",
+      "persona": "You are Orion, the Chairman of the person's life. You see every goal at once, from above, and you care about focus more than volume. Speak calmly and briefly: name what is moving, what is stuck and what only waits. Before a new goal, ask what it replaces, and suggest pausing what dilutes the few that matter. Add a goal only when the person agrees; pausing, archiving and deleting wait for their confirmation on screen, and only an empty goal can be deleted. Daily tasks are not yours: Astra and each goal's companion keep those.",
+      "greeting": "Good to see you. Here is everything you are carrying. What shall we decide?",
+      "capabilities": [],
+      "voice": "Orus"
+    }
+  ],
+  "collections": [
+    {
+      "id": "goals",
+      "label": "Goals",
+      "fields": [
+        {
+          "id": "goal",
+          "label": "Goal",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "state",
+          "label": "State",
+          "type": "choice",
+          "options": ["active", "paused", "backlog", "completed", "cancelled", "archived"]
+        },
+        {
+          "id": "progress",
+          "label": "Progress %",
+          "type": "number"
+        },
+        {
+          "id": "target",
+          "label": "Target date",
+          "type": "date"
+        },
+        {
+          "id": "why",
+          "label": "Why",
+          "type": "text"
+        },
+        {
+          "id": "actions",
+          "label": "Actions",
+          "type": "number"
+        },
+        {
+          "id": "open",
+          "label": "Open actions",
+          "type": "number"
+        },
+        {
+          "id": "empty",
+          "label": "Nothing planned yet",
+          "type": "boolean"
+        }
+      ]
+    }
+  ],
+  "panels": [
+    {
+      "id": "sky",
+      "kind": "world",
+      "title": "The Observatory",
+      "wide": true
+    }
+  ],
+  "world": {
+    "surface": "observatory",
+    "describe": "A dark open sky above the atrium. Every goal is a star: active goals burn gold on the left, paused ones glow pale in the middle, waiting (backlog) ones are faint on the right; completed and archived goals rest in a quiet line below. A brighter star means more progress. Opening a star shows its card, where the person can also act themselves.",
+    "actions": [
+      {
+        "name": "focus_goal",
+        "description": "Open one goal's star while you talk about it.",
+        "params": {
+          "goal": {
+            "type": "text",
+            "description": "The goal's id, shown in [brackets] in your data"
+          }
+        },
+        "required": ["goal"],
+        "silent": true
+      }
+    ]
+  },
+  "services": [
+    {
+      "source": "lifeos.goals",
+      "actions": [
+        {
+          "name": "create_goal",
+          "label": "Add a goal",
+          "description": "Add a new goal to the person's LifeOS, waiting (backlog) unless they want to start now. Only when they agreed.",
+          "params": {
+            "title": {
+              "type": "text",
+              "description": "Short title, in the person's words"
+            },
+            "why": {
+              "type": "text",
+              "description": "Why it matters to them"
+            },
+            "success": {
+              "type": "text",
+              "description": "What done looks like"
+            },
+            "target_date": {
+              "type": "text",
+              "description": "YYYY-MM-DD, only if they gave one"
+            },
+            "start_now": {
+              "type": "boolean",
+              "description": "true to make it active now"
+            }
+          },
+          "required": ["title"]
+        },
+        {
+          "name": "set_goal_status",
+          "label": "Change a goal's state",
+          "description": "Make a goal active, pause it, send it back to waiting, mark it completed, or archive it (archiving keeps its history and can be undone).",
+          "params": {
+            "goal": {
+              "type": "text",
+              "description": "The goal's id, shown in [brackets] in your data"
+            },
+            "status": {
+              "type": "choice",
+              "options": ["active", "paused", "backlog", "completed", "archived"]
+            }
+          },
+          "required": ["goal", "status"],
+          "confirm": true
+        },
+        {
+          "name": "delete_empty_goal",
+          "label": "Delete an empty goal",
+          "description": "Delete a goal that has nothing planned, measured or recorded yet, e.g. one added by mistake. Anything else is archived instead.",
+          "params": {
+            "goal": {
+              "type": "text",
+              "description": "The goal's id, shown in [brackets] in your data"
+            }
+          },
+          "required": ["goal"],
+          "confirm": true
+        }
+      ]
+    }
+  ]
+}

@@ -104,8 +104,8 @@ test('records without an id or a title are left out', () => {
   assert.equal(goalRoom(record(1, { title: '  ' })), null);
 });
 
-test('five active goals fit beside the atrium doors, and Astra can take the person in', () => {
-  const spec = tree([1, 2, 3, 4, 5].map((n) => record(n)));
+test('four active goals fit beside the atrium doors and the observatory', () => {
+  const spec = tree([1, 2, 3, 4].map((n) => record(n)));
   assert.equal(spec.rooms!.length, 8);
   const astra = spec.characters[0];
   const outcome = runTool(

@@ -128,6 +128,15 @@ export class AtriumSurface implements RoomSurface {
             <span className="life-atrium-kicker">EXPERIENCE THE AI / YOUR WORLD</span>
             <h2>Life Atrium</h2>
             <p>Every part of your life, a place to step into.</p>
+            {children.some((r) => r.id === 'observatory') && (
+              <button
+                type="button"
+                className="life-atrium-up"
+                onClick={() => props.world?.open('observatory')}
+              >
+                <span aria-hidden="true">✧</span> The Observatory · every goal from above
+              </button>
+            )}
           </header>
           <div className="life-atrium-guide" aria-live="polite">
             <span className="life-atrium-guide-icon">✦</span>

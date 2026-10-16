@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import { checkGoalRooms } from './goal-rooms-browser.mjs';
+import { checkObservatory } from './observatory-browser.mjs';
 
 /** One real browser walk through the 3D atrium into an editable work room. */
 export async function checkLifeAtrium(page, url) {
@@ -17,4 +19,11 @@ export async function checkLifeAtrium(page, url) {
   assert.equal(await page.getByRole('progressbar').getAttribute('aria-valuenow'), '100');
   await page.screenshot({ path: 'test-results/life-work.png', fullPage: true });
   await page.goto(url);
+}
+
+/** The Life Atrium, then LifeOS: its goals as rooms, and the observatory over all of them. */
+export async function checkLife(page, url) {
+  await checkLifeAtrium(page, url);
+  await checkGoalRooms(page, url);
+  await checkObservatory(page, url);
 }

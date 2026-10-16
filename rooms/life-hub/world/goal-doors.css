@@ -95,3 +95,23 @@
     animation: none;
   }
 }
+
+/* The way up to the observatory, under the atrium's title. */
+.life-atrium-up {
+  margin-top: 14px;
+  padding: 8px 14px;
+  border: 1px solid rgb(232 216 186 / 0.25);
+  border-radius: 999px;
+  background: rgb(9 16 24 / 0.45);
+  backdrop-filter: blur(10px);
+  color: #efe6d6;
+  font:
+    500 12px/1 system-ui,
+    sans-serif;
+  letter-spacing: 0.04em;
+  pointer-events: auto;
+  cursor: pointer;
+}
+.life-atrium-up span {
+  color: #c9a96e;
+}

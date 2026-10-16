@@ -51,3 +51,15 @@ test('a source that would break the tree opens it without its rooms, never half-
   const skipped = loadRooms({ 'lifeos.goals': [{ id: 'bad' }, goal('Fine')] });
   assert.equal([...skipped.all.keys()].filter((k) => k.startsWith('life-hub/g-')).length, 1);
 });
+
+test('a compiled room fills from its source once signed in, and empties on sign-out', () => {
+  const signedIn = loadRooms({
+    'lifeos.goals.all': [goal('Launch'), { ...goal('Run'), id: 'x2' }],
+  });
+  const observatory = signedIn.all.get('life-hub/observatory')!;
+  assert.equal(observatory.sourced, 'lifeos.goals.all');
+  assert.equal(observatory.store.get().goals.length, 2);
+  const out = loadRooms({}, signedIn.all);
+  assert.equal(out.all.get('life-hub/observatory')!.store, observatory.store);
+  assert.equal(observatory.store.get().goals.length, 0);
+});

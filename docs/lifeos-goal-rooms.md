@@ -150,13 +150,18 @@ Engine requests, each with its tests and kept in separate commits from room work
 2. ~~Apply the two migrations.~~ Done on 2026-10-17; the six writing functions show in the
    security advisor as callable by signed-in users, which is intended.
 3. ~~Engine 1–3 and a goal room that only reads.~~ Done: "Connect your life" in the atrium
-   signs in with the LifeOS account (`apps/platform/src/lifeos/`), up to five active goals
+   signs in with the LifeOS account (`apps/platform/src/lifeos/`), up to four active goals
    open as rooms (`rooms/life-hub/goals/`) with their companion, the visit is recorded with
    `lifeos_open_goal_room`. The browser still sends the spec and data to `/api/agent`, as
    for every preview room; engine 4 ends that for goal rooms.
 4. Engine 4–5: the server builds the context; the character keeps memories and sessions.
-5. Astra's Today / Focus / Goals in the atrium. Goal doors are there already.
-6. Reviewed write functions for tasks, one at a time.
+5. ~~The Chairman.~~ Done: the Observatory (`rooms/life-hub/rooms/observatory`) shows every
+   goal as a star by state, with Orion. The person or Orion adds a goal
+   (`lifeos_create_goal`), changes its state (`lifeos_set_goal_status`: active, paused,
+   backlog, completed, archived) or deletes an empty one (`lifeos_delete_empty_goal`); Orion's
+   state changes and deletes wait for the person's tap on a confirm card.
+6. Astra's Today / Focus / Goals in the atrium. Goal doors are there already.
+7. Reviewed write functions for tasks, one at a time.
 
 ## Checking the SQL
 

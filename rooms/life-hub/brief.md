@@ -32,7 +32,12 @@ A first-person-feeling entrance to life management, rendered in Three.js. This i
 
 - 2026-10-16: Built the Three.js parent atrium and the first real Work HQ using existing room contracts.
 - 2026-10-17: Goal rooms. For the one existing profile, during testing: minimal, premium, elegant.
-  - "Connect your life" (top corner) signs in with the LifeOS account; up to five active goals appear as "Your goals", each a door.
+  - "Connect your life" (top corner) signs in with the LifeOS account; up to four active goals appear as "Your goals", each a door.
   - A goal room is a lit study after the dark atrium: paper, ink, one brass line. Title, why, progress, chapters, next actions; read-only, with "changes are made in LifeOS for now".
   - Its companion is docked beside it. LifeOS picks one compiled persona (guide, coach, strategist, tutor, builder) by key and may rename it; without a choice Astra keeps the goal company. The person's notes on how to be accompanied stay data.
   - No onboarding and no new profiles yet: the person chose to build the world for the current profile first.
+- 2026-10-17: The Observatory, above the atrium, with Orion · Chairman (the person chose him, archive over delete, and a confirm tap for his changes).
+  - Every LifeOS goal is a star: active gold on the left, paused pale in the middle, waiting faint on the right; completed and archived rest in a line below. Brighter means more progress.
+  - The person opens a star's card to make it active, pause it, send it back to waiting, complete, archive (two taps) or delete it while it is empty (two taps); "+ New goal" adds one, waiting unless started now.
+  - Orion adds a goal when the person agrees; his state changes and deletes show a confirm card first. Daily tasks are not his: Astra and each goal's companion keep those.
+  - Reached from "✧ The Observatory" under the atrium's title, or by Astra's open_room.

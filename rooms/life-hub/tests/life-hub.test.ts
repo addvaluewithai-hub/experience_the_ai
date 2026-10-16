@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { agentTools, emptyData, runTool, validateRoom } from '@experience/room-spec';
 import lifeHub from '../index';
 
-test('the Life Atrium validates and has exactly one usable inner room', () => {
+test('the Life Atrium validates with Work HQ and the observatory built', () => {
   const result = validateRoom(lifeHub.spec);
   assert.equal(result.ok, true);
   if (!result.ok) return;
@@ -11,11 +11,11 @@ test('the Life Atrium validates and has exactly one usable inner room', () => {
   const doors = result.spec.rooms ?? [];
   assert.deepEqual(
     doors.map((r) => r.id),
-    ['work', 'learning', 'wellbeing'],
+    ['work', 'learning', 'wellbeing', 'observatory'],
   );
   assert.deepEqual(
     doors.filter((r) => !r.planned).map((r) => r.id),
-    ['work'],
+    ['work', 'observatory'],
   );
   const names = agentTools(result.spec, result.spec.characters[0]).map((t) => t.name);
   assert.ok(names.includes('open_room'));
