@@ -17,11 +17,21 @@ export async function post<T>(path: string, payload: unknown, signal?: AbortSign
   return result;
 }
 
-export async function aiAvailable(): Promise<boolean> {
+/** What this deployment offers: the AI characters, and where to sign in for LifeOS rooms. */
+export type PlatformStatus = { ai: boolean; lifeos: { url: string; key: string } | null };
+
+export async function platformStatus(): Promise<PlatformStatus> {
   try {
     const response = await fetch('/api/status');
-    return response.ok && ((await response.json()) as { ai?: boolean }).ai === true;
+    if (!response.ok) return { ai: false, lifeos: null };
+    const status = (await response.json()) as Partial<PlatformStatus>;
+    const lifeos = status.lifeos;
+    return {
+      ai: status.ai === true,
+      lifeos:
+        lifeos && typeof lifeos.url === 'string' && typeof lifeos.key === 'string' ? lifeos : null,
+    };
   } catch {
-    return false;
+    return { ai: false, lifeos: null };
   }
 }

@@ -29,6 +29,10 @@ Rooms and panels work without any key. To talk to characters locally, create an 
 GEMINI_API_KEY=...
 ```
 
+The Life Atrium opens the person's LifeOS goals as rooms when `.dev.vars` also names their
+Supabase project (`LIFEOS_SUPABASE_URL`, `LIFEOS_SUPABASE_PUBLISHABLE_KEY`):
+[docs/lifeos-goal-rooms.md](docs/lifeos-goal-rooms.md).
+
 ## Where things are
 
 | Path                  | Responsibility                                                                               |

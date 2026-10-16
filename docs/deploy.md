@@ -18,12 +18,14 @@ plain variables cannot be edited in the dashboard; everything below is a secret.
 
 ## Secrets (Settings → Variables and Secrets, type Secret)
 
-| Name                | Value                                     | Notes                                      |
-| ------------------- | ----------------------------------------- | ------------------------------------------ |
-| `GEMINI_API_KEY`    | key from Google AI Studio                 | Never in Git or the client bundle          |
-| `OPEN_AI_PREVIEW`   | optional; `false` closes the AI           | Open by default while testing              |
-| `GEMINI_LIVE_MODEL` | optional, default `gemini-3.8-live`       | Voice calls; free tier: unlimited requests |
-| `GEMINI_CHAT_MODEL` | optional, default `gemini-3.5-flash-lite` | Must be a model the key's tier can use     |
+| Name                              | Value                                     | Notes                                       |
+| --------------------------------- | ----------------------------------------- | ------------------------------------------- |
+| `GEMINI_API_KEY`                  | key from Google AI Studio                 | Never in Git or the client bundle           |
+| `OPEN_AI_PREVIEW`                 | optional; `false` closes the AI           | Open by default while testing               |
+| `GEMINI_LIVE_MODEL`               | optional, default `gemini-3.8-live`       | Voice calls; free tier: unlimited requests  |
+| `GEMINI_CHAT_MODEL`               | optional, default `gemini-3.5-flash-lite` | Must be a model the key's tier can use      |
+| `LIFEOS_SUPABASE_URL`             | optional, `https://<ref>.supabase.co`     | With the key below, opens LifeOS goal rooms |
+| `LIFEOS_SUPABASE_PUBLISHABLE_KEY` | the project's publishable key             | Public by design; never the service key     |
 
 Set them for the environment you test on (Production and/or Preview), then redeploy: secrets
 apply to new deployments only.
@@ -39,7 +41,10 @@ per-account quotas exist.
 
 ## Check a deployment
 
-1. `https://<deployment>/api/status` returns `{"ai":true}` when the key is set and the AI is not closed.
+1. `https://<deployment>/api/status` returns `"ai":true` when the key is set and the AI is not
+   closed, and `"lifeos"` with the project URL when LifeOS is connected.
 2. Open a room, talk to a character, ask it to add something, and see the panel change.
-3. If a character replies with an error, the message is the server's real reason (missing key,
+3. With LifeOS connected, open the Life Atrium, "Connect your life", sign in with the LifeOS
+   account (email and password), and the active goals appear as rooms.
+4. If a character replies with an error, the message is the server's real reason (missing key,
    busy quota, provider failure). Nothing is invented.

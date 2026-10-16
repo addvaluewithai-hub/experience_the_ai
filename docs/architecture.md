@@ -94,6 +94,10 @@ Structural validity means "the runtime can render it", not that the room was rev
 - **Pulse**: a room is as alive as the share of one boolean field that is true; a room without
   one averages its inner rooms. The `rooms` panel (doors or a 2.5D world) lights each door by it.
 - Each room in a tree has its own store and its own page at its path (`#/room/life/health`).
+- **Instances**: a tree may open inner rooms from records the person keeps elsewhere
+  (`RoomEntry.instances`: a source the host registers, and the room's own `build` for one
+  record). The Life Atrium opens each active LifeOS goal this way; the host signs the person in,
+  loads the records and validates the grown tree, and leaves them out if it fails.
 
 ## Data: each room has its own database shape
 

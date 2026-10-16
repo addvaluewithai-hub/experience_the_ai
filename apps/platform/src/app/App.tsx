@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
-import { aiAvailable } from '../shared/api';
+import { platformStatus } from '../shared/api';
 import { Home } from '../features/home/Home';
 import { RoomPage } from '../features/room/RoomPage';
 import { setConversationHost } from '../features/room/conversation';
+import { LifeConnect } from '../lifeos/LifeConnect';
+import { enteredFrom, startLifeos, useLifeos } from '../lifeos/connection';
 import { loadRooms, roomHref } from './rooms';
 
 function subscribe(listener: () => void) {
@@ -13,13 +15,27 @@ const currentHash = () => location.hash;
 
 export function App() {
   const hash = useSyncExternalStore(subscribe, currentHash, () => '');
-  const [rooms] = useState(loadRooms);
+  const lifeos = useLifeos();
+  const [rooms, setRooms] = useState(() => ({ ...loadRooms(), records: lifeos.records }));
   const [ai, setAi] = useState<boolean | null>(null);
   const [focus, setFocus] = useState<{ key: string; panel: string }>();
   const timer = useRef(0);
   useEffect(() => {
-    void aiAvailable().then(setAi);
+    void platformStatus().then((status) => {
+      setAi(status.ai);
+      startLifeos(status.lifeos);
+    });
   }, []);
+  // Records from the person's sources grow the trees that open rooms from them.
+  useEffect(
+    () =>
+      setRooms((before) =>
+        before.records === lifeos.records
+          ? before
+          : { ...loadRooms(lifeos.records, before.all), records: lifeos.records },
+      ),
+    [lifeos.records],
+  );
   useEffect(() => window.scrollTo(0, 0), [hash]);
   useEffect(() => {
     setConversationHost({
@@ -39,15 +55,25 @@ export function App() {
 
   const key = /^#\/room\/([a-z0-9/-]+)$/.exec(hash)?.[1];
   const room = key ? rooms.all.get(key) : undefined;
+  const source = room?.source;
+  useEffect(() => {
+    if (source) enteredFrom(source.id, source.record);
+  }, [source?.id, source?.record]);
   if (room)
     return (
-      <RoomPage
-        key={room.key}
-        room={room}
-        rooms={rooms.all}
-        ai={ai}
-        focus={focus?.key === room.key ? focus.panel : undefined}
-      />
+      <>
+        <RoomPage
+          key={room.key}
+          room={room}
+          rooms={rooms.all}
+          ai={ai}
+          focus={focus?.key === room.key ? focus.panel : undefined}
+        />
+        {room.instances && <LifeConnect />}
+      </>
     );
+  // A room from a source opens once the source has loaded (a reload lands here first).
+  if (key && (lifeos.status === 'loading' || rooms.records !== lifeos.records))
+    return <div className="lifeos-wait" aria-busy="true" />;
   return <Home rooms={rooms.top} ai={ai} />;
 }

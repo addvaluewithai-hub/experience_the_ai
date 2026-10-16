@@ -10,12 +10,19 @@ import { limit } from './limits';
  */
 const aiOpen = (env: Env) => env.OPEN_AI_PREVIEW !== 'false';
 
+/** Where the browser signs in for rooms from LifeOS: an https project URL and its public key. */
+function lifeos(env: Env) {
+  const url = env.LIFEOS_SUPABASE_URL ?? '';
+  const key = env.LIFEOS_SUPABASE_PUBLISHABLE_KEY ?? '';
+  return /^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(url) && key ? { url, key } : null;
+}
+
 export async function handleRequest(request: Request, env: Env): Promise<Response> {
   try {
     checkOrigin(request);
     const path = new URL(request.url).pathname;
     if (request.method === 'GET' && path === '/api/status')
-      return json({ ai: aiOpen(env) && Boolean(env.GEMINI_API_KEY) });
+      return json({ ai: aiOpen(env) && Boolean(env.GEMINI_API_KEY), lifeos: lifeos(env) });
     const action = path === '/api/agent' ? 'agent' : path === '/api/live' ? 'live' : null;
     if (!action) throw new HttpError(404, 'Not found.');
     if (request.method !== 'POST') throw new HttpError(405, 'Method not allowed.');

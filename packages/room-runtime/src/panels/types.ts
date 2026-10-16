@@ -61,6 +61,18 @@ export type RoomEntry = {
   spec: unknown;
   panels?: CustomPanels;
   surface?: (spec: RoomSpec, store: RoomStore, path: string) => RoomSurface | undefined;
+  instances?: RoomInstances;
+};
+
+/**
+ * Rooms opened from records the person keeps elsewhere (their goals in their own database),
+ * one inner room of the top room per record. The host registers the source by name, signs the
+ * person in and loads the records; `build` turns one record (an object with a string `id`)
+ * into an inner room and its data, or null to leave it out. The host validates both.
+ */
+export type RoomInstances = {
+  source: string;
+  build: (record: unknown) => { spec: unknown; data?: unknown } | null;
 };
 
 /** Values a panel reads, gathered once so panels stay small. */

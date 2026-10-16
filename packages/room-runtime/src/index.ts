@@ -6,6 +6,7 @@ export type {
   PanelProps,
   PanelRegistry,
   RoomEntry,
+  RoomInstances,
   RoomSurface,
   RoomWorld,
   SurfaceViewProps,

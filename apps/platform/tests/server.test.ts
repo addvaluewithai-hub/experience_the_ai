@@ -37,6 +37,18 @@ function post(path: string, payload: unknown, origin = 'http://app.test') {
 }
 const say = (text: string) => [{ role: 'user', text }];
 
+test('status names the LifeOS project only when it is a Supabase https URL with a key', async () => {
+  const status = (env: object) =>
+    handleRequest(new Request('http://app.test/api/status'), env).then((r) => r.json());
+  const url = 'https://abc123.supabase.co';
+  const key = 'sb_publishable_x';
+  const lifeos = { LIFEOS_SUPABASE_URL: url, LIFEOS_SUPABASE_PUBLISHABLE_KEY: key };
+  assert.deepEqual((await status(lifeos)).lifeos, { url, key });
+  const plain = { ...lifeos, LIFEOS_SUPABASE_URL: 'http://abc123.supabase.co' };
+  assert.equal((await status(plain)).lifeos, null);
+  assert.equal((await status({ LIFEOS_SUPABASE_URL: url })).lifeos, null);
+});
+
 test('AI routes close with OPEN_AI_PREVIEW=false, and reject other origins', async () => {
   const closed = await handleRequest(
     new Request('http://app.test/api/agent', {
@@ -48,8 +60,8 @@ test('AI routes close with OPEN_AI_PREVIEW=false, and reject other origins', asy
   assert.equal(closed.status, 503);
   const status = (env: object) =>
     handleRequest(new Request('http://app.test/api/status'), env).then((r) => r.json());
-  assert.deepEqual(await status({ GEMINI_API_KEY: 'k' }), { ai: true });
-  assert.deepEqual(await status({}), { ai: false });
+  assert.deepEqual(await status({ GEMINI_API_KEY: 'k' }), { ai: true, lifeos: null });
+  assert.deepEqual(await status({}), { ai: false, lifeos: null });
   assert.equal((await post('/api/agent', {}, 'http://evil.test')).status, 403);
   assert.equal((await post('/api/architect', {})).status, 404);
 });
