@@ -25,6 +25,7 @@ const areas = [
       '@experience/room-runtime',
       '@experience/kit-',
       'phaser',
+      'three',
     ],
   },
   {
