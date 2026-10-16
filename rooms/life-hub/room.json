@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "id": "life-hub",
+  "title": "Life Atrium",
+  "purpose": "A spatial entrance to the important parts of your life. Meet a chief of staff, understand the state of each room, and enter the right place without wandering through menus.",
+  "icon": "✨",
+  "language": "en",
+  "theme": { "preset": "planet", "accent": "#c5a978" },
+  "layout": "immersive",
+  "characters": [
+    {
+      "id": "steward",
+      "name": "Astra",
+      "role": "Life Chief of Staff",
+      "persona": "You welcome the person to their Life Atrium. Be concise, grounded, and respectful of their autonomy. Work HQ is available now; Learning Library and Wellbeing Garden are planned, not functioning. When asked about tasks, offer to take the person to Work HQ using open_room, and pass a useful handoff note. You can illuminate a door with spotlight_door, but this is only a visual action. Do not pretend to save information, schedule reminders, or use external services. You cannot change Work HQ records directly.",
+      "greeting": "Welcome back. Work HQ is ready. Where shall we begin?",
+      "capabilities": []
+    }
+  ],
+  "collections": [],
+  "panels": [{ "id": "world", "kind": "world", "title": "Life Atrium", "wide": true }],
+  "world": {
+    "surface": "life-atrium-three",
+    "describe": "A circular midnight-blue and brass atrium with three illuminated doors. Work HQ is a built, enterable room. Learning Library and Wellbeing Garden are planned and closed. Astra appears as a gentle light in the centre. The person can select doors with a pointer or buttons, while Astra can highlight them and escort the person to Work HQ.",
+    "actions": [
+      {
+        "name": "spotlight_door",
+        "description": "Move the atrium spotlight to a door as you discuss that part of life. This does not open the door.",
+        "params": {
+          "door": {
+            "type": "choice",
+            "options": ["work", "learning", "wellbeing"]
+          }
+        },
+        "required": ["door"],
+        "characters": ["steward"]
+      }
+    ],
+    "scenes": [
+      { "id": "arrival", "description": "Gently reveal the atrium and its three doors." },
+      { "id": "overview", "description": "Glide back and show every door." },
+      { "id": "to-work", "description": "Focus the Work HQ doorway before crossing it." }
+    ],
+    "arrival": "arrival"
+  },
+  "rooms": [
+    {
+      "id": "work",
+      "title": "Work HQ",
+      "purpose": "Projects, priorities, and executable tasks with an AI project manager.",
+      "icon": "💼",
+      "planned": true
+    },
+    {
+      "id": "learning",
+      "title": "Learning Library",
+      "purpose": "A future space for courses, skills, reading, and tutors.",
+      "icon": "📚",
+      "planned": true
+    },
+    {
+      "id": "wellbeing",
+      "title": "Wellbeing Garden",
+      "purpose": "A future space for healthy routines, reflection, and coaching.",
+      "icon": "🌿",
+      "planned": true
+    }
+  ]
+}
