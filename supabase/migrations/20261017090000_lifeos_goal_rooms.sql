@@ -1,5 +1,6 @@
 -- Goal rooms V1: every lifeos goal can open as a room with one primary character, its own
--- conversations and its own memories. Draft: run on a Supabase branch before production.
+-- conversations and its own memories. Applied to lifeos on 2026-10-17 after the local tests
+-- in supabase/tests (the free plan has no branching).
 --
 -- Boundary kept from enforce_read_only_viewer_boundary: authenticated reads tables through RLS
 -- and never writes them directly. Writes go through the reviewed functions at the end, which

@@ -1,10 +1,12 @@
 # LifeOS goal rooms
 
-Proposal, not yet applied: every goal in the person's LifeOS database (Supabase project
-`lifeos`) opens as a room with its own character, voice, conversations and memories, under
-the Life Atrium (`rooms/life-hub`, branch `feat/life-atrium-three`), where Astra coordinates.
-The SQL is in `supabase/migrations/` and is checked by `supabase/tests/`. Nothing here has
-been run against the production project.
+Every goal in the person's LifeOS database (Supabase project `lifeos`) opens as a room with
+its own character, voice, conversations and memories, under the Life Atrium
+(`rooms/life-hub`), where Astra coordinates. The SQL is in `supabase/migrations/` and is
+checked by `supabase/tests/`. Schema V1 was applied to `lifeos` on 2026-10-17, at the
+person's choice, after the local tests: the free plan has no branching, and the migrations
+only add tables and functions. For now the world is built for the one existing profile;
+onboarding and new profiles come later.
 
 ## What exists (read on 2026-10-17)
 
@@ -144,10 +146,9 @@ Engine requests, each with its tests and kept in separate commits from room work
 
 ## Order
 
-1. Merge the Life Atrium. Locally its unit, boundary, format and browser checks pass; first
-   remove the bundle-patching debug code from `tests/life-atrium-browser.mjs`.
-2. Apply the two migrations to a Supabase branch, run `supabase/tests/goal_rooms.sql` there,
-   then production.
+1. ~~Merge the Life Atrium.~~ Done, without the debug code in its browser check.
+2. ~~Apply the two migrations.~~ Done on 2026-10-17; the six writing functions show in the
+   security advisor as callable by signed-in users, which is intended.
 3. Engine 1–3, and a goal room template that only reads: open an active goal, see its plan
    and progress, talk with its character.
 4. Engine 4–5: the character keeps memories and sessions; voice per goal.
