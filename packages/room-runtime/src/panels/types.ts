@@ -16,6 +16,11 @@ export type RoomWorld = {
   dataAt: DataAt;
   /** Take the person into an inner room by that path. */
   open: (path: string) => void;
+  /**
+   * The person's own action from the surface, one the room declares in its services (their
+   * tap is the confirmation). Resolves to the source's answer: `ok`, or an `error` to show.
+   */
+  run?: (action: string, args: Record<string, unknown>) => Promise<Record<string, unknown>>;
 };
 
 export type PanelProps = {
@@ -62,6 +67,12 @@ export type RoomEntry = {
   panels?: CustomPanels;
   surface?: (spec: RoomSpec, store: RoomStore, path: string) => RoomSurface | undefined;
   instances?: RoomInstances;
+  /**
+   * Compiled rooms of this tree whose data is the person's records elsewhere (`path` inside
+   * the tree, e.g. "observatory"): the host loads the source once they sign in and `data`
+   * shapes its records into the room's collections. Empty while they are signed out.
+   */
+  sourced?: { path: string; source: string; data: (records: unknown[]) => unknown }[];
 };
 
 /**

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { afterEach, test } from 'node:test';
-import { loadGoals } from '../src/lifeos/goals.ts';
+import { activeGoals, loadGoals } from '../src/lifeos/goals.ts';
 import { SignedOut, supabase } from '../src/lifeos/supabase.ts';
 
 const config = { url: 'https://abc123.supabase.co', key: 'sb_publishable_x' };
@@ -67,7 +67,7 @@ test('a wrong password says so; an expired token refreshes once; a refused one s
   assert.equal(later.email, null);
 });
 
-test('the goals source reads active goals with their plan, progress and companion', async () => {
+test('the goals source reads every goal with its plan, progress and companion', async () => {
   const seen = server(
     [200, signedIn(3600)],
     [
@@ -93,7 +93,7 @@ test('the goals source reads active goals with their plan, progress and companio
   const db = supabase(config);
   await db.signIn('me@example.com', 'secret');
   const goals = await loadGoals(db);
-  assert.ok(seen[1].url.includes('status=eq.active'));
+  assert.ok(!seen[1].url.includes('status='), 'every goal, for the observatory');
   assert.ok(seen[2].url.endsWith('goal_id=in.(g1,g2)'));
   assert.equal(goals[0].progress, 0.1667);
   assert.equal((goals[0].agent as { persona_key: string }).persona_key, 'tutor');
@@ -101,4 +101,14 @@ test('the goals source reads active goals with their plan, progress and companio
   assert.equal(goals[1].progress, null);
   assert.equal(goals[1].agent, null);
   assert.ok(!('lifeos_goal_rooms' in goals[0]));
+});
+
+test('goal rooms open for the first four active goals only', () => {
+  const goals = ['active', 'backlog', 'active', 'paused', 'active', 'active', 'active'].map(
+    (status, n) => ({ id: `g${n}`, status }),
+  );
+  assert.deepEqual(
+    activeGoals(goals).map((g) => g.id),
+    ['g0', 'g2', 'g4', 'g5'],
+  );
 });

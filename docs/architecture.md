@@ -98,6 +98,11 @@ Structural validity means "the runtime can render it", not that the room was rev
   (`RoomEntry.instances`: a source the host registers, and the room's own `build` for one
   record). The Life Atrium opens each active LifeOS goal this way; the host signs the person in,
   loads the records and validates the grown tree, and leaves them out if it fails.
+- **Services**: a room may change records outside itself (`services` in its spec: actions on a
+  host source). Characters receive them as checked tools; the host performs accepted calls with
+  the person's own authorization, asks the person first when the action says `confirm`, and
+  returns the real result. A compiled room can also take its data from a source
+  (`RoomEntry.sourced`), as the observatory takes every LifeOS goal.
 
 ## Data: each room has its own database shape
 

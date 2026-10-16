@@ -1,7 +1,7 @@
 import type { Supabase } from './supabase';
 
-/** The most active goals one atrium opens as rooms (its other doors take the rest). */
-export const ACTIVE_GOALS = 5;
+/** The active goals one atrium opens as rooms (its own doors and the observatory take the rest). */
+export const ACTIVE_GOALS = 4;
 
 const GOAL = [
   'id',
@@ -28,14 +28,13 @@ const list = (value: unknown): Row[] =>
       : [];
 
 /**
- * The source `lifeos.goals`: the person's active goals as plain records, each with its
- * milestones, tasks, computed progress (0–1, from the lifeos_goal_progress view) and the
- * active primary character chosen for its room, if any. Reads only, with the person's token.
+ * Every goal of the person as plain records, each with its milestones, tasks, computed
+ * progress (0–1, from the lifeos_goal_progress view) and the active primary character chosen
+ * for its room, if any. Reads only, with the person's token. The sources: `lifeos.goals` (the
+ * first active ones, each a room) and `lifeos.goals.all` (all of them, for the observatory).
  */
 export async function loadGoals(db: Supabase): Promise<Row[]> {
-  const goals = await db.get<Row[]>(
-    `lifeos_goals?select=${GOAL}&status=eq.active&order=created_at.asc&limit=${ACTIVE_GOALS}`,
-  );
+  const goals = await db.get<Row[]>(`lifeos_goals?select=${GOAL}&order=created_at.asc&limit=200`);
   if (!goals.length) return [];
   const ids = goals.map((g) => g.id).join(',');
   const progress = await db.get<{ goal_id: string; computed_progress: number | string }[]>(
@@ -53,6 +52,9 @@ export async function loadGoals(db: Supabase): Promise<Row[]> {
     };
   });
 }
+
+export const activeGoals = (goals: Row[]) =>
+  goals.filter((g) => g.status === 'active').slice(0, ACTIVE_GOALS);
 
 /** Marks the goal's room as visited (and creates it on the first visit). */
 export async function openGoalRoom(db: Supabase, goalId: string) {

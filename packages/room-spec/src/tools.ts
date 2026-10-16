@@ -1,4 +1,5 @@
 import { addRecord, describeData, removeRecord, updateRecord, type RoomData } from './data';
+import { isServiceCall, parseServiceCall, serviceTools, type ServiceCall } from './services';
 import { isWorldCall, parseWorldCall, worldTools, type WorldAct } from './world';
 import { innerRooms } from './tree';
 import type { Character, Field, RoomSpec } from './types';
@@ -27,6 +28,8 @@ export type ToolOutcome = {
   act?: WorldAct;
   /** Answer it silently, without blocking speech (world actions declared silent). */
   silent?: boolean;
+  /** A service action for the host to perform; its real result replaces `response`. */
+  service?: ServiceCall;
 };
 
 const key = (id: string) => id.replaceAll('-', '_');
@@ -101,7 +104,7 @@ export function agentTools(spec: RoomSpec, character: Character): ToolDeclaratio
         required: ['room', 'note'],
       },
     });
-  return [...tools, ...worldTools(spec, character)];
+  return [...tools, ...worldTools(spec, character), ...serviceTools(spec, character)];
 }
 
 /** Runs one call against the data. Errors become tool responses so the agent can recover. */
@@ -118,6 +121,11 @@ export function runTool(
     const parsed = parseWorldCall(spec, character, call.name, call.args);
     if ('error' in parsed) return { data, response: { error: parsed.error } };
     return { data, response: { ok: true }, act: parsed.act, silent: parsed.silent };
+  }
+  if (isServiceCall(spec, call.name)) {
+    const parsed = parseServiceCall(spec, character, call.name, call.args);
+    if ('error' in parsed) return { data, response: { error: parsed.error } };
+    return { data, response: { pending: true }, service: parsed.call };
   }
   if (call.name === 'open_room') {
     const room = innerRooms(spec).find((r) => r.path === call.args.room && !r.spec.planned);

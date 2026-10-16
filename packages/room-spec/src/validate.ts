@@ -1,5 +1,6 @@
 import { Checker } from './check';
 import { characters, collections, panel, yesNoField } from './parts';
+import { validateServices } from './services';
 import { validateWorld } from './world';
 import {
   LANGUAGES,
@@ -71,6 +72,7 @@ export function validateRoom(value: unknown): Validation {
         'world',
         'layout',
         'presence',
+        'services',
       ])
         if (!empty(source[key]))
           check.at(
@@ -113,6 +115,10 @@ export function validateRoom(value: unknown): Validation {
     }
     if (source.world !== undefined)
       spec.world = validateWorld(check, source.world, at('world'), people);
+    if (source.services !== undefined) {
+      const taken = new Set(['focus_panel', ...(spec.world?.actions.map((a) => a.name) ?? [])]);
+      spec.services = validateServices(check, source.services, at('services'), people, taken);
+    }
     if (inner.length) spec.rooms = inner;
     if (source.layout !== undefined) {
       spec.layout = check.oneOf(source.layout, ['panels', 'immersive'] as const, at('layout'));

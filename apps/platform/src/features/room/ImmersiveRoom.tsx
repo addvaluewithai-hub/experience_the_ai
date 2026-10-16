@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, type CSSProperties } from 'react';
 import type { RoomData } from '@experience/room-spec';
 import { useRoomData } from '@experience/room-runtime';
 import { roomHref, type OpenRoom } from '../../app/rooms';
+import { personRun } from '../../app/services';
 import { arrivalCue, conversationFor, takeHandoff } from './conversation';
 import { PresenceDock } from './PresenceDock';
 import { PresenceLayer } from './PresenceLayer';
@@ -91,6 +92,7 @@ export function ImmersiveRoom(props: {
             world={{
               dataAt: (path) => rooms.get(`${room.key}/${path}`)?.store.get(),
               open: (path) => (location.hash = roomHref(`${room.key}/${path}`)),
+              run: room.spec.services ? (action, args) => personRun(room, action, args) : undefined,
             }}
           />
         )}

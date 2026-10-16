@@ -51,8 +51,8 @@ export async function startCall(
           ? arrivalCue(room, character)
           : undefined,
     ticket: () => post<LiveTicket>('/api/live', conversation.context()),
-    runTool: (call) => {
-      const { response, open, silent } = conversation.apply(call.name, call.args);
+    runTool: async (call) => {
+      const { response, open, silent } = await conversation.apply(call.name, call.args);
       // The call carries on into the inner room: its first character picks up the note.
       if (open) void conversation.handOff(open, true);
       return { response, silent };

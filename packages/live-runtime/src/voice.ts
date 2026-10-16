@@ -10,7 +10,12 @@ export type VoiceHost = {
   character: string;
   ticket(): Promise<LiveTicket>;
   /** Runs one tool call through the room's rules; `silent` for presentation-only tools. */
-  runTool(call: ToolCall): { response: Record<string, unknown>; silent: boolean };
+  /** A call's result; it may take time (the person confirming, a database answering). */
+  runTool(
+    call: ToolCall,
+  ):
+    | { response: Record<string, unknown>; silent: boolean }
+    | Promise<{ response: Record<string, unknown>; silent: boolean }>;
   /** A transcript line so far; `final` when that turn is over. */
   transcript(role: 'person' | 'character', text: string, final: boolean): void;
   status(status: VoiceStatus, message?: string): void;
@@ -58,9 +63,14 @@ export class VoiceSession {
         this.finish('character');
       },
       toolCalls: (calls) =>
-        this.live.respond(
-          calls.map((call): ToolReply => ({ ...call, ...this.host.runTool(call) })),
-        ),
+        void Promise.all(
+          calls.map(
+            async (call): Promise<ToolReply> => ({
+              ...call,
+              ...(await this.host.runTool(call)),
+            }),
+          ),
+        ).then((replies) => this.live.respond(replies)),
       cancelled: () => {},
       closed: (reason) => this.fail(reason),
     });

@@ -1,0 +1,78 @@
+/* A character's request waiting for the person: a quiet card at the top, clear of captions. */
+.confirm-card {
+  position: fixed;
+  z-index: 1000;
+  inset-inline: 16px;
+  top: max(72px, calc(env(safe-area-inset-top) + 64px));
+  margin-inline: auto;
+  display: grid;
+  gap: 10px;
+  width: min(400px, calc(100% - 32px));
+  box-sizing: border-box;
+  padding: 22px 22px 18px;
+  border: 1px solid rgb(232 216 186 / 0.25);
+  border-radius: 20px;
+  background: linear-gradient(180deg, #131d28, #0b131b);
+  box-shadow: 0 24px 70px rgb(0 0 0 / 0.55);
+  color: #efe6d6;
+  font:
+    400 14px/1.5 system-ui,
+    sans-serif;
+  animation: confirm-rise 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.confirm-who {
+  color: #c9a96e;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+.confirm-card h2 {
+  margin: 0;
+  font:
+    400 24px/1.15 Georgia,
+    'Times New Roman',
+    serif;
+}
+.confirm-card ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: rgb(239 230 214 / 0.72);
+}
+.confirm-card li + li {
+  margin-top: 2px;
+}
+.confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 18px;
+  margin-top: 6px;
+}
+.confirm-actions button {
+  border: 0;
+  border-radius: 999px;
+  padding: 11px 20px;
+  background: #e9d7b1;
+  color: #10181f;
+  font:
+    500 14px/1 system-ui,
+    sans-serif;
+  cursor: pointer;
+}
+.confirm-actions .confirm-no {
+  padding-inline: 4px;
+  background: none;
+  color: rgb(239 230 214 / 0.65);
+}
+@keyframes confirm-rise {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .confirm-card {
+    animation: none;
+  }
+}

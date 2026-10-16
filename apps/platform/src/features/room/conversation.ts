@@ -2,6 +2,7 @@ import { useSyncExternalStore } from 'react';
 import { innerRooms, runTool, type Character, type RoomData } from '@experience/room-spec';
 import { newRecordId } from '@experience/room-runtime';
 import type { OpenRoom } from '../../app/rooms';
+import { performCall } from '../../app/services';
 import { post } from '../../shared/api';
 
 type Part = { text?: string; functionCall?: { id?: string; name: string; args?: object } };
@@ -97,9 +98,17 @@ export class Conversation {
    * Runs one tool call through the room rules and applies it: data to the store, world
    * actions to the surface, focus and activity to the page. Text turns and voice share it.
    */
-  apply(name: string, args: Record<string, unknown>) {
+  async apply(name: string, args: Record<string, unknown>) {
     const { room, character } = this;
     const outcome = runTool(room.spec, character, room.store.get(), { name, args }, newRecordId);
+    // A change outside the room: the person may confirm first, the source answers for real.
+    if (outcome.service) {
+      const response: Record<string, unknown> = await performCall(room, character, outcome.service);
+      const label = outcome.service.label;
+      if ('error' in response) this.add('activity', `⚠ ${label}: ${String(response.error)}`);
+      else this.add('activity', response.declined ? `· ${label}: not now` : `✓ ${label}`);
+      return { response, open: undefined, silent: false };
+    }
     room.store.set(outcome.data);
     if (outcome.focus) host?.focus(room.key, outcome.focus);
     if (outcome.act) room.surface?.act(outcome.act.character, outcome.act.action, outcome.act.args);
@@ -196,14 +205,14 @@ export class Conversation {
         }
         const calls = parts.flatMap((p) => (p.functionCall ? [p.functionCall] : []));
         if (!calls.length) break;
-        const results = calls.map((call) => {
-          const { response, open } = this.apply(call.name, { ...call.args } as Record<
-            string,
-            unknown
-          >);
+        // One at a time, in the order the character asked: a confirmation may wait on the person.
+        const results = [];
+        for (const call of calls) {
+          const args = { ...call.args } as Record<string, unknown>;
+          const { response, open } = await this.apply(call.name, args);
           if (open) handoff = open;
-          return { ...(call.id ? { id: call.id } : {}), name: call.name, response };
-        });
+          results.push({ ...(call.id ? { id: call.id } : {}), name: call.name, response });
+        }
         history.push({ role: 'tool', results });
         if (step === MAX_STEPS - 1) this.add('error', 'Stopped after several actions in a row.');
       }

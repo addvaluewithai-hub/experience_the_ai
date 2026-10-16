@@ -31,6 +31,13 @@ export {
   type DataAt,
   type InnerRoom,
 } from './tree';
+export {
+  parsePersonCall,
+  SERVICE_LIMITS,
+  type Service,
+  type ServiceAction,
+  type ServiceCall,
+} from './services';
 export { VOICES, type VoiceName } from './voices';
 export {
   PARAM_TYPES,

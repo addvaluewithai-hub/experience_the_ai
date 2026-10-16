@@ -207,6 +207,26 @@ bottom of a phone) with their conversation, typing and a voice call always at ha
 arrival the first character speaks first in words, once per visit, from its persona and the
 data. Choose it for adults who need someone to manage, plan and follow up.
 
+## Services: changing the person's records outside the room
+
+A room may act on records the person keeps elsewhere, through a source the app registers
+(today `lifeos.goals`, their LifeOS goals). It declares each action like a world action, plus
+a short `label` and whether the person must `confirm` it:
+
+```json
+"services": [{ "source": "lifeos.goals", "actions": [
+  { "name": "set_goal_status", "label": "Change a goal's state", "description": "…",
+    "params": { "goal": { "type": "text" }, "status": { "type": "choice", "options": ["paused", "archived"] } },
+    "required": ["goal", "status"], "confirm": true }
+] }]
+```
+
+Characters get these as tools (the `characters` list narrows who). The app performs an accepted
+call with the person's own authorization and returns the real result; with `confirm` it first
+shows a card ("Orion asks · Change a goal's state · goal: Launch…") and a refusal is an answer
+the character receives. A surface can run the same actions for the person's own taps through
+`world.run`. The source decides what each action may do; a name it does not know is refused.
+
 ## Pulse
 
 A room with `pulse` is as alive as the share of its records where the field is true (no records

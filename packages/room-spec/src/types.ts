@@ -1,4 +1,5 @@
 import type { VoiceName } from './voices';
+import type { Service } from './services';
 import type { World } from './world';
 
 /**
@@ -106,6 +107,8 @@ export type RoomSpec = {
   rooms?: RoomSpec[];
   /** The room's world: the surface that draws it and the actions characters may take there. */
   world?: World;
+  /** Actions on the person's own records outside the room, performed by a host source. */
+  services?: Service[];
   /** `panels` (default): a page of panels beside the conversation. `immersive`: the room is
    * its world on the whole screen; people talk with its characters by voice (captions over the
    * world, a small keyboard when voice cannot be used) and characters change everything through

@@ -3,6 +3,7 @@ import { platformStatus } from '../shared/api';
 import { Home } from '../features/home/Home';
 import { RoomPage } from '../features/room/RoomPage';
 import { setConversationHost } from '../features/room/conversation';
+import { ConfirmCard } from '../features/room/ConfirmCard';
 import { LifeConnect } from '../lifeos/LifeConnect';
 import { enteredFrom, startLifeos, useLifeos } from '../lifeos/connection';
 import { loadRooms, roomHref } from './rooms';
@@ -69,7 +70,8 @@ export function App() {
           ai={ai}
           focus={focus?.key === room.key ? focus.panel : undefined}
         />
-        {room.instances && <LifeConnect />}
+        {(room.instances || room.sourced) && <LifeConnect />}
+        <ConfirmCard />
       </>
     );
   // A room from a source opens once the source has loaded (a reload lands here first).

@@ -61,7 +61,12 @@ export function validateWorld(
   const actions = check
     .list(input.actions, `${path}.actions`, 0, WORLD_LIMITS.actions)
     .map((v, i) =>
-      action(check, check.object(v, `${path}.actions[${i}]`), `${path}.actions[${i}]`, people),
+      validateAction(
+        check,
+        check.object(v, `${path}.actions[${i}]`),
+        `${path}.actions[${i}]`,
+        people,
+      ),
     );
   const seen = new Set<string>();
   for (const a of actions) {
@@ -94,7 +99,13 @@ export function validateWorld(
   return world;
 }
 
-function action(check: Checker, a: Input, at: string, people: Character[]): WorldAction {
+/** One declared action (a world action, or a service action's shared part). */
+export function validateAction(
+  check: Checker,
+  a: Input,
+  at: string,
+  people: Character[],
+): WorldAction {
   const name = typeof a.name === 'string' ? a.name : '';
   if (!NAME.test(name) || RESERVED.test(name))
     check.at(`${at}.name`, 'must be a snake_case name that is not a data tool');
@@ -163,8 +174,9 @@ function actionsFor(spec: RoomSpec, character: Character): WorldAction[] {
   ];
 }
 
-export function worldTools(spec: RoomSpec, character: Character) {
-  return actionsFor(spec, character).map((a) => ({
+/** A declared action as a tool the model can call, with typed parameters. */
+export function actionTool(a: WorldAction) {
+  return {
     name: a.name,
     description: a.description,
     parameters: {
@@ -181,7 +193,11 @@ export function worldTools(spec: RoomSpec, character: Character) {
       ),
       required: a.required,
     },
-  }));
+  };
+}
+
+export function worldTools(spec: RoomSpec, character: Character) {
+  return actionsFor(spec, character).map(actionTool);
 }
 
 /** Whether a tool name belongs to the world (a declared action, or a scene to play). */
@@ -198,6 +214,19 @@ export function parseWorldCall(
 ): { act: WorldAct; silent: boolean } | { error: string } {
   const declared = actionsFor(spec, character).find((a) => a.name === name);
   if (!declared) return { error: `You cannot ${name} here` };
+  const checked = actionArgs(declared, input);
+  if ('error' in checked) return checked;
+  return {
+    act: { character: character.id, action: name, args: checked.args },
+    silent: declared.silent,
+  };
+}
+
+/** The call's arguments checked against the declared params: only these ever reach a host. */
+export function actionArgs(
+  declared: WorldAction,
+  input: Record<string, unknown>,
+): { args: Record<string, unknown> } | { error: string } {
   const args: Record<string, unknown> = {};
   for (const [key, p] of Object.entries(declared.params)) {
     const v = input[key];
@@ -218,7 +247,7 @@ export function parseWorldCall(
       return { error: `${key} must be short text` };
     args[key] = v;
   }
-  return { act: { character: character.id, action: name, args }, silent: declared.silent };
+  return { args };
 }
 
 /** The world as a character reads it: the room's description, the surface's "now", the rules. */

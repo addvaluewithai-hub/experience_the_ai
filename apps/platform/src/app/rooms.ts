@@ -33,6 +33,8 @@ export type OpenRoom = {
   instances?: string;
   /** A room opened from a source record: which source, and the record's id there. */
   source?: { id: string; record: string };
+  /** A compiled room whose data comes from this source. */
+  sourced?: string;
 };
 
 /** Records each source has loaded, by source name. */
@@ -71,10 +73,13 @@ export function loadRooms(
     const key = parent ? `${parent.key}/${spec.id}` : spec.id;
     const before = previous?.get(key);
     const from = parent && !parent.parent ? sourced?.get(spec.id) : undefined;
+    const path = key.split('/').slice(1).join('/');
+    const fill = entry.sourced?.find((f) => f.path === path);
     let initial: RoomData | undefined;
-    if (from) {
+    if (from || fill) {
       try {
-        initial = parseData(spec, from.data ?? {});
+        const raw = fill ? fill.data(records[fill.source] ?? []) : from!.data;
+        initial = parseData(spec, raw ?? {});
       } catch (error) {
         console.error('Room data left out:', key, error);
       }
@@ -84,6 +89,7 @@ export function loadRooms(
     const room: OpenRoom = { key, spec, store, panels: entry.panels ?? {}, parent, example };
     if (from && entry.instances) room.source = { id: entry.instances.source, record: from.record };
     if (!parent && entry.instances) room.instances = entry.instances.source;
+    if (fill) room.sourced = fill.source;
     if (spec.world) room.surface = before?.surface ?? entry.surface?.(spec, store, key);
     all.set(key, room);
     for (const inner of spec.rooms ?? [])
