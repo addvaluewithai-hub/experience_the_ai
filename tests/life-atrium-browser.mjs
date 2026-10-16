@@ -4,6 +4,20 @@ import assert from 'node:assert/strict';
 export async function checkLifeAtrium(page, url) {
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.stack || error.message));
+  page.on('console', (message) => {
+    if (message.text().includes('BAD_EFFECT_CLEANUP')) console.error(message.text());
+  });
+  await page.route('**/assets/index-*.js', async (route) => {
+    const response = await route.fetch();
+    const source = await response.text();
+    const needle = 'var c=n,l=s;try{l()}catch(e){Z(i,c,e)}';
+    const patched = source.replace(
+      needle,
+      'var c=n,l=s;try{typeof l!=="function"&&console.error("BAD_EFFECT_CLEANUP",String(t.type&&t.type.name),String(t.elementType&&t.elementType.name),typeof l,String(l).slice(0,150));l()}catch(e){Z(i,c,e)}',
+    );
+    if (patched === source) console.error('DEBUG PATCH NOT APPLIED');
+    await route.fulfill({ response, body: patched });
+  });
   await page.goto(url + '/#/room/life-hub');
   try {
     await page.locator('.life-atrium-header h2').waitFor({ timeout: 5000 });
