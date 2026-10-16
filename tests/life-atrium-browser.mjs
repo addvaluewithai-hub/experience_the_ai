@@ -18,7 +18,7 @@ export async function checkLifeAtrium(page, url) {
     if (patched === source) console.error('DEBUG PATCH NOT APPLIED');
     await route.fulfill({ response, body: patched });
   });
-  await page.goto(url + '/#/room/life-hub');
+  await page.goto(url + '/?debug=atrium#/room/life-hub');
   try {
     await page.locator('.life-atrium-header h2').waitFor({ timeout: 5000 });
   } catch (error) {
