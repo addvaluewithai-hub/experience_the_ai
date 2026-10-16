@@ -30,10 +30,14 @@ function addDoors(THREE: any, scene: any) {
   const hits: any[] = [];
   const doors: { id: DoorId; core: any; light: any; planned: boolean }[] = [];
   const masonry = new THREE.MeshStandardMaterial({
-    color: '#52616a', roughness: 0.7, metalness: 0.25,
+    color: '#52616a',
+    roughness: 0.7,
+    metalness: 0.25,
   });
   const bronze = new THREE.MeshStandardMaterial({
-    color: '#b99b68', metalness: 0.72, roughness: 0.3,
+    color: '#b99b68',
+    metalness: 0.72,
+    roughness: 0.3,
   });
   for (const door of DOORS) {
     const group = new THREE.Group();
@@ -86,7 +90,9 @@ function addDoors(THREE: any, scene: any) {
     group.add(step);
     const light = new THREE.PointLight(
       door.planned ? '#5195aa' : '#f8c77d',
-      door.planned ? 4 : 8, 8, 1.6,
+      door.planned ? 4 : 8,
+      8,
+      1.6,
     );
     light.position.set(0, 2.1, 1.35);
     group.add(light);
@@ -106,7 +112,9 @@ function addArchitecture(THREE: any, scene: any) {
     const ring = new THREE.Mesh(
       new THREE.RingGeometry(radius - 0.038, radius + 0.038, 128),
       new THREE.MeshBasicMaterial({
-        color: '#bd9b66', transparent: true, opacity: radius > 10 ? 0.22 : 0.5,
+        color: '#bd9b66',
+        transparent: true,
+        opacity: radius > 10 ? 0.22 : 0.5,
         side: THREE.DoubleSide,
       }),
     );
@@ -132,9 +140,16 @@ function addArchitecture(THREE: any, scene: any) {
   }
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute('position', new THREE.BufferAttribute(stars, 3));
-  const sky = new THREE.Points(geometry, new THREE.PointsMaterial({
-    color: '#c4c7cc', size: 0.075, sizeAttenuation: true, transparent: true, opacity: 0.75,
-  }));
+  const sky = new THREE.Points(
+    geometry,
+    new THREE.PointsMaterial({
+      color: '#c4c7cc',
+      size: 0.075,
+      sizeAttenuation: true,
+      transparent: true,
+      opacity: 0.75,
+    }),
+  );
   scene.add(sky);
 }
 
@@ -143,8 +158,11 @@ function addGuide(THREE: any, scene: any) {
   pivot.position.set(0, 2.15, 3.5);
   scene.add(pivot);
   const material = new THREE.MeshStandardMaterial({
-    color: '#ffd69a', emissive: '#e4a75d', emissiveIntensity: 1.4,
-    metalness: 0.38, roughness: 0.18,
+    color: '#ffd69a',
+    emissive: '#e4a75d',
+    emissiveIntensity: 1.4,
+    metalness: 0.38,
+    roughness: 0.18,
   });
   const orb = new THREE.Mesh(new THREE.IcosahedronGeometry(0.36, 2), material);
   pivot.add(orb);
@@ -167,7 +185,11 @@ export async function mountAtrium(
 ): Promise<() => void> {
   const THREE = await import('three');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
+  const renderer = new THREE.WebGLRenderer({
+    antialias: true,
+    alpha: false,
+    powerPreference: 'high-performance',
+  });
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.8));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -250,7 +272,9 @@ export async function mountAtrium(
     for (const door of doors.doors) {
       const chosen = model.selected === door.id;
       const baseline = door.planned ? 0.17 : 0.65;
-      door.core.material.emissiveIntensity = chosen ? 1.7 : baseline + (reduced ? 0 : 0.07 * Math.sin(time * 1.4));
+      door.core.material.emissiveIntensity = chosen
+        ? 1.7
+        : baseline + (reduced ? 0 : 0.07 * Math.sin(time * 1.4));
       door.light.intensity = chosen ? 11 : door.planned ? 3 : 7;
     }
     const pulse = reduced ? 0 : Math.sin(time * 2.8) * 0.045;

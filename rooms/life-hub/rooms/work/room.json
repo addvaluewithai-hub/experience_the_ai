@@ -20,7 +20,12 @@
       "label": "Projects",
       "fields": [
         { "id": "project", "label": "Project", "type": "text", "required": true },
-        { "id": "phase", "label": "Phase", "type": "choice", "options": ["Idea", "Active", "Waiting", "Done"] }
+        {
+          "id": "phase",
+          "label": "Phase",
+          "type": "choice",
+          "options": ["Idea", "Active", "Waiting", "Done"]
+        }
       ]
     },
     {
@@ -29,7 +34,12 @@
       "fields": [
         { "id": "task", "label": "Task", "type": "text", "required": true },
         { "id": "due", "label": "Due", "type": "date" },
-        { "id": "priority", "label": "Priority", "type": "choice", "options": ["Now", "Soon", "Later"] },
+        {
+          "id": "priority",
+          "label": "Priority",
+          "type": "choice",
+          "options": ["Now", "Soon", "Later"]
+        },
         { "id": "done", "label": "Complete", "type": "boolean" }
       ]
     }
@@ -37,7 +47,20 @@
   "pulse": { "collection": "tasks", "field": "done" },
   "panels": [
     { "id": "projects", "kind": "list", "title": "Projects", "collection": "projects" },
-    { "id": "momentum", "kind": "progress", "title": "Progress", "collection": "tasks", "field": "done" },
-    { "id": "tasks", "kind": "list", "title": "Next actions", "collection": "tasks", "field": "done", "wide": true }
+    {
+      "id": "momentum",
+      "kind": "progress",
+      "title": "Progress",
+      "collection": "tasks",
+      "field": "done"
+    },
+    {
+      "id": "tasks",
+      "kind": "list",
+      "title": "Next actions",
+      "collection": "tasks",
+      "field": "done",
+      "wide": true
+    }
   ]
 }

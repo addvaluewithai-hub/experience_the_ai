@@ -18,7 +18,9 @@ export class AtriumModel {
 
   subscribe = (listener: () => void) => {
     this.listeners.add(listener);
-    return () => { this.listeners.delete(listener); };
+    return () => {
+      this.listeners.delete(listener);
+    };
   };
   snapshot = () => String(this.revision);
   private changed() {
@@ -55,9 +57,13 @@ export class AtriumModel {
     this.energy = frame?.energy ?? 0;
   }
   state() {
-    return 'Life Atrium. Work HQ is open; Learning Library and Wellbeing Garden are planned. ' +
-      (this.selected ? 'The ' + this.selected + ' door is highlighted. ' : 'All doors are visible. ') +
-      (this.speaking ? 'Astra is speaking.' : 'Astra is present.');
+    return (
+      'Life Atrium. Work HQ is open; Learning Library and Wellbeing Garden are planned. ' +
+      (this.selected
+        ? 'The ' + this.selected + ' door is highlighted. '
+        : 'All doors are visible. ') +
+      (this.speaking ? 'Astra is speaking.' : 'Astra is present.')
+    );
   }
 }
 
@@ -94,13 +100,19 @@ export class AtriumSurface implements RoomSurface {
             if (live) props.world?.open(id);
           });
         };
-        void import('./scene').then(({ mountAtrium }) =>
-          mountAtrium(element, model, choose)
-        ).then((cleanup) => {
-          if (live) stop = cleanup;
-          else cleanup();
-        }).catch(() => { if (live) setFailed(true); });
-        return () => { live = false; stop(); };
+        void import('./scene')
+          .then(({ mountAtrium }) => mountAtrium(element, model, choose))
+          .then((cleanup) => {
+            if (live) stop = cleanup;
+            else cleanup();
+          })
+          .catch(() => {
+            if (live) setFailed(true);
+          });
+        return () => {
+          live = false;
+          stop();
+        };
         // The parent route owns a stable scene for the lifetime of this room.
         // eslint-disable-next-line react-hooks/exhaustive-deps
       }, []);
@@ -118,11 +130,15 @@ export class AtriumSurface implements RoomSurface {
           <div className="life-atrium-guide" aria-live="polite">
             <span className="life-atrium-guide-icon">✦</span>
             <span>
-              {failed ? '3D is unavailable here; use the doors below.' :
-                selected === 'work' ? 'Work HQ is ready when you are.' :
-                selected === 'learning' ? 'Learning Library is planned, not open yet.' :
-                selected === 'wellbeing' ? 'Wellbeing Garden is planned, not open yet.' :
-                'Choose a door, or ask Astra to guide you.'}
+              {failed
+                ? '3D is unavailable here; use the doors below.'
+                : selected === 'work'
+                  ? 'Work HQ is ready when you are.'
+                  : selected === 'learning'
+                    ? 'Learning Library is planned, not open yet.'
+                    : selected === 'wellbeing'
+                      ? 'Wellbeing Garden is planned, not open yet.'
+                      : 'Choose a door, or ask Astra to guide you.'}
             </span>
           </div>
           <nav className="life-atrium-doors" aria-label="Life rooms">
@@ -141,7 +157,9 @@ export class AtriumSurface implements RoomSurface {
                   {id === 'work' ? '◈' : id === 'learning' ? '◇' : '✳'}
                 </span>
                 <span className="life-atrium-door-name">{title}</span>
-                <span className="life-atrium-door-state">{planned ? 'COMING LATER' : 'ENTER ↗'}</span>
+                <span className="life-atrium-door-state">
+                  {planned ? 'COMING LATER' : 'ENTER ↗'}
+                </span>
               </button>
             ))}
           </nav>
@@ -153,14 +171,24 @@ export class AtriumSurface implements RoomSurface {
     };
   }
 
-  get speaking() { return this.model.speaking; }
-  speak(character: string | null) { this.model.speak(character); }
-  setMode(character: string, mode: PresenceMode) { this.model.setMode(character, mode); }
-  mouth(character: string, frame: MouthFrame | null) { this.model.mouth(character, frame); }
+  get speaking() {
+    return this.model.speaking;
+  }
+  speak(character: string | null) {
+    this.model.speak(character);
+  }
+  setMode(character: string, mode: PresenceMode) {
+    this.model.setMode(character, mode);
+  }
+  mouth(character: string, frame: MouthFrame | null) {
+    this.model.mouth(character, frame);
+  }
   act(character: string, action: string, args: Record<string, unknown>) {
     this.model.act(character, action, args);
   }
-  state() { return this.model.state(); }
+  state() {
+    return this.model.state();
+  }
   play(scene: string) {
     if (!this.spec.world?.scenes?.some((item) => item.id === scene)) return Promise.resolve();
     return this.model.animate(scene);

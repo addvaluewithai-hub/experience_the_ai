@@ -18,9 +18,7 @@
     }
   ],
   "collections": [],
-  "panels": [
-    { "id": "world", "kind": "world", "title": "Life Atrium", "wide": true }
-  ],
+  "panels": [{ "id": "world", "kind": "world", "title": "Life Atrium", "wide": true }],
   "world": {
     "surface": "life-atrium-three",
     "describe": "A circular midnight-blue and brass atrium with three illuminated doors. Work HQ is a built, enterable room. Learning Library and Wellbeing Garden are planned and closed. Astra appears as a gentle light in the centre. The person can select doors with a pointer or buttons, while Astra can highlight them and escort the person to Work HQ.",
