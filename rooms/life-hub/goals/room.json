@@ -1,0 +1,78 @@
+{
+  "id": "goal",
+  "title": "Goal",
+  "purpose": "One of the person's active goals from LifeOS, with its companion: why it matters, its chapters and the next actions. Read-only for now.",
+  "icon": "◆",
+  "layout": "immersive",
+  "presence": "dock",
+  "characters": [],
+  "collections": [
+    {
+      "id": "goal",
+      "label": "Goal",
+      "fields": [
+        { "id": "why", "label": "Why it matters", "type": "text" },
+        { "id": "success", "label": "Done means", "type": "text" },
+        { "id": "lived", "label": "How it will feel", "type": "text" },
+        { "id": "identity", "label": "Who it makes me", "type": "text" },
+        { "id": "target", "label": "Target date", "type": "date" },
+        { "id": "progress", "label": "Progress %", "type": "number" },
+        { "id": "notes", "label": "How I want to be accompanied", "type": "text" }
+      ]
+    },
+    {
+      "id": "milestones",
+      "label": "Chapters",
+      "fields": [
+        { "id": "milestone", "label": "Chapter", "type": "text", "required": true },
+        {
+          "id": "status",
+          "label": "Status",
+          "type": "choice",
+          "options": ["not_started", "active", "completed", "cancelled"]
+        },
+        { "id": "target", "label": "Target date", "type": "date" },
+        { "id": "done", "label": "Done", "type": "boolean" }
+      ]
+    },
+    {
+      "id": "tasks",
+      "label": "Next actions",
+      "fields": [
+        { "id": "task", "label": "Action", "type": "text", "required": true },
+        {
+          "id": "status",
+          "label": "Status",
+          "type": "choice",
+          "options": ["not_started", "ready", "in_progress", "blocked", "completed", "cancelled"]
+        },
+        {
+          "id": "priority",
+          "label": "Priority",
+          "type": "choice",
+          "options": ["low", "medium", "high", "critical"]
+        },
+        { "id": "due", "label": "Due", "type": "date" },
+        { "id": "chapter", "label": "Chapter", "type": "text" },
+        { "id": "done", "label": "Done", "type": "boolean" }
+      ]
+    }
+  ],
+  "pulse": { "collection": "tasks", "field": "done" },
+  "panels": [{ "id": "world", "kind": "world", "title": "Goal", "wide": true }],
+  "world": {
+    "surface": "goal-room",
+    "describe": "A quiet, almost empty room around one goal. The title is set large; under it the reason it matters, a single hairline of progress, the chapters (milestones) in order, and the next few actions. The person reads it; nothing here can be edited yet.",
+    "actions": [
+      {
+        "name": "spotlight",
+        "description": "Softly light one part of the goal while you talk about it.",
+        "params": {
+          "part": { "type": "choice", "options": ["why", "progress", "chapters", "next"] }
+        },
+        "required": ["part"],
+        "silent": true
+      }
+    ]
+  }
+}

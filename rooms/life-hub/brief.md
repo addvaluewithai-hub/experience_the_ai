@@ -9,7 +9,7 @@ A first-person-feeling entrance to life management, rendered in Three.js. This i
 - Language: English; midnight-blue stone and brass; accessible camera movement with reduced-motion support.
 - Character: Astra, a concise chief of staff and visual beacon. The engine supplies real agent conversation and voice when configured.
 - Data: no duplicate global tasks. Each inner room owns its collections and updates.
-- Three doors: Work HQ is built with Atlas, projects and tasks; Learning Library and Wellbeing Garden are intentionally planned stubs.
+- Three doors: Work HQ is built with Atlas, projects and tasks; Learning Library and Wellbeing Garden are intentionally planned stubs. Beside them, the person's active LifeOS goals.
 - Navigation: raycast selection in the 3D scene plus keyboard-friendly HTML door buttons.
 - Three.js is lazy-loaded only when the atrium is opened.
 - The scene draws procedural geometry without needing external model files.
@@ -17,15 +17,22 @@ A first-person-feeling entrance to life management, rendered in Three.js. This i
 ## Boundaries
 
 - The Life Atrium follows the existing RoomSurface / Presence contract and uses open_room for AI handoffs.
-- No accounts, cross-visit persistence, role-based authorization, calendar or email integrations exist yet. Never pretend they do.
+- The person signs in to their own LifeOS (Supabase) to see their goals; Work HQ still keeps its records in the tab only. No calendar or email integrations exist yet. Never pretend they do.
 - A WebGL failure must still leave room navigation usable.
 
 ## Engine request
 
-- Secure persisted room instances and user roles before using this for real life records.
+- ~~Persisted room instances for real life records.~~ Done: `RoomEntry.instances` with the platform's `lifeos.goals` source, read with the person's own token under RLS.
+- The server builds a goal room's context from LifeOS instead of trusting the browser (docs/lifeos-goal-rooms.md, engine 4).
+- Sessions and room memories for goal companions (engine 5).
 - Optional shared navigation transitions and a reusable Three.js kit after a second 3D room needs them.
 - Accessible voice-to-room handoff should eventually retain a continuous live session.
 
 ## Sessions
 
 - 2026-10-16: Built the Three.js parent atrium and the first real Work HQ using existing room contracts.
+- 2026-10-17: Goal rooms. For the one existing profile, during testing: minimal, premium, elegant.
+  - "Connect your life" (top corner) signs in with the LifeOS account; up to five active goals appear as "Your goals", each a door.
+  - A goal room is a lit study after the dark atrium: paper, ink, one brass line. Title, why, progress, chapters, next actions; read-only, with "changes are made in LifeOS for now".
+  - Its companion is docked beside it. LifeOS picks one compiled persona (guide, coach, strategist, tutor, builder) by key and may rename it; without a choice Astra keeps the goal company. The person's notes on how to be accompanied stay data.
+  - No onboarding and no new profiles yet: the person chose to build the world for the current profile first.

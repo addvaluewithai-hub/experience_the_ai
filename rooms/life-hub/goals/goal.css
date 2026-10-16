@@ -1,0 +1,158 @@
+/* A goal room: a lit study after the dark atrium. Paper, ink, one brass line. */
+.goal-room {
+  --goal-paper: #f7f3ec;
+  --goal-ink: #1c1d21;
+  --goal-muted: #6f6a62;
+  --goal-line: #e2dacd;
+  --goal-brass: #a8844c;
+  min-height: 100%;
+  box-sizing: border-box;
+  display: grid;
+  align-content: start;
+  gap: 40px;
+  padding: clamp(28px, 7vw, 88px) clamp(20px, 7vw, 96px) 48px;
+  background: radial-gradient(120% 60% at 20% 0%, #fffdf8 0%, transparent 60%), var(--goal-paper);
+  color: var(--goal-ink);
+  font:
+    400 15px/1.55 system-ui,
+    sans-serif;
+}
+.goal-room > * {
+  max-width: 640px;
+}
+.goal-kicker {
+  color: var(--goal-brass);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+.goal-head h2 {
+  margin: 14px 0 0;
+  font:
+    400 clamp(32px, 5vw, 48px) / 1.08 Georgia,
+    'Times New Roman',
+    serif;
+  letter-spacing: -0.015em;
+}
+.goal-why {
+  margin: 18px 0 0;
+  color: var(--goal-muted);
+  font:
+    italic 400 18px/1.5 Georgia,
+    serif;
+}
+.goal-part {
+  border-radius: 14px;
+  transition:
+    background-color 0.5s,
+    box-shadow 0.5s;
+}
+.goal-part.is-lit {
+  background: #fffaf0;
+  box-shadow:
+    0 0 0 12px #fffaf0,
+    0 0 0 13px color-mix(in srgb, var(--goal-brass) 35%, transparent);
+}
+.goal-line {
+  height: 2px;
+  background: var(--goal-line);
+}
+.goal-line span {
+  display: block;
+  height: 100%;
+  background: var(--goal-brass);
+  transition: width 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.goal-meta {
+  margin: 10px 0 0;
+  color: var(--goal-muted);
+  font-size: 13px;
+}
+.goal-meta strong {
+  color: var(--goal-ink);
+  font-weight: 600;
+}
+.goal-room h3 {
+  margin: 0 0 14px;
+  color: var(--goal-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+.goal-chapters,
+.goal-next {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.goal-chapters li,
+.goal-next li {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  padding: 13px 0;
+  border-top: 1px solid var(--goal-line);
+}
+.goal-chapters li:last-child,
+.goal-next li:last-child {
+  border-bottom: 1px solid var(--goal-line);
+}
+.goal-index {
+  color: var(--goal-brass);
+  font:
+    400 13px/1 Georgia,
+    serif;
+  font-variant-numeric: tabular-nums;
+}
+.goal-text {
+  flex: 1;
+  min-width: 0;
+}
+.goal-chapters time,
+.goal-note {
+  color: var(--goal-muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.goal-chapters .is-completed .goal-text {
+  color: var(--goal-muted);
+  text-decoration: line-through;
+  text-decoration-color: var(--goal-line);
+}
+.goal-chapters .is-active .goal-text {
+  font-weight: 600;
+}
+.goal-next li::before {
+  content: '';
+  flex: none;
+  align-self: center;
+  width: 6px;
+  height: 6px;
+  border: 1px solid var(--goal-brass);
+  border-radius: 50%;
+}
+.goal-next .is-high::before,
+.goal-next .is-critical::before {
+  background: var(--goal-brass);
+}
+.goal-empty {
+  margin: 0;
+  color: var(--goal-muted);
+  font:
+    italic 400 16px/1.5 Georgia,
+    serif;
+}
+.goal-foot {
+  margin: 0;
+  color: var(--goal-muted);
+  font-size: 12px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .goal-part,
+  .goal-line span {
+    transition: none;
+  }
+}

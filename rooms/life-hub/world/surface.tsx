@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ComponentType } from 'react';
 import type { MouthFrame, PresenceMode, RoomSpec } from '@experience/room-spec';
 import type { RoomSurface, SurfaceViewProps } from '@experience/room-runtime';
+import { GoalDoors, isGoalRoom } from './goal-doors';
 
 export type DoorId = 'work' | 'learning' | 'wellbeing';
 const DOORS: DoorId[] = ['work', 'learning', 'wellbeing'];
@@ -164,8 +165,10 @@ export class AtriumSurface implements RoomSurface {
               </button>
             ))}
           </nav>
+          <GoalDoors rooms={children.filter(isGoalRoom)} world={props.world} />
           <p className="life-atrium-help">
-            Select a door in the world or use the buttons. Your work stays in this tab for now.
+            Select a door in the world or use the buttons. Work HQ keeps its notes in this tab for
+            now.
           </p>
         </div>
       );

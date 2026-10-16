@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { mkdir } from 'node:fs/promises';
 import { chromium } from 'playwright';
+import { checkGoalRooms } from './goal-rooms-browser.mjs';
 import { checkLifeAtrium } from './life-atrium-browser.mjs';
 
 // Built app + mocked API: this checks rooms, panels and the agent tool loop in a real browser.
@@ -92,6 +93,7 @@ try {
   await page.getByRole('link', { name: /وادي قوس قزح/ }).waitFor();
   await page.screenshot({ path: 'test-results/home.png', fullPage: true });
   await checkLifeAtrium(page, url);
+  await checkGoalRooms(page, url);
 
   // A person's own edits go through the room rules and every panel agrees.
   await page.getByRole('link', { name: /كوكب العادات/ }).click();
