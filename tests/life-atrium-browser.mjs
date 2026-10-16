@@ -13,8 +13,14 @@ export async function checkLifeAtrium(page, url) {
       const script = document.querySelector('script[src*="/assets/index-"]');
       if (!script) return 'script element absent';
       const source = await (await fetch(script.src)).text();
-      const line = source.split('\\n')[8];
-      return line?.slice(91300, 92500) ?? source.slice(0, 300);
+      const line = source.split('\n')[8];
+      const start = source.indexOf('function Uc(');
+      return JSON.stringify({
+        sourceLength: source.length,
+        lineLength: line?.length,
+        location: line?.slice(91300, 92400) ?? 'line missing',
+        functionSnippet: source.slice(start, start + 1200),
+      });
     });
     console.error('React expression around 9:91883:', built);
     console.error('Life Atrium URL:', page.url());
