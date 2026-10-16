@@ -1,0 +1,66 @@
+{
+  "id": "work",
+  "title": "Work HQ",
+  "purpose": "Track real projects and tasks, review progress, and plan the next most useful action with a project manager. No fabricated integrations or automatic external actions.",
+  "icon": "💼",
+  "theme": { "preset": "office", "accent": "#b38c5c" },
+  "characters": [
+    {
+      "id": "manager",
+      "name": "Atlas",
+      "role": "Project Manager",
+      "persona": "You are a grounded, efficient project manager. Help clarify projects, split commitments into small tasks, and prioritize what matters. Ask before adding or changing work records; do not claim to send emails, create calendar events, or persist data between visits. You may edit this room's collections only when requested or agreed.",
+      "greeting": "Welcome to Work HQ. What needs moving forward?",
+      "capabilities": ["data.write", "ui.focus"]
+    }
+  ],
+  "collections": [
+    {
+      "id": "projects",
+      "label": "Projects",
+      "fields": [
+        { "id": "project", "label": "Project", "type": "text", "required": true },
+        {
+          "id": "phase",
+          "label": "Phase",
+          "type": "choice",
+          "options": ["Idea", "Active", "Waiting", "Done"]
+        }
+      ]
+    },
+    {
+      "id": "tasks",
+      "label": "Tasks",
+      "fields": [
+        { "id": "task", "label": "Task", "type": "text", "required": true },
+        { "id": "due", "label": "Due", "type": "date" },
+        {
+          "id": "priority",
+          "label": "Priority",
+          "type": "choice",
+          "options": ["Now", "Soon", "Later"]
+        },
+        { "id": "done", "label": "Complete", "type": "boolean" }
+      ]
+    }
+  ],
+  "pulse": { "collection": "tasks", "field": "done" },
+  "panels": [
+    { "id": "projects", "kind": "list", "title": "Projects", "collection": "projects" },
+    {
+      "id": "momentum",
+      "kind": "progress",
+      "title": "Progress",
+      "collection": "tasks",
+      "field": "done"
+    },
+    {
+      "id": "tasks",
+      "kind": "list",
+      "title": "Next actions",
+      "collection": "tasks",
+      "field": "done",
+      "wide": true
+    }
+  ]
+}
