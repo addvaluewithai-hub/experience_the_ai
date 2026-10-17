@@ -156,10 +156,12 @@ Engine requests, each with its tests and kept in separate commits from room work
    for every preview room; engine 4 ends that for goal rooms.
 4. Engine 4–5: the server builds the context; the character keeps memories and sessions.
 5. ~~The Chairman.~~ Done: the Observatory (`rooms/life-hub/rooms/observatory`) shows every
-   goal as a star by state, with Orion. The person or Orion adds a goal
-   (`lifeos_create_goal`), changes its state (`lifeos_set_goal_status`: active, paused,
-   backlog, completed, archived) or deletes an empty one (`lifeos_delete_empty_goal`); Orion's
-   state changes and deletes wait for the person's tap on a confirm card.
+   goal by state (the sky) or in time (the timeline, start to target, today in gold), with
+   Orion. The person or Orion adds a goal (`lifeos_create_goal`) or changes its state
+   (`lifeos_set_goal_status`: active, paused, backlog, completed, archived). Orion is a leader,
+   not an assistant: he weighs a change with the person first, and every change he makes
+   waits for their tap on a confirm card. Deleting stays the person's own, in LifeOS; the
+   delete function was never applied.
 6. Astra's Today / Focus / Goals in the atrium. Goal doors are there already.
 7. Reviewed write functions for tasks, one at a time.
 

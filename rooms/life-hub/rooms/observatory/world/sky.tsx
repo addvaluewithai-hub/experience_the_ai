@@ -1,62 +1,72 @@
 import type { CSSProperties } from 'react';
-import type { RoomRecord } from '@experience/room-spec';
+import {
+  LABEL,
+  LIVE,
+  RESTING,
+  overdue,
+  progressOf,
+  stateOf,
+  titleOf,
+  when,
+  type Goal,
+} from './goal';
 
-export type Goal = RoomRecord;
-const BANDS = [
-  { id: 'active', label: 'Active', empty: 'Nothing is moving yet.' },
-  { id: 'paused', label: 'Paused', empty: 'Nothing on hold.' },
-  { id: 'backlog', label: 'Waiting', empty: 'Nothing waiting.' },
-] as const;
-export const RESTING = ['completed', 'cancelled', 'archived'];
+const EMPTY: Record<string, string> = {
+  active: 'Nothing is moving yet.',
+  paused: 'Nothing on hold.',
+  backlog: 'Nothing waiting.',
+};
 
-/** A stable 0–1 from the goal's id, so each star keeps its place in the sky between visits. */
-function drift(id: string) {
-  let h = 2166136261;
-  for (const c of id) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
-  return ((h >>> 0) % 1000) / 1000;
-}
+type Choose = (id: string) => void;
 
-export const stateOf = (goal: Goal) => String(goal.values.state ?? 'backlog');
-const progressOf = (goal: Goal) =>
-  typeof goal.values.progress === 'number' ? Math.max(0, Math.min(100, goal.values.progress)) : 0;
-
-function Star(props: { goal: Goal; selected: boolean; choose: (id: string) => void }) {
+function Star(props: { goal: Goal; selected: boolean; choose: Choose }) {
   const { goal } = props;
   const progress = progressOf(goal);
-  const style = {
-    '--drift': `${Math.round(drift(goal.id) * 46)}%`,
-    '--size': `${7 + progress * 0.13}px`,
-  } as CSSProperties;
+  const state = stateOf(goal);
+  const meta =
+    state === 'backlog'
+      ? ''
+      : [
+          `${progress}%`,
+          goal.values.target
+            ? `${overdue(goal) ? 'passed' : 'by'} ${when(goal.values.target, true)}`
+            : '',
+        ]
+          .filter(Boolean)
+          .join(' · ');
   return (
-    <li style={style}>
+    <li>
       <button
         type="button"
         className="obs-star"
         aria-pressed={props.selected}
-        aria-label={`${String(goal.values.goal)}, ${stateOf(goal)}, ${progress}%`}
+        aria-label={`${titleOf(goal)}, ${state}, ${progress}%`}
         onClick={() => props.choose(goal.id)}
       >
-        <span className="obs-light" aria-hidden="true" />
-        <span className="obs-name">{String(goal.values.goal)}</span>
+        <span
+          className="obs-light"
+          aria-hidden="true"
+          style={{ '--size': `${6 + progress * 0.1}px` } as CSSProperties}
+        />
+        <span className="obs-text">
+          <span className="obs-name">{titleOf(goal)}</span>
+          {meta && <span className={overdue(goal) ? 'obs-sub obs-late' : 'obs-sub'}>{meta}</span>}
+        </span>
       </button>
     </li>
   );
 }
 
-/** Three regions of the sky by state; each goal a star whose glow grows with its progress. */
-export function Sky(props: {
-  goals: Goal[];
-  selected: string | null;
-  choose: (id: string) => void;
-}) {
+/** Three columns of the sky by state; each goal a star whose glow grows with its progress. */
+export function Sky(props: { goals: Goal[]; selected: string | null; choose: Choose }) {
   return (
     <div className="obs-sky">
-      {BANDS.map((band) => {
-        const goals = props.goals.filter((g) => stateOf(g) === band.id);
+      {LIVE.map((state) => {
+        const goals = props.goals.filter((g) => stateOf(g) === state);
         return (
-          <section key={band.id} className={`obs-band obs-${band.id}`} aria-label={band.label}>
+          <section key={state} className={`obs-band obs-${state}`} aria-label={LABEL[state]}>
             <h3>
-              {band.label} <span>{goals.length}</span>
+              {LABEL[state]} <span>{goals.length}</span>
             </h3>
             {goals.length ? (
               <ol>
@@ -70,7 +80,7 @@ export function Sky(props: {
                 ))}
               </ol>
             ) : (
-              <p className="obs-none">{band.empty}</p>
+              <p className="obs-none">{EMPTY[state]}</p>
             )}
           </section>
         );
@@ -79,16 +89,13 @@ export function Sky(props: {
   );
 }
 
-/** Completed, cancelled and archived goals: a quiet line below the sky, still reachable. */
-export function Resting(props: {
-  goals: Goal[];
-  selected: string | null;
-  choose: (id: string) => void;
-}) {
+/** Completed, cancelled and archived goals: a quiet line below, still reachable. */
+export function Resting(props: { goals: Goal[]; selected: string | null; choose: Choose }) {
   const resting = props.goals.filter((g) => RESTING.includes(stateOf(g)));
   if (!resting.length) return null;
   return (
     <nav className="obs-resting" aria-label="Completed and archived">
+      <span>Resting</span>
       {resting.map((goal) => (
         <button
           type="button"
@@ -96,8 +103,8 @@ export function Resting(props: {
           aria-pressed={props.selected === goal.id}
           onClick={() => props.choose(goal.id)}
         >
-          <span aria-hidden="true">{stateOf(goal) === 'completed' ? '✓' : '·'}</span>
-          {String(goal.values.goal)}
+          {stateOf(goal) === 'completed' ? '✓ ' : ''}
+          {titleOf(goal)}
         </button>
       ))}
     </nav>

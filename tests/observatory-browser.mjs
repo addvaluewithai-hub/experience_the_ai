@@ -4,14 +4,54 @@ const LIFEOS = 'https://lifeos-test.supabase.co';
 const LAUNCH = '22222222-aaaa-4bbb-8ccc-000000000000';
 const COURSE = '33333333-aaaa-4bbb-8ccc-000000000000';
 
+/** Waits until entrance animations end, so a screenshot shows the room as a person sees it. */
+const settle = (page) =>
+  page.waitForFunction(() =>
+    document
+      .getAnimations()
+      .every((a) => a.playState !== 'running' || a.effect?.getTiming().iterations === Infinity),
+  );
+
 /**
  * The observatory against a LifeOS answered here, which really changes: the person pauses,
  * adds and deletes from the cards, and Orion archives a goal only after the person confirms.
  */
 export async function checkObservatory(page, url) {
   const goals = [
-    { id: LAUNCH, title: 'Launch agency outreach', status: 'active', why: 'Independence.' },
-    { id: COURSE, title: 'Arabic English course', status: 'backlog' },
+    {
+      id: LAUNCH,
+      title: 'Launch agency outreach',
+      status: 'active',
+      why: 'Independence.',
+      starts_on: '2026-07-20',
+      target_date: '2026-08-30',
+    },
+    {
+      id: COURSE,
+      title: 'Arabic English course',
+      status: 'backlog',
+      created_at: '2026-08-01T09:00:00Z',
+    },
+    {
+      id: '55555555-aaaa-4bbb-8ccc-000000000000',
+      title: 'Win the first $20,000 in signed contracts',
+      status: 'active',
+      starts_on: '2026-09-01',
+      target_date: '2027-01-31',
+    },
+    {
+      id: '66666666-aaaa-4bbb-8ccc-000000000000',
+      title: 'Build the first habit app for my daughter',
+      status: 'active',
+      created_at: '2026-09-15T09:00:00Z',
+    },
+    {
+      id: '77777777-aaaa-4bbb-8ccc-000000000000',
+      title: 'Relocate to Lisbon',
+      status: 'backlog',
+      target_date: '2027-06-01',
+      created_at: '2026-08-10T09:00:00Z',
+    },
   ];
   const calls = [];
   const agent = [];
@@ -92,33 +132,49 @@ export async function checkObservatory(page, url) {
   await page.getByRole('button', { name: /The Observatory/ }).click();
   await page.waitForURL(/#\/room\/life-hub\/observatory$/);
   const sky = page.locator('.observatory');
-  await sky.getByText('1 active · 0 paused · 1 waiting').waitFor();
+  const count = (state) => sky.locator(`.obs-count.obs-${state} dd`);
+  await sky.getByRole('button', { name: 'Launch agency outreach, active, 40%' }).waitFor();
+  assert.deepEqual(
+    [await count('active').textContent(), await count('backlog').textContent()],
+    ['3', '2'],
+  );
+  await settle(page);
   await page.screenshot({ path: 'test-results/observatory.png' });
 
-  // The person pauses a goal from its card; the sky follows LifeOS.
+  // The person pauses a goal from its drawer; the sky follows LifeOS.
   await sky.getByRole('button', { name: 'Launch agency outreach, active, 40%' }).click();
+  await sky.getByText('Target passed Aug 30, 2026').waitFor();
+  await settle(page);
+  await page.screenshot({ path: 'test-results/observatory-drawer.png' });
   await sky.getByRole('button', { name: 'Pause' }).click();
   await sky.getByRole('button', { name: 'Launch agency outreach, paused, 40%' }).waitFor();
   assert.deepEqual(calls.at(-1), {
     name: 'lifeos_set_goal_status',
     body: { p_goal_id: LAUNCH, p_status: 'paused' },
   });
+  assert.equal(await sky.getByRole('button', { name: /^Delete/ }).count(), 0, 'no delete here');
 
-  // A new goal, waiting; then an empty one deleted with a second tap.
+  // A new goal, waiting; then one archived with a second tap.
   await sky.getByRole('button', { name: '+ New goal' }).click();
   await sky.getByLabel('Title').fill('Speak Spanish');
   await sky.getByRole('button', { name: 'Add goal' }).click();
   await sky.getByRole('button', { name: 'Speak Spanish, backlog, 0%' }).waitFor();
   assert.equal(calls.at(-1).body.p_status, 'backlog');
   await sky.getByRole('button', { name: 'Arabic English course, backlog, 0%' }).click();
-  await sky.getByRole('button', { name: 'Delete' }).click();
+  await sky.getByRole('button', { name: 'Archive' }).click();
   assert.equal(calls.at(-1).name, 'lifeos_create_goal', 'one tap only arms it');
-  await sky.getByRole('button', { name: 'Tap again to delete' }).click();
-  await sky.getByText('0 active · 1 paused · 1 waiting').waitFor();
-  assert.deepEqual(calls.at(-1), {
-    name: 'lifeos_delete_empty_goal',
-    body: { p_goal_id: COURSE },
-  });
+  await sky.getByRole('button', { name: 'Tap again to archive' }).click();
+  await sky.getByRole('navigation', { name: 'Completed and archived' }).waitFor();
+  assert.deepEqual(calls.at(-1).body, { p_goal_id: COURSE, p_status: 'archived' });
+  await sky.getByRole('button', { name: 'Close' }).click();
+
+  // The timeline: each goal from its start to its target, today in gold.
+  await sky.getByRole('tab', { name: 'Timeline' }).click();
+  await sky.getByRole('button', { name: /^Win the first \$20,000.*target Jan 31, 2027/ }).waitFor();
+  await sky.getByText('Today').waitFor();
+  await settle(page);
+  await page.screenshot({ path: 'test-results/observatory-timeline.png' });
+  await sky.getByRole('tab', { name: 'Sky' }).click();
 
   // Orion asks; nothing happens until the person confirms on the card.
   await page.getByRole('button', { name: 'Type instead of talking' }).click();
@@ -126,13 +182,9 @@ export async function checkObservatory(page, url) {
   await page.keyboard.press('Enter');
   const card = page.getByRole('alertdialog', { name: "Change a goal's state" });
   await card.getByText('goal: Launch agency outreach').waitFor();
-  await page.waitForFunction(() =>
-    document
-      .getAnimations()
-      .every((a) => a.playState !== 'running' || a.effect?.getTiming().iterations === Infinity),
-  );
+  await settle(page);
   await page.screenshot({ path: 'test-results/observatory-confirm.png' });
-  assert.equal(calls.at(-1).name, 'lifeos_delete_empty_goal', 'not before the tap');
+  assert.deepEqual(calls.at(-1).body, { p_goal_id: COURSE, p_status: 'archived' }, 'not yet');
   await card.getByRole('button', { name: 'Confirm' }).click();
   await page.getByText('Done. It rests in the archive.').last().waitFor();
   assert.deepEqual(calls.at(-1).body, { p_goal_id: LAUNCH, p_status: 'archived' });
@@ -140,7 +192,10 @@ export async function checkObservatory(page, url) {
     ok: true,
     status: 'archived',
   });
-  await sky.getByRole('navigation', { name: 'Completed and archived' }).waitFor();
+  await sky
+    .getByRole('navigation', { name: 'Completed and archived' })
+    .getByRole('button', { name: 'Launch agency outreach' })
+    .waitFor();
   await page.setViewportSize({ width: 390, height: 844 });
   await page.screenshot({ path: 'test-results/observatory-390.png' });
   await page.setViewportSize({ width: 1280, height: 900 });

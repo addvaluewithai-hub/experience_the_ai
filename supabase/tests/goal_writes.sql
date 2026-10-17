@@ -1,4 +1,5 @@
--- The Chairman's goal writes, as the signed-in person and as someone else. Run after
+-- The Chairman's goal writes (adding a goal and changing its state; deleting stays the
+-- person's own, in LifeOS), as the signed-in person and as someone else. Run after
 -- lifeos_baseline.sql and every migration, with psql -v ON_ERROR_STOP=1. It prints
 -- "goal writes: all checks passed".
 
@@ -58,20 +59,11 @@ select pg_temp.fails($$select public.lifeos_set_goal_status((select id from g), 
 select pg_temp.fails($$select public.lifeos_set_goal_status(
   'b1000000-0000-0000-0000-000000000000', 'paused')$$, 'not owned');
 
--- Deleting: only an empty goal; one with a plan is archived instead.
-select pg_temp.fails($$select public.lifeos_delete_empty_goal(
-  'a1000000-0000-0000-0000-000000000000')$$, 'archive it instead');
-select public.lifeos_open_goal_room((select id from g));
-select public.lifeos_delete_empty_goal((select id from g));
-select pg_temp.equals($$select count(*)::text from public.lifeos_goals
-  where id = (select id from g)$$, '0');
-select pg_temp.fails($$select public.lifeos_delete_empty_goal(
-  'b1000000-0000-0000-0000-000000000000')$$, 'not owned');
 -- Still no direct writes.
 select pg_temp.fails($$update public.lifeos_goals set status = 'paused'$$, 'permission denied');
 reset role;
 select pg_temp.equals($$select string_agg(event_type, ',' order by id) from public.lifeos_events$$,
-  'goal.created,goal.created,goal.created,goal.status_changed,goal.status_changed,goal.status_changed,goal.status_changed,goal.deleted');
+  'goal.created,goal.created,goal.created,goal.status_changed,goal.status_changed,goal.status_changed,goal.status_changed');
 select pg_temp.equals($$select status from public.lifeos_goals
   where id = 'b1000000-0000-0000-0000-000000000000'$$, 'active');
 

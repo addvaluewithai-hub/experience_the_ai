@@ -35,9 +35,5 @@ export async function goalAction(
     await db.rpc('lifeos_set_goal_status', { p_goal_id: goal, p_status: args.status });
     return { ok: true, status: args.status };
   }
-  if (action === 'delete_empty_goal') {
-    await db.rpc('lifeos_delete_empty_goal', { p_goal_id: goal });
-    return { ok: true, deleted: goal };
-  }
   return { error: `LifeOS cannot ${action}.` };
 }

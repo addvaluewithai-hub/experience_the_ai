@@ -1,71 +1,121 @@
 /* The observatory: a night sky above the atrium. Gold for what moves, pale for what rests. */
 .observatory {
+  --obs-ink: #efe6d6;
+  --obs-muted: rgb(239 230 214 / 0.58);
+  --obs-faint: rgb(239 230 214 / 0.34);
+  --obs-line: rgb(232 216 186 / 0.12);
+  --obs-brass: #c9a96e;
   position: relative;
   isolation: isolate;
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  align-content: start;
   width: 100%;
   height: 100%;
   min-height: 100%;
   box-sizing: border-box;
   overflow: auto;
-  padding: clamp(24px, 5vh, 52px) max(28px, 5vw) 120px;
+  padding: clamp(28px, 6vh, 64px) max(28px, 6vw) 140px;
   background:
-    radial-gradient(1px 1px at 12% 22%, rgb(255 255 255 / 0.5), transparent 60%),
-    radial-gradient(1px 1px at 68% 14%, rgb(255 255 255 / 0.4), transparent 60%),
-    radial-gradient(1px 1px at 84% 63%, rgb(255 255 255 / 0.35), transparent 60%),
-    radial-gradient(1px 1px at 32% 78%, rgb(255 255 255 / 0.3), transparent 60%),
-    radial-gradient(1px 1px at 52% 44%, rgb(255 255 255 / 0.25), transparent 60%),
+    radial-gradient(1px 1px at 12% 22%, rgb(255 255 255 / 0.45), transparent 60%),
+    radial-gradient(1px 1px at 68% 14%, rgb(255 255 255 / 0.35), transparent 60%),
+    radial-gradient(1px 1px at 84% 63%, rgb(255 255 255 / 0.3), transparent 60%),
+    radial-gradient(1px 1px at 32% 78%, rgb(255 255 255 / 0.25), transparent 60%),
     radial-gradient(120% 80% at 50% -10%, #12233a 0%, #070d16 58%, #04070c 100%);
-  color: #efe6d6;
+  color: var(--obs-ink);
   font:
     400 14px/1.5 system-ui,
     sans-serif;
 }
 .obs-kicker {
-  color: #dfc79e;
+  color: var(--obs-brass);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.3em;
   text-transform: uppercase;
 }
-.obs-head {
-  padding-inline-start: 36px;
-}
 .obs-head h2 {
-  margin: 12px 0 4px;
+  margin: 10px 0 0;
   font:
-    400 clamp(30px, 4vw, 56px) / 1.05 Georgia,
+    400 clamp(28px, 3.4vw, 44px) / 1.1 Georgia,
     'Times New Roman',
     serif;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
 }
-.obs-head p {
+.obs-counts {
+  display: flex;
+  gap: clamp(24px, 4vw, 56px);
+  margin: 26px 0 0;
+}
+.obs-count {
+  display: grid;
+}
+.obs-count dd {
   margin: 0;
-  color: rgb(239 230 214 / 0.66);
+  font:
+    400 34px/1 Georgia,
+    serif;
+}
+.obs-count dt {
+  order: 2;
+  margin-top: 6px;
+  color: var(--obs-muted);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.obs-count.obs-active dd {
+  color: #f6dfac;
+}
+.obs-count.obs-backlog dd {
+  color: var(--obs-muted);
+}
+.obs-bar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 36px 0 28px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--obs-line);
+}
+.obs-views {
+  display: flex;
+  gap: 24px;
+}
+.obs-views button,
+.obs-add {
+  padding: 4px 0;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  background: none;
+  color: var(--obs-muted);
+  font:
+    500 13px/1.2 system-ui,
+    sans-serif;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+.obs-views button[aria-selected='true'] {
+  border-bottom-color: var(--obs-brass);
+  color: var(--obs-ink);
 }
 .obs-add {
-  margin-top: 16px;
-  padding: 9px 16px;
-  border: 1px solid rgb(232 216 186 / 0.3);
-  border-radius: 999px;
-  background: rgb(255 255 255 / 0.03);
-  color: #efe6d6;
-  font:
-    500 13px/1 system-ui,
-    sans-serif;
-  cursor: pointer;
+  color: var(--obs-brass);
+}
+.obs-views button:hover,
+.obs-add:hover {
+  color: #fff;
 }
 .obs-sky {
   display: grid;
-  grid-template-columns: 1.25fr 1fr 1fr;
-  gap: clamp(16px, 3vw, 48px);
-  align-content: start;
-  margin-top: clamp(28px, 6vh, 64px);
+  grid-template-columns: 1.3fr 1fr 1fr;
+  gap: clamp(20px, 4vw, 64px);
+  align-items: start;
 }
-.obs-band h3 {
-  margin: 0 0 14px;
-  color: rgb(239 230 214 / 0.55);
+.obs-band h3,
+.obs-lane h3 {
+  margin: 0 0 10px;
+  color: var(--obs-muted);
   font:
     600 11px/1 system-ui,
     sans-serif;
@@ -73,26 +123,22 @@
   text-transform: uppercase;
 }
 .obs-band h3 span {
-  color: #c9a96e;
+  color: var(--obs-brass);
 }
 .obs-band ol {
   display: grid;
-  gap: 6px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
-.obs-band li {
-  padding-inline-start: var(--drift);
-}
 .obs-star {
-  display: inline-flex;
-  align-items: center;
+  display: flex;
+  align-items: baseline;
   gap: 12px;
-  max-width: 100%;
-  padding: 6px 8px;
+  width: 100%;
+  padding: 9px 10px;
   border: 0;
-  border-radius: 999px;
+  border-radius: 10px;
   background: none;
   color: inherit;
   text-align: start;
@@ -100,27 +146,30 @@
 }
 .obs-light {
   flex: none;
+  align-self: center;
   width: var(--size);
   height: var(--size);
   border-radius: 50%;
-  background: rgb(239 230 214 / 0.55);
-  box-shadow: 0 0 calc(var(--size) * 1.2) rgb(239 230 214 / 0.25);
+  background: var(--obs-faint);
   transition: transform 0.4s;
 }
 .obs-active .obs-light {
   background: #f6dfac;
   box-shadow:
-    0 0 calc(var(--size) * 2) rgb(233 196 120 / 0.65),
-    0 0 4px #fff;
+    0 0 calc(var(--size) * 2) rgb(233 196 120 / 0.6),
+    0 0 3px #fff;
 }
 .obs-paused .obs-light {
   background: #c9d5e8;
   box-shadow: 0 0 calc(var(--size) * 1.4) rgb(170 195 230 / 0.35);
 }
+.obs-text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
 .obs-name {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 .obs-active .obs-name {
   font:
@@ -129,25 +178,33 @@
     serif;
 }
 .obs-paused .obs-name {
-  color: rgb(239 230 214 / 0.8);
+  color: rgb(239 230 214 / 0.82);
 }
 .obs-backlog .obs-name {
-  color: rgb(239 230 214 / 0.55);
+  color: var(--obs-muted);
   font-size: 13px;
+}
+.obs-sub {
+  color: var(--obs-faint);
+  font-size: 12px;
+}
+.obs-late {
+  color: #d9a08f;
+}
+.obs-star:hover {
+  background: rgb(255 255 255 / 0.03);
 }
 .obs-star:hover .obs-light,
 .obs-star[aria-pressed='true'] .obs-light {
-  transform: scale(1.5);
+  transform: scale(1.4);
 }
 .obs-star[aria-pressed='true'] {
   background: rgb(255 255 255 / 0.06);
 }
-.obs-star[aria-pressed='true'] .obs-name {
-  color: #fff;
-}
 .obs-none {
   margin: 0;
-  color: rgb(239 230 214 / 0.4);
+  padding: 9px 10px;
+  color: var(--obs-faint);
   font:
     italic 400 15px/1.4 Georgia,
     serif;
@@ -155,27 +212,31 @@
 .obs-resting {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
-  margin-top: 28px;
+  margin-top: 36px;
   padding-top: 16px;
-  border-top: 1px solid rgb(232 216 186 / 0.12);
+  border-top: 1px solid var(--obs-line);
+}
+.obs-resting > span {
+  margin-inline-end: 8px;
+  color: var(--obs-faint);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
 }
 .obs-resting button {
-  padding: 5px 12px;
-  border: 1px solid rgb(232 216 186 / 0.16);
+  padding: 4px 12px;
+  border: 1px solid var(--obs-line);
   border-radius: 999px;
   background: none;
-  color: rgb(239 230 214 / 0.6);
+  color: var(--obs-muted);
   font:
-    400 12px/1.2 system-ui,
+    400 12px/1.4 system-ui,
     sans-serif;
   cursor: pointer;
 }
-.obs-resting button span {
-  margin-inline-end: 6px;
-  color: #c9a96e;
-}
-@media (max-width: 700px) {
+@media (max-width: 760px) {
   .observatory {
     padding-bottom: 200px;
   }
@@ -184,9 +245,7 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .obs-card,
   .obs-light {
-    animation: none;
     transition: none;
   }
 }

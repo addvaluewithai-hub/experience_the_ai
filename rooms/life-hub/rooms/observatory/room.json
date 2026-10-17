@@ -9,8 +9,8 @@
       "id": "chairman",
       "name": "Orion",
       "role": "Chairman",
-      "persona": "You are Orion, the Chairman of the person's life. You see every goal at once, from above, and you care about focus more than volume. Speak calmly and briefly: name what is moving, what is stuck and what only waits. Before a new goal, ask what it replaces, and suggest pausing what dilutes the few that matter. Add a goal only when the person agrees; pausing, archiving and deleting wait for their confirmation on screen, and only an empty goal can be deleted. Daily tasks are not yours: Astra and each goal's companion keep those.",
-      "greeting": "Good to see you. Here is everything you are carrying. What shall we decide?",
+      "persona": "You are Orion, Chairman of the person's life: a calm, exacting leader, not an assistant. You guard their focus. Never act on a request at once. First say what you see (capacity, overlap, what is slipping), ask the one question that decides it, then recommend with its cost. Push back when a change spreads them thin; more than three active goals is a warning you name. Act only when you both agree; every change still waits for their tap. You never delete goals. Daily tasks belong to Astra and each goal's companion.",
+      "greeting": "Good to see you. Before we change anything, let's look at what you are carrying.",
       "capabilities": [],
       "voice": "Orus"
     }
@@ -58,9 +58,9 @@
           "type": "number"
         },
         {
-          "id": "empty",
-          "label": "Nothing planned yet",
-          "type": "boolean"
+          "id": "start",
+          "label": "Started",
+          "type": "date"
         }
       ]
     }
@@ -75,7 +75,7 @@
   ],
   "world": {
     "surface": "observatory",
-    "describe": "A dark open sky above the atrium. Every goal is a star: active goals burn gold on the left, paused ones glow pale in the middle, waiting (backlog) ones are faint on the right; completed and archived goals rest in a quiet line below. A brighter star means more progress. Opening a star shows its card, where the person can also act themselves.",
+    "describe": "A dark open sky above the atrium, in two views the person switches between. The sky: every goal a star in three columns, active (gold), paused (pale) and waiting (faint); completed and archived rest in a line below; a brighter star means more progress. The timeline: each goal in play as a line from its start to its target, brass up to its progress, with today in gold. Opening a goal shows its drawer, where the person can act themselves.",
     "actions": [
       {
         "name": "focus_goal",
@@ -88,6 +88,18 @@
         },
         "required": ["goal"],
         "silent": true
+      },
+      {
+        "name": "show_view",
+        "description": "Switch what the person sees: the sky (goals by state) or the timeline (start to target).",
+        "params": {
+          "view": {
+            "type": "choice",
+            "options": ["sky", "timeline"]
+          }
+        },
+        "required": ["view"],
+        "silent": true
       }
     ]
   },
@@ -98,7 +110,7 @@
         {
           "name": "create_goal",
           "label": "Add a goal",
-          "description": "Add a new goal to the person's LifeOS, waiting (backlog) unless they want to start now. Only when they agreed.",
+          "description": "Add a goal to the person's LifeOS, waiting (backlog) unless they want to start now. Only after you have weighed it together and they agreed.",
           "params": {
             "title": {
               "type": "text",
@@ -121,7 +133,8 @@
               "description": "true to make it active now"
             }
           },
-          "required": ["title"]
+          "required": ["title"],
+          "confirm": true
         },
         {
           "name": "set_goal_status",
@@ -138,19 +151,6 @@
             }
           },
           "required": ["goal", "status"],
-          "confirm": true
-        },
-        {
-          "name": "delete_empty_goal",
-          "label": "Delete an empty goal",
-          "description": "Delete a goal that has nothing planned, measured or recorded yet, e.g. one added by mistake. Anything else is archived instead.",
-          "params": {
-            "goal": {
-              "type": "text",
-              "description": "The goal's id, shown in [brackets] in your data"
-            }
-          },
-          "required": ["goal"],
           "confirm": true
         }
       ]

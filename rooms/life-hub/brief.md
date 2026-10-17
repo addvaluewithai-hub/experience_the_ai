@@ -41,3 +41,8 @@ A first-person-feeling entrance to life management, rendered in Three.js. This i
   - The person opens a star's card to make it active, pause it, send it back to waiting, complete, archive (two taps) or delete it while it is empty (two taps); "+ New goal" adds one, waiting unless started now.
   - Orion adds a goal when the person agrees; his state changes and deletes show a confirm card first. Daily tasks are not his: Astra and each goal's companion keep those.
   - Reached from "✧ The Observatory" under the atrium's title, or by Astra's open_room.
+- 2026-10-17, later: the person's first look at the Observatory with their real goals.
+  - No delete: they delete goals themselves. Archive (two taps) stays.
+  - Orion is a leader, not an assistant: he never acts at once, says what he sees, asks the deciding question, recommends with its cost, names more than three active goals as a warning, and acts only once they agree; adding a goal also waits for their tap.
+  - A timeline beside the sky: each goal from its start (or when it was added) to its target, brass up to its progress, today in gold, overdue ends marked.
+  - Calmer design: three numbers instead of a sentence, aligned columns that wrap, a drawer on the right the sky steps aside for. The way-in button follows the room's theme instead of the children's candy gradient.
