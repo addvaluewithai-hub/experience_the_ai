@@ -72,6 +72,7 @@ export function ImmersiveRoom(props: {
   return (
     <div
       className={docked ? 'immersive immersive-docked' : 'immersive'}
+      data-theme={room.spec.theme.preset}
       dir={ar ? 'rtl' : 'ltr'}
       lang={room.spec.language}
       style={

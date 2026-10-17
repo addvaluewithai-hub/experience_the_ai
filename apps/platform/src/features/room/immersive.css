@@ -24,7 +24,7 @@
 .immersive-cast button,
 .immersive-live,
 .caption {
-  background: rgb(20 12 48 / 0.42);
+  background: var(--presence-glass, rgb(8 14 22 / 0.5));
   backdrop-filter: blur(8px);
   border: 1px solid rgb(255 255 255 / 0.22);
   color: #fff;
@@ -104,13 +104,26 @@
   border-radius: 50%;
   font-size: 20px;
 }
+/* The way in follows the room: quiet and warm by default, a candy glow for children's rooms. */
 .immersive-begin {
-  padding: 14px 28px;
+  padding: 13px 26px;
   border: 0;
   border-radius: 999px;
+  background: color-mix(in srgb, var(--room-accent, #c9a96e) 30%, #f6efe2);
+  color: #12171e;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  box-shadow: 0 0 24px color-mix(in srgb, var(--room-accent, #c9a96e) 35%, transparent);
+}
+.immersive:is([data-theme='kids'], [data-theme='habit']) {
+  --presence-glass: rgb(20 12 48 / 0.42);
+}
+.immersive:is([data-theme='kids'], [data-theme='habit']) .immersive-begin {
+  padding: 14px 28px;
   background: linear-gradient(135deg, #f9a8d4, #c4b5fd, #93c5fd);
   color: #2e1065;
-  font: inherit;
   font-size: 20px;
   font-weight: 700;
   box-shadow: 0 0 28px rgb(244 114 182 / 0.6);
